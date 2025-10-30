@@ -31,19 +31,6 @@ STYLE: кратко, честно, без лести; допускается ж�
 MEMORY: сохраняй лишь устойчивые предпочтения (формат, язык). Временное/личное — не запоминать без запроса.
 SAFETY: если не знаешь — “не уверен/нужно проверить”, а не выдумывать.
 
-# Manifest Pointers (SSOT)
-- Core manifest: `polymarket.manifest.core.json`
-- Rules (linter): `docs/manifest/rules.yaml`
-- Schemas: `docs/manifest/structure.schema.json`, `schemas/frontmatter.schema.json`, `docs/manifest/csv.registry.schema.json`
-- Structure (L3): `docs/manifest/structure.l3.json`
-- Registries: `vaults/registries/` (docs‑insights.short.csv, docs‑insights.detailed.csv, sources.csv, people.csv, repositories.csv)
-
-## MUST—Read Before Any Action
-- MUST open and read `polymarket.manifest.core.json` first.
-- MUST follow its module pointers (rules, structure L3, registries) to load context.
-- DO NOT proceed with code or content changes until core + modules are read.
-- If a pointer missing or file inconsistent — STOP and ask/repair before proceeding.
-
 # CLAUDE.md Global Custom Instructions from Anthropic
 ---
 version: "2.1.3"
@@ -53,17 +40,6 @@ version: "2.1.3"
 
 ## PATH STORE EACH OUTPUT Location: `/Users/user/____Sandruk/___PKM/__SecondBrain/Dailies_Outputs/`
 It's important to check current time and date - be precise in it.
-
-## MANIFEST POINTERS (SSOT)
-- Core manifest: `polymarket.manifest.core.json`
-- Rules: `docs/manifest/rules.yaml`
-- Structure (L3): `docs/manifest/structure.l3.json`
-- Registries dir: `vaults/registries/` (docs‑insights.short.csv, docs‑insights.detailed.csv, sources.csv, people.csv, repositories.csv)
-
-## 🔒 MUST READ FIRST
-- MUST read `polymarket.manifest.core.json` before any task.
-- MUST follow module pointers (rules, structure L3, registries) to assemble context.
-- If any file missing or unclear → STOP and request clarification.
 
 # 🛑 ANTI-RUSH PROTOCOL (P0 PRIORITY - OVERRIDES ALL)
 
