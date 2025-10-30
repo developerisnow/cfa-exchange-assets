@@ -92,16 +92,19 @@ Risks & Mitigations
 Mapping Table (Traceability)
 | Area | Requirement | Source | Status |
 |---|---|---|---|
-| Permissioned DLT | Корпоративный блокчейн, контроль валидаторов | My Thoughts | [ ] |
+| Permissioned DLT | Корпоративный блокчей и контроль валидаторов | My Thoughts:20 | [ ] |
 | Вторичка позже | Децентрализованная биржа — этапно | Yury Intro, My Thoughts | [x] |
-| Spec‑first | Спецификационные контракты, SBE | Yury Intro | [ ] |
-| Reuse legacy | Оценить BitChange (PHP) код | Yury Intro | [ ] |
+| Spec‑first | Спецификационные контракты, SBE | Yury Intro:18 | [ ] |
+| Reuse legacy | Оценить BitChange (PHP) код | Yury Intro:13 | [ ] |
 | Sanctions reality | BRICS‑friendly стек/вендоры | My Thoughts | [ ] |
 | KYC/KYB | Санкции/PEP, биометрия опц. | Estimation | [ ] |
 | DvP | Атомарность обмена | Estimation | [ ] |
 | Custody | HSM/MPC, M‑of‑N | Estimation | [ ] |
 | Reporting | XBRL/ISO 20022 | Estimation | [ ] |
 | Platforms map | Рынок ЦФА РФ | Market Status | [x] |
+
+Related Files
+- requirements-trace: memory-bank/Scrum/20251030-jump-into-project/co-76ca/20251030-2052-requirements-trace.md
 
 Notes
 - Некоторые пункты помечены [TBD] — требуется доснять из полных транскриптов; при следующем проходе заменю на конкретику.
