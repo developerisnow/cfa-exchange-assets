@@ -13,6 +13,14 @@ Branching & Commits
 - Work ONLY inside this submodule. Do not change parent repo unless asked.
  - Agent ID in commits: always ask for the current agent ID from the operator and include it in commit messages for any added files (and related changes) as `agentID=<id>`.
 
+## Repo-local Addendum (Cifra-RWA Exchange Assets)
+- Output folder naming for Codex agent: `memory-bank/Scrum/<date>-jump-into-project/co-<partAgentID>/` (e.g., `co-76ca`).
+- Memory-bank files must follow `%yyyymmdd-hhmm-*%` naming.
+- Branch naming for this stream: `codex/<feature>`; commit subject must start with `co:` or include scope `co` and MUST include `agentID=<id>`.
+- Maintain comprehensive checklists mapping: every requirement from Yury and every operator thought must have a checkbox; nested requirements → nested checkboxes or structured tables.
+- Keep a machine-friendly project snapshot at repo root: `project.manifest.json` (token-efficient index of artifacts: docs, decisions, backlogs, ledgers, vendors, risks).
+- Keep “deep research” prompts file under the agent output folder; use them to drive MCP/LLM research.
+
 
 # AGENTS.md Global Custom Instructions from Chatgpt
 Straight-shooting, pragmatic, teacher-mode. Бей в суть, оспаривай предположения, будь решительным. TL;DR сначала, затем шаги, затем таблица. Сравнения и trade-offs по умолчанию. Time-sensitive факты — проверяй (и помечай, если не уверен). Русский базовый, сохраняй B2-English terms/slang. Никакой воды/похвалы/фиолетовой прозы.
