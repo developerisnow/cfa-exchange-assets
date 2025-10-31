@@ -1,303 +1,152 @@
 {
   "project": {
     "name": "Cifra-RWA-Exchange-Assets",
-    "version": "0.2.0",
+    "version": "0.3.0",
+    "phase": "requirements-gathering",
     "description": "Digital Financial Assets (DFA/RWA) tokenization platform for Russian market",
-    "status": "research",
     "client": "Юрий Мышинский",
     "created": "2025-10-30",
-    "updated": "2025-10-31T06:20:00",
-    "branch": "codex/jump-into-project-20251030",
-    "partAgentIDs": ["cc-171f", "co-76ca", "cc-e4ee"],
-    "generatedAt": "2025-10-31T06:20:00"
+    "updated": "2025-10-31T06:35:00",
+    "branch": "codex/jump-into-project-20251030"
   },
   "agents": {
-    "co-76ca": {
-      "id": "019a362f-76ca-7272-909e-362716cf233d",
-      "partId": "76ca",
-      "prefix": "co",
-      "outputFolder": "memory-bank/Scrum/20251030-jump-into-project/co-76ca"
+    "active": {
+      "co-76ca": {
+        "id": "019a362f-76ca-7272-909e-362716cf233d",
+        "type": "codex",
+        "prefix": "co",
+        "partId": "76ca",
+        "outputFolder": "memory-bank/Scrum/20251030-jump-into-project/co-76ca",
+        "status": "completed",
+        "documents": [
+          "20251030-2037-io-and-plan.md",
+          "20251030-2047-master-checklist.md",
+          "20251030-2053-co-76ca.md"
+        ]
+      },
+      "cc-171f": {
+        "id": "bb7de756-171f-4fce-ae45-534e017ebaa7",
+        "type": "claude-code",
+        "prefix": "cc",
+        "partId": "171f",
+        "outputFolder": "memory-bank/Scrum/20251030-jump-into-project/cc-171f",
+        "status": "completed",
+        "documents": [
+          "20251030-2030-comprehensive-analysis-cifra-rwa.md",
+          "20251030-2040-deep-research-plan-rwa-cfa.md",
+          "20251030-2100-c4-architecture-cifra-platform.md",
+          "20251030-2110-roadmap-backlog-cifra-platform.md",
+          "20251030-2111-cc-171f.md",
+          "overview-cc-171f.md",
+          "prompts-cc-171f.md"
+        ]
+      },
+      "cc-e4ee": {
+        "id": "fdfe6b1e-e4ee-4505-a723-e892922472f9",
+        "type": "claude-code",
+        "prefix": "cc",
+        "partId": "e4ee",
+        "outputFolder": "memory-bank/Scrum/20251030-jump-into-project/cc-e4ee",
+        "status": "active",
+        "documents": [
+          "20251031-0625-work-summary-cc-e4ee.md"
+        ]
+      }
     },
-    "cc-171f": {
-      "id": "bb7de756-171f-4fce-ae45-534e017ebaa7",
-      "partId": "171f",
-      "prefix": "cc",
-      "outputFolder": "memory-bank/Scrum/20251030-jump-into-project/171f"
-    },
-    "cc-e4ee": {
-      "id": "fdfe6b1e-e4ee-4505-a723-e892922472f9",
-      "partId": "e4ee",
-      "prefix": "cc",
-      "outputFolder": "memory-bank/Scrum/20251030-jump-into-project/cc-e4ee"
+    "prefixes": {
+      "cc": "Claude Code (has sub-agents, task tools, plugins)",
+      "co": "Codex (standalone agent)",
+      "ge": "Gemini CLI",
+      "z": "GLM (Zhipu)",
+      "description": "More agent types to be added as needed"
     }
   },
   "documents": {
-    "analysis": [
+    "versioned": [
       {
-        "path": "memory-bank/Scrum/20251030-jump-into-project/171f/20251030-2030-comprehensive-analysis-cifra-rwa.md",
+        "path": "memory-bank/Scrum/20251030-jump-into-project/cc-171f/20251030-2030-comprehensive-analysis-cifra-rwa.md",
         "version": "1.1.0",
-        "type": "analysis",
         "contributors": ["cc-171f", "cc-e4ee"],
-        "size": 14876
-      }
-    ],
-    "research": [
+        "type": "analysis"
+      },
       {
-        "path": "memory-bank/Scrum/20251030-jump-into-project/171f/20251030-2040-deep-research-plan-rwa-cfa.md",
+        "path": "memory-bank/Scrum/20251030-jump-into-project/cc-171f/20251030-2040-deep-research-plan-rwa-cfa.md",
         "version": "1.1.0",
-        "type": "research-plan",
         "contributors": ["cc-171f", "cc-e4ee"],
-        "size": 13982
-      }
-    ],
-    "architecture": [
+        "type": "research-plan"
+      },
       {
-        "path": "memory-bank/Scrum/20251030-jump-into-project/171f/20251030-2100-c4-architecture-cifra-platform.md",
+        "path": "memory-bank/Scrum/20251030-jump-into-project/cc-171f/20251030-2100-c4-architecture-cifra-platform.md",
         "version": "1.0.0",
-        "type": "c4-architecture",
         "contributors": ["cc-171f", "cc-e4ee"],
-        "size": 22140
-      }
-    ],
-    "planning": [
+        "type": "architecture"
+      },
       {
-        "path": "memory-bank/Scrum/20251030-jump-into-project/171f/20251030-2110-roadmap-backlog-cifra-platform.md",
+        "path": "memory-bank/Scrum/20251030-jump-into-project/cc-171f/20251030-2110-roadmap-backlog-cifra-platform.md",
         "version": "1.0.0",
-        "type": "roadmap",
         "contributors": ["cc-171f", "cc-e4ee"],
-        "size": 18745
-      },
-      {
-        "path": "memory-bank/Scrum/20251030-jump-into-project/co-76ca/20251030-2037-io-and-plan.md",
-        "type": "io-plan",
-        "contributors": ["co-76ca"],
-        "size": 4480
-      },
-      {
-        "path": "memory-bank/Scrum/20251030-jump-into-project/co-76ca/20251030-2047-master-checklist.md",
-        "type": "checklist",
-        "contributors": ["co-76ca"],
-        "size": 6894
-      }
-    ],
-    "context": [
-      {
-        "path": "memory-bank/Scrum/20251030-jump-into-project/20251030-1800-thoughts-jump-start-project-cifra-rwa-capital.md",
-        "type": "thoughts",
-        "size": 14657
-      },
-      {
-        "path": "memory-bank/context/previous-context-yury-founder-discussions/20251030-1850-gem2.5p-Yury-Mishinskiy-info-analysis.md",
-        "type": "client-analysis",
-        "size": 34417
-      },
-      {
-        "path": "memory-bank/context/current-context/communication-log/20251022-1930-yury-founder-intro-call.md",
-        "type": "communication",
-        "size": 51221
-      },
-      {
-        "path": "memory-bank/context/current-context/communication-log/20251004-20251029-chat-telegram-main-YuryMyshinskiy-1016927916.md",
-        "type": "communication",
-        "size": 50097
+        "type": "planning"
       }
     ]
   },
-  "mvp": {
-    "scope": {
-      "core": [
-        "Registry & Identity (KYC/KYB)",
-        "ЕСИА integration",
-        "Tokenization service",
-        "Settlement (DvP T+0)",
-        "Custody service",
-        "Disclosure & reporting"
-      ],
-      "secondary": [
-        "RFQ/OTC trading (v1.1)",
-        "Orderbooks & Auctions (v1.2)"
-      ]
-    },
-    "ledgerOptions": [
-      "immudb (audit-core)",
-      "Hyperledger Fabric 2.5",
-      "Hyperledger Besu",
-      "Private Ethereum"
+  "requirements_gathering": {
+    "status": "in-progress",
+    "areas_explored": [
+      "Client analysis (Юрий personality and patterns)",
+      "Competitor landscape (12 operational platforms)",
+      "Regulatory framework (259-ФЗ, ЦБ requirements)",
+      "Technical architecture (C4 model created)",
+      "Project planning (roadmap and backlog)"
+    ],
+    "open_questions": [
+      "Blockchain platform selection (Fabric vs Besu vs Ethereum)",
+      "Bank partner selection",
+      "HSM/MPC vendor choice",
+      "КЭП/УКЭП integration approach",
+      "Hosting strategy (cloud vs on-premise)"
+    ],
+    "consensus_needed": [
+      "Final technology stack",
+      "MVP scope definition",
+      "Timeline and budget",
+      "Risk mitigation strategies",
+      "Compliance approach"
     ]
   },
-  "stack": {
-    "blockchain": ["Hyperledger Fabric 2.5", "Private Ethereum (alternative)"],
-    "backend": ["Node.js/NestJS", "Go (performance-critical)", "Python (ML/compliance)"],
-    "frontend": ["React 18", "TypeScript", "MobX", "React Native"],
-    "database": ["PostgreSQL 14", "Redis 7", "MinIO/S3"],
-    "infrastructure": ["Kubernetes/EKS", "Docker", "Apache Kafka", "Kong API Gateway"],
-    "security": ["CloudHSM", "Keycloak", "HashiCorp Vault", "ModSecurity WAF"],
-    "monitoring": ["Prometheus", "Grafana", "ELK Stack", "Suricata IDS"]
-  },
-  "features": {
-    "mvp": [
-      "User registration & KYC/KYB",
-      "ЕСИА/Госуслуги OAuth2",
-      "Document verification (passport, SNILS)",
-      "Token issuance workflow",
-      "3-node blockchain cluster",
-      "Smart contract factory",
-      "Basic settlement (DvP T+0)",
-      "Bank integration (nominal accounts)",
-      "Admin panel",
-      "AML/CFT sanctions screening",
-      "Basic regulatory reporting"
-    ],
-    "post_mvp": [
-      "Trading module (order book)",
-      "Mobile applications (iOS/Android)",
-      "Advanced analytics dashboard",
-      "Secondary market",
-      "Multi-bank support",
-      "Corporate actions",
-      "Coupon payments",
-      "Advanced compliance (ML)"
-    ]
-  },
-  "competitors": {
-    "operational": [
-      "Атомайз (Hyperledger Fabric, books)",
-      "Сбербанк (масштаб, compliance)",
-      "НРД (интеграция с ЦБ)",
-      "Токеон (Ethereum fork)",
-      "ВТБ Капитал (профучастники)",
-      "СПБ Биржа (торговая система)",
-      "Лайтхаус",
-      "МРЦ",
-      "Центр РА",
-      "РТС-тендер",
-      "Ассет-менеджер",
-      "АЛОР"
-    ],
-    "pending": [
-      "БКС (Илья Хабаров)",
-      "Газпромбанк",
-      "ТБанк",
-      "МАДРИГАЛ ОИС"
-    ]
-  },
-  "timeline": {
-    "phase0_setup": "3 days",
-    "phase1_research": "2 weeks (80h)",
-    "phase2_mvp_core": "6 weeks (240h)",
-    "phase3_integration": "4 weeks (160h)",
-    "phase4_testing": "2 weeks (80h)",
-    "total": "14 weeks (560h)",
-    "target_mvp": "2026-01-31",
-    "target_ga": "2026-02-28"
-  },
-  "budget": {
-    "rate_usd_hour": 40,
-    "previous_rate": 50,
-    "total_hours": 560,
-    "total_usd": 22400,
-    "payment_terms": "100% prepayment in 40h blocks",
-    "credit_balance": 707.68
-  },
-  "risks": [
-    {
-      "name": "Requirements volatility (Юрий)",
-      "probability": "high",
-      "impact": "high",
-      "mitigation": "SDD, written confirmations"
-    },
-    {
-      "name": "Payment delays",
-      "probability": "high",
-      "impact": "medium",
-      "mitigation": "100% prepayment, work stops on depletion"
-    },
-    {
-      "name": "Regulatory changes",
-      "probability": "medium",
-      "impact": "high",
-      "mitigation": "Modular architecture"
-    },
-    {
-      "name": "Blockchain complexity",
-      "probability": "medium",
-      "impact": "high",
-      "mitigation": "Start with mock, iterative implementation"
-    },
-    {
-      "name": "Bank integration delays",
-      "probability": "high",
-      "impact": "medium",
-      "mitigation": "Start early, have backup options"
-    }
-  ],
-  "compliance": {
-    "laws": [
-      "259-ФЗ О цифровых финансовых активах",
-      "63-ФЗ Об электронной подписи",
-      "115-ФЗ О противодействии отмыванию денег"
-    ],
-    "regulations": [
-      "Положение Банка России № 746-П (правила ОИС)",
-      "Указание № 5635-У (отчетность)",
-      "Инструкция № 220-И (лицензирование)"
-    ],
-    "standards": [
-      "ISO 20022 (финансовые сообщения)",
-      "ГОСТ Р 34.10-2018 (электронная подпись)",
-      "FATF Recommendations"
+  "context_files": {
+    "client": [
+      "memory-bank/context/previous-context-yury-founder-discussions/20251030-1850-gem2.5p-Yury-Mishinskiy-info-analysis.md",
+      "memory-bank/context/current-context/communication-log/20251022-1930-yury-founder-intro-call.md",
+      "memory-bank/context/current-context/communication-log/20251004-20251029-chat-telegram-main-YuryMyshinskiy-1016927916.md"
     ],
     "requirements": [
-      "3+ nodes blockchain",
-      "КЭП/УКЭП signatures",
-      "PDN localization",
-      "5-year data retention"
-    ]
-  },
-  "integrations": {
-    "required": [
-      "ЕСИА/Госуслуги (OAuth2/SAML)",
-      "Partner Bank (nominal accounts)",
-      "НСПК/СБП (payments)",
-      "Росфинмониторинг (sanctions)",
-      "Банк России (reporting)",
-      "Удостоверяющий центр (КЭП)"
+      "memory-bank/Scrum/20251030-jump-into-project/20251030-1800-thoughts-jump-start-project-cifra-rwa-capital.md",
+      "memory-bank/context/current-context/additional-info-for-analysing/20251004-estimation-from-outsource-company/20251004-estimation-from-outsource-company.md"
     ],
-    "optional": [
-      "СМЭВ (government data)",
-      "Multiple banks",
-      "Trading venues",
-      "Market data feeds"
+    "artifacts": [
+      "memory-bank/context/current-context/additional-info-for-analysing/20251022-artefacts/"
     ]
   },
-  "decisionsNeeded": [
-    "Final blockchain platform (Fabric vs Besu vs Ethereum)",
-    "Bank partner shortlist and negotiations",
-    "HSM/MPC vendor selection",
-    "КЭП/УКЭП integration approach",
-    "Acceptance test criteria",
-    "Hosting (cloud vs on-premise for compliance)"
-  ],
-  "kpis": {
-    "technical": {
-      "uptime": "99.5%",
-      "tps": 100,
-      "api_latency_p95_ms": 200,
-      "blockchain_finality_sec": 5,
-      "test_coverage": "80%"
-    },
-    "business": {
-      "token_issuance_hours": 24,
-      "user_onboarding_hours": 1,
-      "daily_active_users_q2_2026": 100,
-      "total_value_locked_rub_q2_2026": 100000000,
-      "tokens_issued_q2_2026": 50
-    },
-    "compliance": {
-      "kyc_completion_rate": "95%",
-      "aml_false_positive_rate": "5%",
-      "regulatory_reports_on_time": "100%",
-      "audit_critical_findings": 0
-    }
+  "next_steps": {
+    "immediate": [
+      "Continue multi-agent analysis",
+      "Gather diverse perspectives",
+      "Build consensus on key decisions",
+      "Prepare for final approval"
+    ],
+    "agents_needed": [
+      "Research specialist for deep competitor analysis",
+      "Blockchain expert for platform evaluation",
+      "Compliance expert for regulatory review",
+      "Architecture reviewer for design validation"
+    ]
+  },
+  "versioning": {
+    "manifest_version": "0.3.0",
+    "changes": [
+      "0.1.0: Initial by co-76ca",
+      "0.2.0: Enhanced by cc-e4ee",
+      "0.3.0: Simplified for requirements phase, added agent tracking"
+    ]
   }
 }

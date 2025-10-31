@@ -1,3 +1,12 @@
+---
+created: 2025-10-30
+updated: 2025-10-31 06:40
+version: 1.2.0
+type: project-rules
+partAgentID: [co-76ca, cc-171f, cc-e4ee]
+symlink_note: CLAUDE.md is a symlink to this file for SSOT
+---
+
 # Project rules
 
 ## Organization (Conventions)
@@ -9,17 +18,103 @@
 
 Branching & Commits
 - Branch: {claude|codex|gemini}/{feature-name} (e.g., codex/rwa-research-20251030)
-- Commits: type(scope): subject (e.g., chore(structure): move scripts)
+- Commits: type(scope): [{prefix}-{partAgentID}] - subject
+  ```
+  feat(scope): [cc-e4ee] - Title describing change
+  • First bullet point detail
+  • Second bullet point detail
+  agentID=fdfe6b1e-e4ee-4505-a723-e892922472f9
+  ```
 - Work ONLY inside this submodule. Do not change parent repo unless asked.
- - Agent ID in commits: always ask for the current agent ID from the operator and include it in commit messages for any added files (and related changes) as `agentID=<id>`.
+- Agent ID in commits: always include full agentID at the end of commit message
 
 ## Repo-local Addendum (Cifra-RWA Exchange Assets)
-- Output folder naming for Codex agent: `memory-bank/Scrum/<date>-jump-into-project/co-<partAgentID>/` (e.g., `co-76ca`).
-- Memory-bank files must follow `%yyyymmdd-hhmm-*%` naming.
-- Branch naming for this stream: `codex/<feature>`; commit subject must start with `co:` or include scope `co` and MUST include `agentID=<id>`.
-- Maintain comprehensive checklists mapping: every requirement from Yury and every operator thought must have a checkbox; nested requirements → nested checkboxes or structured tables.
-- Keep a machine-friendly project snapshot at repo root: `project.manifest.json` (token-efficient index of artifacts: docs, decisions, backlogs, ledgers, vendors, risks).
-- Keep “deep research” prompts file under the agent output folder; use them to drive MCP/LLM research.
+
+### Agent Naming Convention & Folder Structure
+**CRITICAL**: All agent folders must use format: `{prefix}-{partAgentID}`
+- **Prefixes by agent type:**
+  - `cc-` = Claude Code (has sub-agents, task tools, plugins, skills)
+  - `co-` = Codex (standalone agent, no sub-agents)
+  - `ge-` = Gemini CLI
+  - `z-` = GLM (Zhipu)
+  - More types added as needed
+
+**Output folder structure:**
+```
+memory-bank/Scrum/<date>-jump-into-project/{prefix}-{partAgentID}/
+Examples:
+  cc-171f/  # Claude Code agent 171f
+  co-76ca/  # Codex agent 76ca
+  ge-abc1/  # Gemini agent abc1
+```
+
+### Symlink Strategy for SSOT
+**Note**: `CLAUDE.md` is a symlink to `AGENTS.md` to maintain Single Source of Truth
+```bash
+CLAUDE.md -> AGENTS.md  # One file, multiple access points
+```
+This avoids duplicate maintenance across agent types while providing expected filenames.
+
+### Document Versioning & Frontmatter
+All markdown documents must include YAML frontmatter:
+```yaml
+---
+created: YYYY-MM-DD HH:MM
+updated: YYYY-MM-DD HH:MM  # Add when updating
+type: [analysis|research-plan|architecture|planning|etc]
+sphere: [finance, blockchain, etc]
+topic: [specific topics]
+author: original-author
+agentID: original-full-agent-id
+partAgentID: [cc-171f, co-76ca, ...]  # Array of all contributors
+version: x.y.z  # Semantic versioning
+tags: [relevant, tags]
+---
+```
+
+### Version Increments
+- **Major (x.0.0)**: Fundamental changes/rewrites
+- **Minor (0.x.0)**: Significant additions/modifications
+- **Patch (0.0.x)**: Small fixes/updates
+
+### Multi-Agent Collaboration Rules
+1. **SSOT Principle**: Update existing docs rather than creating duplicates
+2. **When updating another agent's document:**
+   - First commit current state to preserve history
+   - Update with your changes
+   - Add your partAgentID to frontmatter array
+   - Increment version appropriately
+3. **Commit frequently** to maintain clear diffs and history
+
+### Project Manifest
+- Maintain `project.manifest.json` at repo root as machine-readable project index
+- Structure focuses on agent work tracking during requirements phase
+- Update version and agent info when modifying
+
+### Agent-Specific Capabilities
+
+#### Claude Code (cc-) Agents
+- ✅ Has sub-agents via Task tool
+- ✅ Can use plugins and skills
+- ✅ Rich ecosystem of extensions
+- ✅ Can delegate complex multi-step tasks
+
+#### Codex (co-) Agents
+- ❌ No sub-agent capability
+- ✅ Standalone execution
+- ✅ Direct task implementation
+- ✅ Good for focused single-thread work
+
+#### Gemini (ge-) Agents
+- ✅ CLI-based interaction
+- ❌ Limited sub-agent support
+- ✅ Good for analysis tasks
+
+### Other Requirements
+- Memory-bank files must follow `%yyyymmdd-hhmm-*%` naming (24h format)
+- Keep document names stable even when updating (preserve creation timestamp)
+- Maintain comprehensive checklists: every requirement must have a checkbox
+- Keep "deep research" prompts file under agent output folder
 
 
 # AGENTS.md Global Custom Instructions from Chatgpt
