@@ -1,0 +1,21 @@
+﻿Платформа,Статус,Роли,DLT,Custody,УКЭП_ГОСТ,DvP_модель,Банки,Вторичка_RFQ,Вторичка_orderbook,API,Hosting_RU,Hosting_OnPrem,Источники,Last_Checked,Confidence
+Альфа-Банк (А-Токен),working,"ois, bank",waves,unknown,Да,t+0,Альфа-Банк,Нет,Нет,Да,Да,Да,2,2025-10-31,high
+Атомайз (Atomyze),working,ois,fabric,unknown,Да,t+0,Росбанк,Нет,Нет,Да,Да,Да,2,2025-10-31,high
+"Блокчейн Хаб (ЦФА Хаб, МТС)",working,ois,ethereum,unknown,Да,unknown,-,Нет,Нет,Да,Да,Нет,1,2025-10-31,mid
+ВТБ Капитал Трейдинг,working,"ois, bank",unknown,unknown,Да,t+0,ВТБ,Нет,Нет,Нет,Да,Да,2,2025-10-31,mid
+Еврофинанс Моснарбанк,working,"ois, bank",waves,unknown,Да,unknown,Еврофинанс Моснарбанк,Нет,Нет,Нет,Да,Нет,1,2025-10-31,mid
+Токеон (ПСБ),working,"ois, bank",waves,unknown,Да,t+0,ПСБ,Нет,Нет,Да,Да,Нет,2,2025-10-31,high
+Лайтхаус,working,ois,fabric,unknown,Да,unknown,-,Нет,Нет,Нет,Да,Нет,1,2025-10-31,low
+НРД (Национальный расчетный депозитарий),working,"ois, depository, exchange",waves,unknown,Да,t+0,Мосбиржа,Да,Нет,Нет,Да,Да,2,2025-10-31,high
+Сбербанк (Цифровые активы),working,"ois, bank",fabric,unknown,Да,t+0,Сбербанк,Да,Да,Да,Да,Нет,2,2025-10-31,high
+СПБ Биржа,working,"ois, exchange",fabric,unknown,Да,unknown,-,Да,Нет,Нет,Да,Нет,1,2025-10-31,high
+Мастерчейн (Системы распределенного реестра),working,"ois, infra",waves,unknown,Да,unknown,ВТБ Факторинг,Нет,Нет,Нет,Да,Да,1,2025-10-31,mid
+МРЦ (Межрегиональный регистраторский центр),working,"ois, depository",unknown,unknown,Да,unknown,-,Нет,Нет,Нет,Да,Нет,1,2025-10-31,low
+Т-Банк (Тинькофф),working,"ois, bank",unknown,unknown,Да,unknown,Т-Банк,Нет,Нет,Да,Да,Нет,2,2025-10-31,high
+Токеник,working,ois,unknown,unknown,Да,unknown,Росбанк,Нет,Нет,Нет,Да,Нет,1,2025-10-31,low
+Банк Синара,working,"ois, bank",unknown,unknown,Да,unknown,Банк Синара,Нет,Нет,Нет,Да,Нет,1,2025-10-31,low
+БКС Холдинг (Компания БКС),working,"ois, bank",unknown,unknown,Да,unknown,БКС Банк,Нет,Нет,Нет,Да,Нет,1,2025-10-31,low
+Газпромбанк,working,"ois, bank",unknown,unknown,Да,unknown,Газпромбанк,Нет,Нет,Нет,Да,Нет,1,2025-10-31,low
+Мадригал ОИС,working,ois,unknown,unknown,Да,unknown,-,Да,Нет,Нет,Да,Нет,2,2025-10-31,mid
+Статус Инвест,license_pending,ois,iroha,unknown,Да,unknown,-,Нет,Нет,Нет,Нет,Нет,1,2025-10-31,low
+Спутник ЦФА,license_pending,ois,unknown,unknown,Да,unknown,-,Нет,Нет,Нет,Нет,Нет,1,2025-10-31,low
