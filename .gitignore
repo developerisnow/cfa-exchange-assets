@@ -20,3 +20,5 @@ exchange-assets-tokenization-rwa/
 *data/*
 # memory-bank/_unstructured/
 *.txt
+# Ignore customer gitlab submodules until configured
+repositories/customer-gitlab/**

@@ -9,11 +9,10 @@ agentID: 019a362f-76ca-7272-909e-362716cf233d
 partAgentID: [co-76ca]
 version: 1.0.0
 tags: [sow, architecture, c4]
+---
 next: [[roadmap]]
 previous: [[README-v2]]
 related: [[20251004-estimation-from-outsource-company]], [[20251030-1925-gpt5h-conversion-development-capital-platform-diagrams]], [[20251030-1926-son4.5-conversion-development-capital-platform-diagrams]], [[../ge-4V2i/20251103-1506-gem2.5p-ge-4V2i.session]]
----
-
 # Why → What → How → Result
 
 - Why: за 20 часов ресёрча выстроить единое архитектурное видение ОИС «Капитал» (только первичка), согласованное с рыночной практикой РФ ЦФА и с исходной оценкой подрядчика.

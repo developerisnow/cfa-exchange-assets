@@ -1,0 +1,3 @@
+[submodule "repositories/customer-gitlab/docs-cfa-rwa"]
+	path = repositories/customer-gitlab/docs-cfa-rwa
+	url = git@git.telex.global:cfa/docs-cfa.git

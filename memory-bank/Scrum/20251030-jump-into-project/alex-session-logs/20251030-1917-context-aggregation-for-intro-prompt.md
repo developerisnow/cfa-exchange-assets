@@ -7,7 +7,7 @@
 - [ ] Learn estimation by another team [[20251004-estimation-from-outsource-company]]
 	- [ ] diagrams
 		- [ ] gpt5h  [[20251030-1925-gpt5h-conversion-development-capital-platform-diagrams]]
-		- [ ] sonnet 4.5 the same [[20251030-1926-son4.5-conversion-development-capital-platform-diagrams]]
+		- [ ] sonnet 4.5 the same [[20251030-1926-development-capital-platform-diagrams]]
 - [ ] Learn attachments from Yury at 20251022
 ```bash
 yury-founder-discussions  ❯ tree /Users/user/__Repositories/prj_Cifra-rwa-exachange-assets/memory-bank/context/current-context/additional-info-for-analysing/20251022-artefacts
