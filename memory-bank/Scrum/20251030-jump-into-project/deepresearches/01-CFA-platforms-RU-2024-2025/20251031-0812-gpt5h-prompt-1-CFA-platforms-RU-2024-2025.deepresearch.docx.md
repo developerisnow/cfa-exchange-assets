@@ -28,7 +28,7 @@
 **Legend:** *“Custody” \= key storage method; “УКЭП” \= qualified e-signature (CryptoPro \= widespread GOST provider); “DvP” \= settlement model (t+0 unless noted) and partner bank; “Secondary” \= secondary market trading availability (order book or RFQ).*
 
 ## Mermaid Diagram – Platforms by Status
-
+```mermaid
 flowchart TB  
     subgraph Работают  
         AAtom\["Атомайз"\]:::work  
@@ -58,9 +58,10 @@ flowchart TB
         Status\["АО Статус"\]:::soon  
         Sputnik\["Спутник ЦФА"\]:::soon  
     end
+```
 
 ## Mermaid Diagram – Platforms by DLT Technology
-
+```mermaid
 flowchart LR  
     subgraph Hyperledger\_Fabric  
         Atomyze\["Атомайз"\]:::fabric  
@@ -68,21 +69,21 @@ flowchart LR
         Sberbank\["Сбербанк"\]:::fabric  
         SPB\["СПБ Биржа"\]:::fabric  
     end  
-    subgraph Masterchain/Waves (RU)  
+    subgraph Masterchain/Waves RU  
         MasterchainPlat\["Мастерчейн"\]:::ru  
         NRDplat\["НРД"\]:::ru  
         Eurofinance\["Еврофинанс"\]:::ru  
-        TokeonPSB\["Токеон (ПСБ)"\]:::ru  
+        TokeonPSB\["Токеон ПСБ"\]:::ru  
     end  
     subgraph Ethereum-based  
-        CFAHub\["ЦФА Хаб (MTS)"\]:::eth  
+        CFAHub\["ЦФА Хаб MTS"\]:::eth  
     end  
-    subgraph Proprietary (Custom)  
+    subgraph Proprietary Custom  
         AlfaToken\["Альфа-Банк A-Token"\]:::custom  
         MadrigalPlat\["Мадригал ОИС"\]:::custom  
         BKSplat\["Платформа БКС"\]:::custom  
     end
-
+```
 *Styling:* fabric \= fill:\#e7f7ff, ru (Masterchain/Waves) \= fill:\#ffefdb, eth \= fill:\#f0fff0, custom \= fill:\#f9e8ff, work \= fill:\#d2f8d2, pending \= fill:\#fff5cc, soon \= fill:\#e0e0e0. (These are conceptual groupings for clarity.)
 
 ## Sources and References

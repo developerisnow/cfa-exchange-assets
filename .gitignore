@@ -18,5 +18,5 @@
 *.doc
 exchange-assets-tokenization-rwa/
 *data/*
-memory-bank/_unstructured/
+# memory-bank/_unstructured/
 *.txt

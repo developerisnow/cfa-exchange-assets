@@ -47,6 +47,7 @@ TL;DR
 - Latency/finality (ledger), TPS, p95 end‑to‑end (Emission→DvP), SLA банков/УКЭП.
 
 Glossary Table (to expand)
+
 | RU term | EN analog | Domain | Why important | Key differences | Related | Checks/Metrics |
 |---|---|---|---|---|---|---|
 | ОИС (оператор инф. системы) | OIS/CFA platform | regulation | Правовой статус платформы | Оператор обмена ≠ ОИС | Регистратор, Депозитарий | Лицензии ЦБ, реестр |
