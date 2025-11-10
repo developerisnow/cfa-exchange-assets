@@ -6,7 +6,7 @@ topic: yougile export by-creator + links catalog
 author: Alex
 agentID: 019a5914-6519-7752-a558-3a161f0a2407
 partAgentID: [co-6519]
-version: 0.1.0
+version: 0.2.0
 tags: [yougile, export, links, creator, alias]
 ---
 
@@ -21,20 +21,23 @@ tags: [yougile, export, links, creator, alias]
 ## DoD
 - Exporter
   - [x] `--all-assignees` downloads per user + not-assigned
-  - [x] `--by-creator` writes to `by-creator/<email>/`
+  - [x] `--by-creator` writes to `by-creator/<email>/` (default)
+  - [x] per-assignee disabled by default (no duplicates)
   - [x] `users-aliases.csv` generated at context root
   - [x] Frontmatter enriched (project/board/status/timestamp/completed)
+  - [x] No rewrite if content is identical (ignores only `updated:`)
 - Index & Summary
   - [x] Unique tasks index `yougile-index.csv` (id, title, creator, assignees, paths_count)
-  - [x] Weekly summary `*-yougile-weekly-summary.md` generated
+  - [x] Weekly summary `yougile-weekly-summary.md` (stable filename, write only on diff)
 - Links
   - [x] Links catalog script `*-yougile-links-catalog.py`
-  - [ ] Links CSV generated including Nextcloud and Google domains
+  - [x] Links CSV generated including Nextcloud and Google domains
+  - [x] Unique registry `links-unique-registry.csv` with countMentions
 - Commits
   - [x] Iterative commits with messages per AGENTS.md, branch `codex/yougile-mcp-export`
+  - [x] Auto-commit every 2h with 2–3 semantic commits per run
 
 ## Next
-- [ ] Decide on cleanup of legacy per-assignee-only layout after validating by-creator
-- [ ] Add cron/launchd job for nightly `scripts/yougile_sync_all.sh`
-- [ ] Investigate Yougile event history endpoint (capture HAR) and add client if exists; else webhook-based log
-
+- [x] Cleanup per-assignee-only layout after validating by-creator
+- [x] Add launchd job for 2h sync + semantic commits
+- [ ] (Optional) Webhooks for event log; HAR disabled by default
