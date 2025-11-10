@@ -7,3 +7,6 @@
 [submodule "repositories/customer-gitlab/velvet"]
 	path = repositories/customer-gitlab/velvet
 	url = git@git.telex.global:npk/velvet.git
+[submodule "repositories/ai/SDD-shotgun-pro"]
+	path = repositories/ai/SDD-shotgun-pro
+	url = git@github.com:developerisnow/SDD-shotgun-pro.git
