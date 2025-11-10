@@ -19,10 +19,19 @@
   },
   "agents": {
     "maintainers": [
-      { "partAgentID": "co-76ca", "agentID": "019a362f-76ca-7272-909e-362716cf233d" },
-      { "partAgentID": "cc-171f" },
-      { "partAgentID": "cc-e4ee" },
-      { "partAgentID": "cc-03-0f8f" }
+      {
+        "partAgentID": "co-76ca",
+        "agentID": "019a362f-76ca-7272-909e-362716cf233d"
+      },
+      {
+        "partAgentID": "cc-171f"
+      },
+      {
+        "partAgentID": "cc-e4ee"
+      },
+      {
+        "partAgentID": "cc-03-0f8f"
+      }
     ]
   },
   "git": {
@@ -62,44 +71,48 @@
   },
   "environments": {
     "servers": [
-      { "id": "AVA1", "purpose": "demos", "notes": "Hosts OSCVA and Velvet demo services." }
+      {
+        "id": "AVA1",
+        "purpose": "demos",
+        "notes": "Hosts OSCVA and Velvet demo services."
+      }
     ]
   },
   "indices": [
     {
       "id": "people",
       "path": "./manifests/people.manifest.json",
-      "checksum": "8dc4c9871ee5e7219cdbb214a679d086b2d1e0a0e6c7914b64f8957edbe1593e",
+      "checksum": "42101920df33f13fe507306cff306ee5c8bb80a1c775d0b90c6978f16bf05d3f",
       "description": "Registry of project members and stakeholders."
     },
     {
       "id": "repositories",
       "path": "./manifests/repositories.manifest.json",
-      "checksum": "c1462d02b10dc5cbc3ac25d0347c2c46c6d3c24022357387a5e78091394de967",
+      "checksum": "385d6fd1be310e6f779912a591a46eb18a4daf53d2f50226dbe812c9cd365abe",
       "description": "All code repositories and roles."
     },
     {
       "id": "domains",
       "path": "./manifests/domains.manifest.json",
-      "checksum": "6b5358fb2284b11bea8cd6b1253bdd1a0709ff8aad479988642e371707745562",
+      "checksum": "f785757259983a8f61a0c5864129927068172edba87f37bc0f50a23f3474a5fd",
       "description": "Business domains and ownership."
     },
     {
       "id": "communication",
       "path": "./manifests/communication.manifest.json",
-      "checksum": "a509f9e4887cf1e3b2f25a3c97b67f5233c597e1caebd492aac0aa97dbf33b31",
+      "checksum": "f59d78caff66ff854be58e6390526d987ab3509e47908acb94e7daedf59f863e",
       "description": "Key communication logs and transcripts."
     },
     {
       "id": "docs",
       "path": "./manifests/docs.manifest.json",
-      "checksum": "1069a256cb140d2b0ee9b791e4ebad712c7bc48f29a9f6e0cbca81dd84f4f3d0",
+      "checksum": "09d069a46d41b4610fe19595522e0a2c737c7dace3547d16eadc1c83d027eef8",
       "description": "Critical documents and research."
     },
     {
       "id": "repo-structure",
       "path": "./manifests/repo-structure.manifest.json",
-      "checksum": "27b5b1916f6f3110bd2b5ecc3e13735105c3cee9528a56266b608927582d6b11",
+      "checksum": "32cb6d5473a1daaeb57a172aaaabf7f60e4f051c956d9f9906aa973511e7b834",
       "description": "Folder map for agent navigation."
     }
   ],
@@ -111,4 +124,3 @@
     }
   }
 }
-
