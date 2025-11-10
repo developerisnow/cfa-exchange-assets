@@ -17,23 +17,6 @@
     "agents_md": "./AGENTS.md",
     "notes": "Follow commit style and folder naming from AGENTS.md."
   },
-  "agents": {
-    "maintainers": [
-      {
-        "partAgentID": "co-76ca",
-        "agentID": "019a362f-76ca-7272-909e-362716cf233d"
-      },
-      {
-        "partAgentID": "cc-171f"
-      },
-      {
-        "partAgentID": "cc-e4ee"
-      },
-      {
-        "partAgentID": "cc-03-0f8f"
-      }
-    ]
-  },
   "git": {
     "root": ".",
     "submodules": [
@@ -88,7 +71,7 @@
     {
       "id": "repositories",
       "path": "./manifests/repositories.manifest.json",
-      "checksum": "385d6fd1be310e6f779912a591a46eb18a4daf53d2f50226dbe812c9cd365abe",
+      "checksum": "2cd229a431f244b9f66fd60d7baad47a6f687a2dc7cdca56ce3d9f429aed8492",
       "description": "All code repositories and roles."
     },
     {
