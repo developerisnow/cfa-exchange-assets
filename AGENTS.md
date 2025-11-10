@@ -105,7 +105,7 @@ tags: [relevant, tags]
 ### Workflow & AI Workplace
 The actual operational setup spans macOS and two Ubuntu VPS servers with GUI orchestration:
 - Servers
-  - `AVA1` (Ubuntu): primary workhorse, runs Vibe Diffuse Kanban (password-protected), Codex & Cline auth installed
+  - `eywa1` aka `AVA1` (Ubuntu): primary workhorse, runs Vibe‑Kanban (password-protected), Codex & Claude Code auth installed
   - `CFA1` (Ubuntu): demo hosting for Velvet (Node.js exchange) and .NET services
   - `macOS-local`: initial sessions (8–15) with CLI agents and web tools
 - Orchestrator: Vibe Diffuse Kanban (GUI). Each step = new session; sessions can reach hundreds per task. Do not mirror all raw sessions into the repo; only index high‑signal artefacts to `memory-bank` using `YYYYMMDD-HHMM-*` naming
