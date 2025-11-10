@@ -1,0 +1,30 @@
+{
+    "id": "repo-structure",
+    "description": "Map of the project repository for agent navigation.",
+    "structure": {
+      "manifests/": {
+        "description": "This directory. Contains all project manifest files. The SSOT for project structure.",
+        "role": "TRUNK"
+      },
+      "memory-bank/": {
+        "description": "The project's 'data lake'. Contains all raw and processed information.",
+        "role": "DATA"
+      },
+      "memory-bank/context/current-context/communication-log/": {
+        "description": "Raw transcripts and chat logs. Primary source for understanding project history and stakeholder intent.",
+        "role": "RAW_DATA"
+      },
+      "memory-bank/Scrum/": {
+        "description": "Agent-specific work folders from previous experiments. Good source for architectural patterns and reusable prompts.",
+        "role": "AGENT_WORKSPACE"
+      },
+      "repositories/customer-gitlab/docs-cfa-rwa/": {
+        "description": "The official documentation repository. Contains the canonical architecture, legal, and security documents.",
+        "role": "BRANCH_DOCS"
+      },
+      "scripts/": {
+        "description": "Utility scripts for project automation (e.g., manifest validation, ETL).",
+        "role": "TOOLS"
+      }
+    }
+  }

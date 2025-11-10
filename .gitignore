@@ -22,3 +22,5 @@ exchange-assets-tokenization-rwa/
 *.txt
 # Ignore customer gitlab submodules until configured
 repositories/customer-gitlab/**
+data/
+

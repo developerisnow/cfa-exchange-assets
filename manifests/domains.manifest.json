@@ -1,0 +1,42 @@
+{
+    "id": "domains",
+    "description": "Core business domains of the RWA platform.",
+    "domains": [
+      {
+        "id": "identity",
+        "description": "Handles user/entity registration, KYC/KYB, authentication (Keycloak), and authorization (RBAC/ABAC).",
+        "owner": "aleksandr-o",
+        "critical_docs": ["docs-cfa-rwa/architecture/11-Sequence-ESIA-OIDC.md"]
+      },
+      {
+        "id": "tokenization",
+        "description": "Manages the lifecycle of digital assets: creation (minting), issuance, and corporate actions.",
+        "owner": "alex-a",
+        "critical_docs": ["docs-cfa-rwa/legal/01-ПравилаИС-template.md"]
+      },
+      {
+        "id": "exchange",
+        "description": "Core trading functionality: order book, matching engine, market data. Initially focused on primary issuance.",
+        "owner": "alex-a",
+        "critical_docs": ["docs-cfa-rwa/architecture/10-HighLevel-Architecture.md"]
+      },
+      {
+        "id": "settlement",
+        "description": "Handles Delivery-vs-Payment (DvP) logic, integration with banking rails, and transaction reconciliation.",
+        "owner": "aleksandr-o",
+        "critical_docs": []
+      },
+      {
+        "id": "compliance",
+        "description": "AML/CFT monitoring, rule engine, sanctions screening, and regulatory reporting.",
+        "owner": "yury-m",
+        "critical_docs": ["docs-cfa-rwa/security/20-ГОСТ57580-Чеклист.md"]
+      },
+      {
+        "id": "custody",
+        "description": "Manages wallets and keys, likely integrating with an HSM or external custodian.",
+        "owner": "aleksandr-o",
+        "critical_docs": []
+      }
+    ]
+  }

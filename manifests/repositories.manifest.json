@@ -1,0 +1,27 @@
+{
+    "id": "repositories",
+    "description": "Code repositories relevant to the project.",
+    "repositories": [
+      {
+        "id": "main-docs",
+        "path": "./repositories/customer-gitlab/docs-cfa-rwa",
+        "url": "git@git.telex.global:cfa/docs-cfa.git",
+        "role": "Primary SSOT for documentation, specs, and architecture (The 'Trunk').",
+        "notes": "This is where all SDD artifacts live. Agents should read from here."
+      },
+      {
+        "id": "legacy-exchange-nodejs",
+        "path": "./repositories/legacy/exchange-nodejs",
+        "url": "tbd",
+        "role": "Reference code from a previous exchange project (Node.js).",
+        "notes": "Source of potential reusable logic. Alex Semenov is the expert."
+      },
+      {
+        "id": "legacy-bitchange-php",
+        "path": "./repositories/legacy/bitchange-php",
+        "url": "tbd",
+        "role": "Reference code from BitChange project (PHP/Laravel).",
+        "notes": "Mentioned as a source of some components, but likely outdated."
+      }
+    ]
+  }

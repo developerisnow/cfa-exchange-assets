@@ -34,6 +34,18 @@
         "CODEX_CLI_PATH": "/Users/user/.nvm/versions/node/v22.13.0/bin/codex"
       }
     },
+    "yougile": {
+      "command": "python3",
+      "args": ["/Users/user/__Repositories/yougile/yougile-mcp__justrussian/run_server.py"],
+      "cwd": "/Users/user/__Repositories/yougile/yougile-mcp__justrussian",
+      "env": {
+        "PATH": "/Users/user/__Repositories/yougile/yougile-mcp__justrussian/venv/bin:$PATH",
+        "YOUGILE_BASE_URL": "https://yougile.com",
+        "YOUGILE_EMAIL": "aa@cfa.capital",
+        "YOUGILE_PASSWORD": "hNAYl^Yh6S1SNy",
+        "YOUGILE_COMPANY_ID": "98ab8509-9e44-447d-9654-50ff0f730cac"
+      }
+    },
     "time": {
       "command": "uvx",
       "args": [

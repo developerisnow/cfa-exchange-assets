@@ -4,16 +4,13 @@ updated: 2025-11-03 14:20
 type: customer-artifact
 sphere: [market, cfa]
 topic: [competitors-all-in-one]
-author: codex
-agentID: 019a362f-76ca-7272-909e-362716cf233d
+owner: [alex]
+co-author: openai-codex
 partAgentID: [co-76ca]
 version: 1.0.0
 tags: [competitors, summary, ssot]
 ---
 
-next: [[20251103-customer-pack-Yury/presentation]]
-previous: [[20251103-customer-pack-Yury/README-v2]]
-related: [[20251103-customer-pack-Yury/competitors-overview]], [[20251103-customer-pack-Yury/batch1-competitors]], [[20251103-customer-pack-Yury/batch1-qa]]
 # Glossary — Columns (short, practical)
 
 | abbr      | 🤔✅ | title         | description                                                   | example             | notes                                            | cfa-capital insights                  |

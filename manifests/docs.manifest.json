@@ -1,0 +1,34 @@
+{
+    "id": "docs",
+    "description": "Catalog of critical project documents.",
+    "documents": [
+      {
+        "id": "competitor-analysis-xlsx",
+        "path": "./memory-bank/_unstructured/Действующие информационные платформы и операторы ЦФА.xlsx",
+        "type": "spreadsheet",
+        "owner": "yury-m",
+        "summary": "Primary spreadsheet with analysis of ~20 Russian RWA competitors."
+      },
+      {
+        "id": "outsource-estimation-pdf",
+        "path": "./memory-bank/context/current-context/additional-info-for-analysing/20251004-estimation-from-outsource-company/20251004-estimation-from-outsource-company.md",
+        "type": "estimation",
+        "owner": "yury-m",
+        "summary": "An external company's estimation for the project, mentioned as ~6000 hours."
+      },
+      {
+        "id": "tokeon-guide-pdf",
+        "path": "./memory-bank/data/memory-bank/files/Цифровые_активы_Руководство_по_ЦФА_и_платформе_Токеон.md",
+        "type": "competitor-doc",
+        "owner": "boris-m",
+        "summary": "Official guide for the Tokeon platform, a key competitor."
+      },
+      {
+        "id": "atomyze-book-pdf",
+        "path": "./memory-bank/data/memory-bank/files/Цифровые_финансовые_активы_Атомайз.pdf",
+        "type": "competitor-doc",
+        "owner": "boris-m",
+        "summary": "Official book from Atomyze, another key competitor."
+      }
+    ]
+  }

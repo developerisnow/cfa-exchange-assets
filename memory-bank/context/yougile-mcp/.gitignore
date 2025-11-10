@@ -1,0 +1,6 @@
+# local secrets for export script
+.env
+.env.local
+# python
+__pycache__/
+*.pyc
