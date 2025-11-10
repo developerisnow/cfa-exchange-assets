@@ -100,6 +100,7 @@ tags: [relevant, tags]
 - Maintain `project.manifest.json` at repo root as machine-readable project index
 - Structure focuses on agent work tracking during requirements phase
 - Update version and agent info when modifying
+ - Use scripts: `scripts/lint-manifests.sh`, `scripts/update-checksums.sh`, `scripts/validate-manifests.sh`, `scripts/regen-repositories-manifest.sh`
 
 ### Workflow & AI Workplace
 The actual operational setup spans macOS and two Ubuntu VPS servers with GUI orchestration:
