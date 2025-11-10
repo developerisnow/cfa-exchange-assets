@@ -114,13 +114,12 @@
       "path": "./manifests/repo-structure.manifest.json",
       "checksum": "32cb6d5473a1daaeb57a172aaaabf7f60e4f051c956d9f9906aa973511e7b834",
       "description": "Folder map for agent navigation."
+    },
+    {
+      "id": "workflow",
+      "path": "./manifests/workflow.manifest.json",
+      "checksum": "6d6793178106ae3eb1ea49701657717ccbd12ec8c94c91a8027f68b5b9e57862",
+      "description": "Operational workflow, tools, servers, and policies."
     }
-  ],
-  "backcompat": {
-    "previous_root": {
-      "path": "./tree.manifest.json",
-      "checksum": "4cdd3ffbea931817b81949cf997803ea8a06f44e1e23bcc36f9d3425721e7e76",
-      "deprecated": true
-    }
-  }
+  ]
 }

@@ -1,0 +1,97 @@
+{
+  "id": "workflow",
+  "description": "Workplace, orchestration, tools, and operational workflow for AI-assisted development and research.",
+  "meta": {
+    "version": "1.0.0",
+    "updated": "2025-11-10T19:25:00+03:00",
+    "edited_by": ["co-76ca"]
+  },
+  "workplaces": {
+    "servers": [
+      {
+        "id": "AVA1",
+        "os": "Ubuntu",
+        "role": ["primary-workhorse", "agent-orchestration"],
+        "auth": ["password-protected GUI for Vibe Diffuse Kanban", "SSH"],
+        "notes": "Main remote machine. Hosts Vibe Diffuse Kanban; used predominantly over CLI. Codex and Cline authorizations installed."
+      },
+      {
+        "id": "CFA1",
+        "os": "Ubuntu",
+        "role": ["demo-hosting"],
+        "notes": "Used for spinning demos (Velvet Node.js exchange, .NET services)."
+      },
+      {
+        "id": "macOS-local",
+        "os": "macOS",
+        "role": ["initial-sessions"],
+        "notes": "Early work with CLI agents (Cline, Codeium, Codex CLI) and web UIs. ~8–15 sessions." 
+      }
+    ],
+    "orchestrator": {
+      "name": "Vibe Diffuse Kanban",
+      "type": "GUI",
+      "access": "password-protected",
+      "behavior": {
+        "session_model": "each step = new session",
+        "session_volume": "tens to hundreds per task",
+        "persistence": "do not mirror all raw sessions into repo; index only high-signal artefacts"
+      },
+      "agents": ["Cline", "Codex"],
+      "notes": "Primary interface for coding agents; accessed even from mobile."
+    }
+  },
+  "tools": {
+    "providers": ["OpenAI", "Google", "Anthropic", "Perplexity"],
+    "wrappers": [
+      { "name": "Cline", "kind": "coding-agent" },
+      { "name": "Codex CLI", "kind": "coding-agent" },
+      { "name": "Codeium", "kind": "coding-agent" },
+      { "name": "OpenHands", "kind": "coding-agent", "status": "testing" },
+      { "name": "Kodu", "kind": "coding-agent", "status": "testing" },
+      { "name": "Droid", "kind": "coding-agent", "status": "testing" },
+      { "name": "JustCode", "kind": "coding-agent", "status": "testing" }
+    ],
+    "deep_research": [
+      { "name": "OpenAI Deep Research", "use": "research" },
+      { "name": "Anthropic Deep Research", "use": "research" },
+      { "name": "Gemini Deep Research", "use": "research" },
+      { "name": "Perplexity", "use": "research-only" },
+      { "name": "Perlexity", "use": "research-only" }
+    ],
+    "cli": [
+      { "name": "Gemini CLI", "use": "coding + analysis" }
+    ],
+    "assistants": [
+      { "name": "AI Studio", "role": "evaluator/teacher/buddy", "context_window": "~1M tokens", "use": "large-context analysis" }
+    ]
+  },
+  "dev_practices": {
+    "tmux": {
+      "policy": "Create dedicated tmux session per project; organize by tabs for tools and tasks"
+    },
+    "session_storage": {
+      "raw": "kept in orchestrator/runtime; not all checked-in",
+      "indexing": "link only essential artefacts into memory-bank with YYYYMMDD-HHMM prefix"
+    },
+    "manifests": {
+      "role": "SSOT for agents; indices drive navigation",
+      "update_cadence": "incremental, checksum-updated"
+    }
+  },
+  "git_policy": {
+    "structure": ["monorepo", "submodules"],
+    "zones": [
+      { "id": "most-private", "audience": "owner-only" },
+      { "id": "customer", "audience": "customer" },
+      { "id": "customer-devs", "audience": "customer-engineering" }
+    ],
+    "remotes": {
+      "origin": "Customer GitLab (authoritative for customer)",
+      "monorepo": "DeveloperIsNow monorepo mirror (owner’s SSOT)",
+      "webfree-stealth": "Third-party service access; limited, purpose-bound"
+    },
+    "notes": "Repositories may have multiple remotes configured; origin points to customer GitLab, additional mirrors used for owner workflows and third-party service integrations."
+  }
+}
+

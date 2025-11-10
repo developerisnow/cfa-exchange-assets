@@ -1,68 +1,48 @@
 {
-    "id": "repositories",
-    "description": "Code repositories relevant to the project.",
-    "meta": {
-      "version": "1.1.0",
-      "updated": "2025-11-10T19:04:00+03:00",
-      "edited_by": ["co-76ca"]
-    },
-    "repositories": [
-      {
-        "id": "main-docs",
-        "path": "./repositories/customer-gitlab/docs-cfa-rwa",
-        "remotes": {
-          "origin": "git@git.telex.global:cfa/docs-cfa.git"
-        },
-        "role": "Primary SSOT for documentation, specs, and architecture (The 'Trunk').",
-        "notes": "This is where all SDD artifacts live. Agents should read from here.",
-        "default_branch": "main",
-        "submodule": true
-      },
-      {
-        "id": "ois-cfa",
-        "path": "./repositories/customer-gitlab/ois-cfa",
-        "remotes": {
-          "origin": "git@git.telex.global:npk/ois-cfa.git",
-          "github-mirror": "git@github.com:developerisnow/cfa-ois-cfa.git"
-        },
-        "role": "Core application repository (ОИС ЦФА).",
-        "notes": "Primary GitLab repo; mirrored to GitHub under developerisnow/cfa-ois-cfa via local pushurl config.",
-        "default_branch": "main",
-        "submodule": true
-      },
-      {
-        "id": "velvet",
-        "path": "./repositories/customer-gitlab/velvet",
-        "remotes": {
-          "origin": "git@git.telex.global:npk/velvet.git",
-          "github-mirror": "git@github.com:developerisnow/cfa-velvet.git"
-        },
-        "role": "Partner/auxiliary repository (Velvet).",
-        "notes": "Primary GitLab repo; mirrored to GitHub under developerisnow/cfa-velvet via local pushurl config.",
-        "default_branch": "main",
-        "submodule": true
-      },
-      {
-        "id": "legacy-exchange-nodejs",
-        "path": "./repositories/legacy/exchange-nodejs",
-        "remotes": {
-          "origin": "tbd"
-        },
-        "role": "Reference code from a previous exchange project (Node.js).",
-        "notes": "Source of potential reusable logic. Alex Semenov is the expert.",
-        "default_branch": "main",
-        "submodule": false
-      },
-      {
-        "id": "legacy-bitchange-php",
-        "path": "./repositories/legacy/bitchange-php",
-        "remotes": {
-          "origin": "tbd"
-        },
-        "role": "Reference code from BitChange project (PHP/Laravel).",
-        "notes": "Mentioned as a source of some components, but likely outdated.",
-        "default_branch": "main",
-        "submodule": false
-      }
+  "id": "repositories",
+  "description": "Code repositories relevant to the project.",
+  "meta": {
+    "version": "1.1.0",
+    "updated": "2025-11-10T19:04:00+03:00",
+    "edited_by": [
+      "co-76ca"
     ]
-  }
+  },
+  "repositories": [
+    {
+      "id": "main-docs",
+      "path": "./repositories/customer-gitlab/docs-cfa-rwa",
+      "remotes": {
+        "origin": "git@git.telex.global:cfa/docs-cfa.git"
+      },
+      "role": "Primary SSOT for documentation, specs, and architecture (The 'Trunk').",
+      "notes": "This is where all SDD artifacts live. Agents should read from here.",
+      "default_branch": "main",
+      "submodule": true
+    },
+    {
+      "id": "ois-cfa",
+      "path": "./repositories/customer-gitlab/ois-cfa",
+      "remotes": {
+        "origin": "git@git.telex.global:npk/ois-cfa.git",
+        "github-mirror": "git@github.com:developerisnow/cfa-ois-cfa.git"
+      },
+      "role": "Core application repository (ОИС ЦФА).",
+      "notes": "Primary GitLab repo; mirrored to GitHub under developerisnow/cfa-ois-cfa via local pushurl config.",
+      "default_branch": "main",
+      "submodule": true
+    },
+    {
+      "id": "velvet",
+      "path": "./repositories/customer-gitlab/velvet",
+      "remotes": {
+        "origin": "git@git.telex.global:npk/velvet.git",
+        "github-mirror": "git@github.com:developerisnow/cfa-velvet.git"
+      },
+      "role": "Node.js Exchange (Velvet)",
+      "notes": "Legacy 2017–2018 codebase; serves as reference for Node.js exchange functionality.",
+      "default_branch": "main",
+      "submodule": true
+    }
+  ]
+}

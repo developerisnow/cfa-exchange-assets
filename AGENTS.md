@@ -101,6 +101,26 @@ tags: [relevant, tags]
 - Structure focuses on agent work tracking during requirements phase
 - Update version and agent info when modifying
 
+### Workflow & AI Workplace
+The actual operational setup spans macOS and two Ubuntu VPS servers with GUI orchestration:
+- Servers
+  - `AVA1` (Ubuntu): primary workhorse, runs Vibe Diffuse Kanban (password-protected), Codex & Cline auth installed
+  - `CFA1` (Ubuntu): demo hosting for Velvet (Node.js exchange) and .NET services
+  - `macOS-local`: initial sessions (8–15) with CLI agents and web tools
+- Orchestrator: Vibe Diffuse Kanban (GUI). Each step = new session; sessions can reach hundreds per task. Do not mirror all raw sessions into the repo; only index high‑signal artefacts to `memory-bank` using `YYYYMMDD-HHMM-*` naming
+- Coding agents/wrappers: Cline, Codex CLI, Codeium; testing OpenHands, Kodu, Droid, JustCode
+- Deep Research: OpenAI DR, Anthropic DR, Gemini DR; Perplexity/Perlexity used only for research
+- CLI: Gemini CLI (coding + analysis)
+- Assistants: AI Studio as evaluator/teacher with large context (~1M tokens)
+- tmux policy: per‑project tmux session; tabs for tools/tasks when working via CLI
+
+### Git Remote Policy
+- Multi‑remote setup per repository is expected:
+  - `origin`: Customer GitLab (authoritative for customer)
+  - `monorepo`: DeveloperIsNow monorepo mirror (owner’s SSOT)
+  - `webfree-stealth`: limited third‑party integrations that need read/push without exposing main accounts
+- Submodules reflect customer repos; mirrors may be configured locally via additional remotes or pushurls.
+
 ### Work Cadence & Pragmatism
 - Default chunk: 10–15 minutes focused work per iteration before asking for feedback (unless blocked).
 - Prioritize operator interests: prepayment blocks, scope control, anti‑scope creep; minimize analysis‑paralysis.
