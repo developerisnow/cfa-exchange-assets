@@ -10,6 +10,20 @@
         "notes": "This is where all SDD artifacts live. Agents should read from here."
       },
       {
+        "id": "ois-cfa",
+        "path": "./repositories/customer-gitlab/ois-cfa",
+        "url": "git@git.telex.global:npk/ois-cfa.git",
+        "role": "Core application repository (ОИС ЦФА).",
+        "notes": "Primary GitLab repo; mirrored to GitHub under developerisnow/cfa-ois-cfa via local pushurl config."
+      },
+      {
+        "id": "velvet",
+        "path": "./repositories/customer-gitlab/velvet",
+        "url": "git@git.telex.global:npk/velvet.git",
+        "role": "Partner/auxiliary repository (Velvet).",
+        "notes": "Primary GitLab repo; mirrored to GitHub under developerisnow/cfa-velvet via local pushurl config."
+      },
+      {
         "id": "legacy-exchange-nodejs",
         "path": "./repositories/legacy/exchange-nodejs",
         "url": "tbd",
