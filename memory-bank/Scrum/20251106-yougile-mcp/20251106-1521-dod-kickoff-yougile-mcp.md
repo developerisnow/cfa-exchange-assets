@@ -1,13 +1,13 @@
 ---
 created: 2025-11-06 15:21
-updated: 2025-11-06 15:28
+updated: 2025-11-10 11:02
 type: planning
 sphere: operations
 topic: yougile mcp setup and export
 author: Alex
 agentID: 019a5914-6519-7752-a558-3a161f0a2407
 partAgentID: [co-6519]
-version: 0.1.1
+version: 0.2.0
 tags: [yougile, mcp, setup, export, tasks]
 ---
 
@@ -46,6 +46,14 @@ tags: [yougile, mcp, setup, export, tasks]
 - Run: `mcp:yougile export --assignee "aa@cfa.capital" --out memory-bank/context/yougile-mcp` creates `.md` files
 - Verify a sample file contains required frontmatter and correct content fields
 - No secrets present in repo via `rg -n "(token|api_key|password)"`
+
+## Implementation Notes (Snapshot)
+- Exporter defaults to by-creator; per-assignee code left behind but disabled
+- Write policy: do not rewrite an existing task file if nothing changed (ignores only `updated:`)
+- Links catalogs: verbose + unique (commit only on diff)
+- Weekly v2 report: single filename `yougile-weekly-summary.md`, write only if content changes
+- Auto-sync (launchd 2h) runs export → links → weekly → index with semantic commits
+- README with full instructions: `memory-bank/context/yougile-mcp/README.md`
 
 ## Task Export — Frontmatter Template
 ```yaml

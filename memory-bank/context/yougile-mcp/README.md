@@ -6,7 +6,7 @@ topic: yougile export + sync pipeline
 author: Alex
 agentID: 019a5914-6519-7752-a558-3a161f0a2407
 partAgentID: [co-6519]
-version: 0.2.0
+version: 0.2.1
 tags: [yougile, sync, summary, links, creator]
 ---
 
@@ -14,7 +14,7 @@ tags: [yougile, sync, summary, links, creator]
 
 ## TL;DR
 - Default grouping: by-creator only → `by-creator/<email>/*.md` (1 file = 1 task)
-- Every 2h: export → links (verbose+unique) → weekly summary v2 → index → git commits
+- Every 2h: export → links (verbose+unique) → weekly summary v2 → index → single git commit
 - Local secrets: `.env.local` (preferred) or `.env` in this folder (ignored by git)
 
 ## Layout
@@ -44,7 +44,7 @@ tags: [yougile, sync, summary, links, creator]
   - links (verbose + unique)
   - summary v2 (role/name + wiki links)
   - index (unique tasks)
-  - 2–3 semantic git commits per run
+  - Single semantic git commit per run (only on diff)
 
 ## Aliases (manual)
 - File: `/Users/user/____Sandruk/___PARA/__Areas/_5_CAREER/DEVOPS/automations/zsh/aliases/project-hypetrain.zsh`
@@ -82,4 +82,3 @@ tags: [yougile, sync, summary, links, creator]
 ## Commit Policy
 - Авто-коммиты каждые 2 часа (3 шага): export, links, summary (и index как отдельный chore при изменении)
 - Вручную — любые скрипты можно запускать через алиасы; коммиты фиксируют только изменения
-

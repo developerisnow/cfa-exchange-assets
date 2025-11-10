@@ -126,8 +126,7 @@ def main():
             if completed:
                 bucket['completed'].append((title, url, rel))
 
-    out_ts = datetime.now().strftime('%Y%m%d-%H%M')
-    out = base / f"{out_ts}-yougile-weekly-summary.md"
+    out = base / "yougile-weekly-summary.md"
     lines: List[str] = []
     lines.append('---')
     lines.append(f"created: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
@@ -164,7 +163,15 @@ def main():
                 lines.append(f"- [ ] {wikilink} ([{title}]({url}))")
             lines.append('')
 
-    out.write_text('\n'.join(lines), encoding='utf-8')
+    new_text = '\n'.join(lines)
+    if out.exists():
+        try:
+            if out.read_text(encoding='utf-8') == new_text:
+                print(f"Summary unchanged: {out}")
+                return
+        except Exception:
+            pass
+    out.write_text(new_text, encoding='utf-8')
     print(f"Summary written to {out}")
 
 

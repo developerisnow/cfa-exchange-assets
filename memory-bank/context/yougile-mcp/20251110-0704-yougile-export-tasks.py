@@ -239,6 +239,15 @@ def build_index_for_subdir(subdir: Path) -> Dict[str, Path]:
     return index
 
 
+def _strip_updated(text: str) -> str:
+    lines = []
+    for ln in text.splitlines():
+        if ln.strip().startswith('updated:'):
+            continue
+        lines.append(ln)
+    return '\n'.join(lines)
+
+
 def write_md(out_dir: Path, task: Dict[str, Any], agent_id: str, part_agent_id: str, existing: Optional[Path]) -> Path:
     out_dir.mkdir(parents=True, exist_ok=True)
     now = datetime.now()
@@ -274,10 +283,12 @@ def write_md(out_dir: Path, task: Dict[str, Any], agent_id: str, part_agent_id: 
         try:
             created_ts = None
             lines = path.read_text(encoding="utf-8").splitlines()
+            prev_updated = None
             for i, line in enumerate(lines[:50]):
                 if line.startswith("created:"):
                     created_ts = line.split(":", 1)[1].strip()
-                    break
+                if line.startswith("updated:"):
+                    prev_updated = line.split(":", 1)[1].strip()
         except Exception:
             created_ts = None
     else:
@@ -290,7 +301,7 @@ def write_md(out_dir: Path, task: Dict[str, Any], agent_id: str, part_agent_id: 
     fm = [
         "---",
         f"created: {created_ts or now_ts}",
-        f"updated: {now_ts}",
+        f"updated: {prev_updated or now_ts}",
         "type: task",
         "sphere: operations",
         "topic: yougile",
@@ -320,7 +331,22 @@ def write_md(out_dir: Path, task: Dict[str, Any], agent_id: str, part_agent_id: 
         "## Description",
         task.get("description") or "(no description)",
     ]
-    path.write_text("\n".join(map(str, fm)), encoding="utf-8")
+    new_content = "\n".join(map(str, fm))
+
+    # If file exists, avoid churn when nothing except 'updated' would change
+    if existing and existing.exists():
+        try:
+            old = path.read_text(encoding="utf-8")
+            if _strip_updated(old) == _strip_updated(new_content):
+                # No material change; do not rewrite to keep timestamps stable
+                return path
+            # There is a change; bump updated to now
+            new_content = new_content.replace(f"updated: {prev_updated or now_ts}", f"updated: {now_ts}")
+        except Exception:
+            # fallback: write
+            pass
+
+    path.write_text(new_content, encoding="utf-8")
     return path
 
 
