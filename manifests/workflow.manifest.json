@@ -9,7 +9,7 @@
   "workplaces": {
     "servers": [
       {
-        "id": "AVA1",
+        "id": "eywa1",
         "os": "Ubuntu",
         "role": ["primary-workhorse", "agent-orchestration"],
         "auth": ["password-protected GUI for Vibe Diffuse Kanban", "SSH"],
@@ -29,37 +29,40 @@
       }
     ],
     "orchestrator": {
-      "name": "Vibe Diffuse Kanban",
-      "type": "GUI",
+      "name": "Vibe-Kanban",
+      "type": "TUI",
       "access": "password-protected",
       "behavior": {
         "session_model": "each step = new session",
         "session_volume": "tens to hundreds per task",
         "persistence": "do not mirror all raw sessions into repo; index only high-signal artefacts"
       },
-      "agents": ["Cline", "Codex"],
+      "agents": ["Claude Code", "Codex", "Gemini", "Opencode", "Qwen_Code", "AMP", "COPILOT", "Cursor_Agent" ],
       "notes": "Primary interface for coding agents; accessed even from mobile."
     }
   },
   "tools": {
     "providers": ["OpenAI", "Google", "Anthropic", "Perplexity"],
     "wrappers": [
-      { "name": "Cline", "kind": "coding-agent" },
+      { "name": "Claude Code", "kind": "coding-agent" },
       { "name": "Codex CLI", "kind": "coding-agent" },
-      { "name": "Codeium", "kind": "coding-agent" },
-      { "name": "OpenHands", "kind": "coding-agent", "status": "testing" },
-      { "name": "Kodu", "kind": "coding-agent", "status": "testing" },
+      { "name": "GeminiCli", "kind": "coding-agent", "status": "testing" },
       { "name": "Droid", "kind": "coding-agent", "status": "testing" },
+      { "name": "Droid", "kind": "coding-agent", "status": "testing" },
+      { "name": "Opencode", "kind": "coding-agent", "status": "testing" },
+      { "name": "Crush", "kind": "coding-agent", "status": "testing" },
       { "name": "JustCode", "kind": "coding-agent", "status": "testing" }
     ],
     "deep_research": [
-      { "name": "OpenAI Deep Research", "use": "research" },
-      { "name": "Anthropic Deep Research", "use": "research" },
-      { "name": "Gemini Deep Research", "use": "research" },
-      { "name": "Perplexity", "use": "research-only" },
-      { "name": "Perlexity", "use": "research-only" }
+      { "name": "chatgpt.com", "use": "deepresearch" },
+      { "name": "Claude.ai", "use": "deepresearch" },
+      { "name": "Gemini.google.com", "use": "deepresearch" },
+      { "name": "Perplexity.ai", "use": "deepresearch" },
+      { "name": "Parallel.ai", "use": "deepresearch" }
     ],
     "cli": [
+      { "name": "Claude CLI", "use": "coding + analysis" },
+      { "name": "Codex CLI", "use": "coding + analysis" },
       { "name": "Gemini CLI", "use": "coding + analysis" }
     ],
     "assistants": [
@@ -70,9 +73,9 @@
     "tmux": {
       "policy": "Create dedicated tmux session per project; organize by tabs for tools and tasks",
       "naming": {
-        "session": "<project>-<env>-<date>",
+        "session": "p-<project>-<optional-session-name>",
         "windows": ["code", "agents", "logs", "services"],
-        "example": "cfa-main-20251110"
+        "example": "p-cfa"
       }
     },
     "session_storage": {
@@ -92,8 +95,9 @@
     "structure": ["monorepo", "submodules"],
     "zones": [
       { "id": "most-private", "audience": "owner-only" },
-      { "id": "customer", "audience": "customer" },
-      { "id": "customer-devs", "audience": "customer-engineering" }
+      { "id": "pet-projects-teammates", "audience": "teammates" },
+      { "id": "customer-devs", "audience": "customer-engineering" },
+      { "id": "customer", "audience": "customer" }
     ],
     "remotes": {
       "origin": "Customer GitLab (authoritative for customer)",
