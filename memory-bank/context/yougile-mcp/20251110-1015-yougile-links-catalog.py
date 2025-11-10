@@ -167,14 +167,35 @@ def main():
                     domain = urlparse(u).netloc
                     rows.append((tid, title, u, domain, 'comment'))
 
-    # write CSV
+    # write verbose CSV
     out = base / 'links-catalog.csv'
     with out.open('w', newline='', encoding='utf-8') as f:
         w = csv.writer(f)
         w.writerow(['task_id', 'title', 'url', 'domain', 'source'])
         for r in rows:
             w.writerow(list(r))
-    print(f'Links catalog written: {out} ({len(rows)} rows)')
+    # write unique registry by URL
+    uniq: Dict[str, Dict[str, object]] = {}
+    for tid, title, url, domain, source in rows:
+        u = uniq.setdefault(url, {
+            'title': title,
+            'url': url,
+            'taskid': tid,
+            'domain': domain,
+            'source': source,
+            'countMentions': 0,
+        })
+        u['countMentions'] = int(u['countMentions']) + 1
+        # keep first seen title/taskid; if mixed sources, mark as mixed
+        if u.get('source') != source:
+            u['source'] = 'mixed'
+    out2 = base / 'links-unique-registry.csv'
+    with out2.open('w', newline='', encoding='utf-8') as f:
+        w = csv.writer(f)
+        w.writerow(['title','url','taskid','domain','source','countMentions'])
+        for url, d in uniq.items():
+            w.writerow([d['title'], d['url'], d['taskid'], d['domain'], d['source'], d['countMentions']])
+    print(f'Links catalog written: {out} ({len(rows)} rows); unique: {out2} ({len(uniq)})')
 
 
 if __name__ == '__main__':

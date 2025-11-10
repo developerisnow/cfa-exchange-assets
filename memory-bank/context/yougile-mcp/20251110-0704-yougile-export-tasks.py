@@ -324,6 +324,24 @@ def write_md(out_dir: Path, task: Dict[str, Any], agent_id: str, part_agent_id: 
     return path
 
 
+def write_users_alias_csv(out_base: Path, users: List[Dict[str, Any]]):
+    import csv
+    out_path = out_base / "users-aliases.csv"
+    fields = ["id", "email", "realName", "name", "role", "departments"]
+    with out_path.open("w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=fields)
+        w.writeheader()
+        for u in users:
+            row = {
+                "id": u.get("id", ""),
+                "email": u.get("email", ""),
+                "realName": u.get("realName", ""),
+                "name": u.get("name", ""),
+                "role": u.get("role", ""),
+                "departments": ",".join(u.get("departments", []) if isinstance(u.get("departments"), list) else [])
+            }
+            w.writerow(row)
+
 def main():
     # Load env from local files in script dir
     here = Path(__file__).resolve().parent
@@ -340,7 +358,8 @@ def main():
     parser.add_argument("--part-agent-id", default="co-6519")
     parser.add_argument("--max-tasks", type=int, default=5000, help="Safety cap for total tasks fetched (default 5000)")
     parser.add_argument("--all-assignees", action="store_true", help="Iterate per-user and export into per-assignee folders, plus not-assigned")
-    parser.add_argument("--by-creator", action="store_true", help="Also group tasks into by-creator/<email>/ folders")
+    parser.add_argument("--by-creator", action="store_true", default=True, help="Group tasks into by-creator/<email>/ folders (default on)")
+    parser.add_argument("--assignee-folders", action="store_true", help="Additionally write per-assignee/not-assigned folders (off by default)")
     args = parser.parse_args()
 
     # Resolve paths and env
@@ -388,20 +407,23 @@ def main():
             creator_targets = []
             if creator_email:
                 creator_targets = [Path("by-creator") / creator_email]
-            for tgt in targets:
-                subdir = out_base / tgt
-                if subdir not in subdir_index_cache:
-                    subdir_index_cache[subdir] = build_index_for_subdir(subdir)
-                existing = subdir_index_cache[subdir].get(t.get("id", ""))
-                write_md(subdir, t, args.agent_id, args.part_agent_id, existing)
-                if not existing:
-                    new_files = sorted(subdir.glob(f"*-yougile-*-{t.get('id','')}*.md"))
-                    if new_files:
-                        subdir_index_cache[subdir][t.get("id", "")] = new_files[-1]
-                written_local += 1
+            # by-creator is default
             if args.by_creator and creator_targets:
                 for ct in creator_targets:
                     subdir = out_base / ct
+                    if subdir not in subdir_index_cache:
+                        subdir_index_cache[subdir] = build_index_for_subdir(subdir)
+                    existing = subdir_index_cache[subdir].get(t.get("id", ""))
+                    write_md(subdir, t, args.agent_id, args.part_agent_id, existing)
+                    if not existing:
+                        new_files = sorted(subdir.glob(f"*-yougile-*-{t.get('id','')}*.md"))
+                        if new_files:
+                            subdir_index_cache[subdir][t.get("id", "")] = new_files[-1]
+                    written_local += 1
+            # optional per-assignee folders
+            if args.assignee_folders:
+                for tgt in targets:
+                    subdir = out_base / tgt
                     if subdir not in subdir_index_cache:
                         subdir_index_cache[subdir] = build_index_for_subdir(subdir)
                     existing = subdir_index_cache[subdir].get(t.get("id", ""))
@@ -424,8 +446,9 @@ def main():
             per_user_tasks = fetch_all_tasks(tasks_api, YouGileClient, auth_mgr, uid, max_tasks=args.max_tasks)
             written += write_tasks_to_targets(per_user_tasks)
         # Unassigned
-        unassigned = fetch_all_tasks(tasks_api, YouGileClient, auth_mgr, None, max_tasks=args.max_tasks, only_unassigned=True)
-        written += write_tasks_to_targets(unassigned)
+        if args.assignee_folders:
+            unassigned = fetch_all_tasks(tasks_api, YouGileClient, auth_mgr, None, max_tasks=args.max_tasks, only_unassigned=True)
+            written += write_tasks_to_targets(unassigned)
     else:
         # Single-assignee or all-in-one
         one_assignee_id: Optional[str] = None
