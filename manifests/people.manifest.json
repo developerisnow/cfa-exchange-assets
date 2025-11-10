@@ -1,50 +1,57 @@
 {
-    "id": "people",
-    "description": "Key project members and stakeholders.",
-    "people": [
-      {
-        "id": "yury-m",
-        "name": "Yury Mishinsky",
-        "role": "Customer / Founder / Visionary",
-        "handles": {
-          "telegram": "YuryMyshinskiy"
-        },
-        "notes": "Drives the vision, sets deadlines, manages business/legal side. Prefers high-level results and weekly syncs."
+  "id": "people",
+  "description": "Key project members and stakeholders.",
+  "people": [
+    {
+      "id": "yury-m",
+      "name": "Yury Mishinsky",
+      "role": "Customer / Founder / Visionary",
+      "handles": {
+        "telegram": "YuryMyshinskiy"
       },
-      {
-        "id": "alex-a",
-        "name": "Alex A (Aleksandruk)",
-        "role": "AI Architect / Context Engineering / System Architect / DX Engineer / Evangelist / Spec-Driven Development Lead",
-        "handles": {
-          "telegram": "herewegohereiam",
-          "gitlab": "alexa@cfa.capital"
-        },
-        "notes": "Responsible for overall technical architecture, agent-driven workflows, and context engineering. Bridges business requirements and technical implementation."
+      "notes": "Drives the vision, sets deadlines, manages business/legal side. Prefers high-level results and weekly syncs."
+    },
+    {
+      "id": "alex-a",
+      "name": "Alex A (Aleksandruk)",
+      "role": "AI Architect / Context Engineering / System Architect / DX Engineer / Evangelist / Spec-Driven Development Lead",
+      "handles": {
+        "telegram": "herewegohereiam",
+        "gitlab": "alexa@cfa.capital"
       },
-      {
-        "id": "aleksandr-o",
-        "name": "Aleksandr Ozherelev",
-        "role": "Technical Director / DevOps / Backend Lead (.NET)",
-        "handles": {
-          "gitlab": "ao@cfa.capital"
-        },
-        "notes": "Owner of the backend implementation, Keycloak setup, and Kubernetes infrastructure. Prefers .NET stack."
+      "notes": "Responsible for overall technical architecture, agent-driven workflows, and context engineering. Bridges business requirements and technical implementation."
+    },
+    {
+      "id": "aleksandr-o",
+      "name": "Aleksandr Ozherelev",
+      "role": "Technical Director / DevOps / Backend Lead (.NET)",
+      "handles": {
+        "gitlab": "ao@cfa.capital"
       },
-      {
-        "id": "boris-m",
-        "name": "Boris Markevich",
-        "role": "Project Coordinator / Personal Yury's Assistant",
-        "handles": {
-          "telegram": "bmarkevich"
-        },
-        "notes": "Manages access, credentials, and coordinates tasks between technical and business teams. Go-to person for access to competitor platforms."
+      "notes": "Owner of the backend implementation, Keycloak setup, and Kubernetes infrastructure. Prefers .NET stack."
+    },
+    {
+      "id": "boris-m",
+      "name": "Boris Markevich",
+      "role": "Project Coordinator / Personal Yury's Assistant",
+      "handles": {
+        "telegram": "bmarkevich"
       },
-      {
-        "id": "alex-s",
-        "name": "Alex Semenov",
-        "role": "Legacy Velvet Exchange Project Code Expert / Consultant",
-        "handles": {},
-        "notes": "Expert on the legacy crypto exchange codebase (Node.js). Key person for understanding existing assets."
-      }
+      "notes": "Manages access, credentials, and coordinates tasks between technical and business teams. Go-to person for access to competitor platforms."
+    },
+    {
+      "id": "alex-s",
+      "name": "Alex Semenov",
+      "role": "Legacy Velvet Exchange Project Code Expert / Consultant",
+      "handles": {},
+      "notes": "Expert on the legacy crypto exchange codebase (Node.js). Key person for understanding existing assets."
+    }
+  ],
+  "meta": {
+    "version": "1.1.0",
+    "updated": "2025-11-10T19:04:00+03:00",
+    "edited_by": [
+      "co-76ca"
     ]
   }
+}
