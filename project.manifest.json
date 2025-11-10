@@ -101,7 +101,7 @@
     {
       "id": "workflow",
       "path": "./manifests/workflow.manifest.json",
-      "checksum": "4467c0c40646e6d94408f3b5dbe37b9197fee4ab1ca545981245dec3cdd0578b",
+      "checksum": "78e4b105085c3f5e4450e930670136e29e71dd15be2afdce235561e666f68b1f",
       "description": "Operational workflow, tools, servers, and policies."
     }
   ]
