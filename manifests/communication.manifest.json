@@ -1,47 +1,100 @@
 {
-    "id": "communication",
-    "description": "Index of key project communication logs.",
-    "meta": {
-      "version": "1.1.0",
-      "updated": "2025-11-10T19:04:00+03:00",
-      "edited_by": ["co-76ca"]
-    },
-    "logs": [
-      {
-        "id": "intro-call-20251022",
-        "path": "./memory-bank/context/current-context/communication-log/20251022-1930-yury-founder-intro-call.md",
-        "type": "call-transcript",
-        "participants": ["yury-m", "alex-a"],
-        "timestamp": "2025-10-22T19:30:00+03:00",
-        "tags": ["intro", "vision", "mvp"],
-        "summary": "Initial project introduction. Yury outlines the vision for a licensed RWA platform in Russia. Discusses team, tech, and a one-month MVP goal."
-      },
-      {
-        "id": "setup-call-20251103",
-        "path": "./memory-bank/context/current-context/communication-log/20251103-1530-call-Yury-Aleksandr-Alex-setup-work.md",
-        "type": "call-transcript",
-        "participants": ["yury-m", "aleksandr-o", "alex-a"],
-        "timestamp": "2025-11-03T15:30:00+03:00",
-        "tags": ["team-sync", "architecture", ".NET", "C4"],
-        "summary": "First team sync. Discussion on roles, tech stack (.NET vs others), architecture (C4, domains), and initial deliverables. Yury pushes for speed, Alex A. and Aleksandr O. discuss need for proper architecture."
-      },
-      {
-        "id": "tech-sync-20251105",
-        "path": "./memory-bank/context/current-context/communication-log/20251105-1030-call-Alex-and-Aleksandr__Tech-Sync.md",
-        "type": "call-transcript",
-        "participants": ["alex-a", "aleksandr-o"],
-        "timestamp": "2025-11-05T10:30:00+03:00",
-        "tags": ["tech-sync", "SSOT", "Kubernetes", "Keycloak"],
-        "summary": "Technical alignment between Alex A. and Aleksandr O. Discussed SSOT, GitLab vs. Nextcloud, existing Kubernetes/Keycloak setup, and the need to align on a development process."
-      },
-      {
-        "id": "main-chat-yury-oct",
-        "path": "./memory-bank/context/current-context/communication-log/20251004-20251029-chat-telegram-main-YuryMyshinskiy-1016927916.md",
-        "type": "chat-log",
-        "participants": ["yury-m", "alex-a"],
-        "period": { "from": "2025-10-04", "to": "2025-10-29" },
-        "tags": ["payment", "planning", "competitors"],
-        "summary": "Early discussions, payment negotiations, initial research on competitors and tech."
-      }
+  "id": "communication",
+  "description": "Index of key project communication logs.",
+  "meta": {
+    "version": "1.1.0",
+    "updated": "2025-11-10T19:04:00+03:00",
+    "edited_by": [
+      "co-76ca"
     ]
-  }
+  },
+  "logs": [
+    {
+      "id": "intro-call-20251022",
+      "path": "./memory-bank/context/current-context/communication-log/20251022-1930-yury-founder-intro-call.md",
+      "type": "call-transcript",
+      "participants": [
+        "yury-m",
+        "alex-a"
+      ],
+      "timestamp": "2025-10-22T19:30:00+03:00",
+      "tags": [
+        "intro",
+        "vision",
+        "mvp"
+      ],
+      "summary": "Initial project introduction. Yury outlines the vision for a licensed RWA platform in Russia. Discusses team, tech, and a one-month MVP goal."
+    },
+    {
+      "id": "setup-call-20251103",
+      "path": "./memory-bank/context/current-context/communication-log/20251103-1530-call-Yury-Aleksandr-Alex-setup-work.md",
+      "type": "call-transcript",
+      "participants": [
+        "yury-m",
+        "aleksandr-o",
+        "alex-a"
+      ],
+      "timestamp": "2025-11-03T15:30:00+03:00",
+      "tags": [
+        "team-sync",
+        "architecture",
+        ".NET",
+        "C4"
+      ],
+      "summary": "First team sync. Discussion on roles, tech stack (.NET vs others), architecture (C4, domains), and initial deliverables. Yury pushes for speed, Alex A. and Aleksandr O. discuss need for proper architecture."
+    },
+    {
+      "id": "tech-sync-20251105",
+      "path": "./memory-bank/context/current-context/communication-log/20251105-1030-call-Alex-and-Aleksandr__Tech-Sync.md",
+      "type": "call-transcript",
+      "participants": [
+        "alex-a",
+        "aleksandr-o"
+      ],
+      "timestamp": "2025-11-05T10:30:00+03:00",
+      "tags": [
+        "tech-sync",
+        "SSOT",
+        "Kubernetes",
+        "Keycloak"
+      ],
+      "summary": "Technical alignment between Alex A. and Aleksandr O. Discussed SSOT, GitLab vs. Nextcloud, existing Kubernetes/Keycloak setup, and the need to align on a development process."
+    },
+    {
+      "id": "main-chat-yury-oct",
+      "path": "./memory-bank/context/current-context/communication-log/20251004-20251029-chat-telegram-main-YuryMyshinskiy-1016927916.md",
+      "type": "chat-log",
+      "participants": [
+        "yury-m",
+        "alex-a"
+      ],
+      "period": {
+        "from": "2025-10-04",
+        "to": "2025-10-29"
+      },
+      "tags": [
+        "payment",
+        "planning",
+        "competitors"
+      ],
+      "summary": "Early discussions, payment negotiations, initial research on competitors and tech."
+    },
+    {
+      "id": "org-tech-planning-20251110",
+      "path": "./memory-bank/context/current-context/communication-log/20251110-1200-call-Org-Tech-Planning-Yury-AleksandrO-AlexA.call.md",
+      "type": "call-transcript",
+      "participants": [
+        "yury-m",
+        "aleksandr-o",
+        "alex-a"
+      ],
+      "timestamp": "2025-11-10T12:00:00+03:00",
+      "tags": [
+        "planning",
+        "org",
+        "tech"
+      ],
+      "summary": "Org/Tech planning call; align realistic plan and deadlines, scope, and the role of AI in delivery."
+    }
+  ]
+}
