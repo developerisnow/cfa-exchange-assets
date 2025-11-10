@@ -68,11 +68,20 @@
   },
   "dev_practices": {
     "tmux": {
-      "policy": "Create dedicated tmux session per project; organize by tabs for tools and tasks"
+      "policy": "Create dedicated tmux session per project; organize by tabs for tools and tasks",
+      "naming": {
+        "session": "<project>-<env>-<date>",
+        "windows": ["code", "agents", "logs", "services"],
+        "example": "cfa-main-20251110"
+      }
     },
     "session_storage": {
       "raw": "kept in orchestrator/runtime; not all checked-in",
-      "indexing": "link only essential artefacts into memory-bank with YYYYMMDD-HHMM prefix"
+      "indexing": "link only essential artefacts into memory-bank with YYYYMMDD-HHMM prefix",
+      "retention": {
+        "orchestrator_sessions": "rotate by age/volume; keep high-signal references",
+        "memory_bank": "immutable timestamps; edits append-only with version bump"
+      }
     },
     "manifests": {
       "role": "SSOT for agents; indices drive navigation",
@@ -94,4 +103,3 @@
     "notes": "Repositories may have multiple remotes configured; origin points to customer GitLab, additional mirrors used for owner workflows and third-party service integrations."
   }
 }
-

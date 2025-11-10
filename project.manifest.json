@@ -1,11 +1,11 @@
 {
-  "schemaVersion": "1.1",
+  "schemaVersion": "1.2",
   "project": {
     "id": "prj_Cifra-rwa-exachange-assets",
     "name": "Cifra RWA Exchange Assets",
     "description": "Root project manifest (SSOT) for agents and operators.",
-    "version": "1.1.0",
-    "updated": "2025-11-10T19:04:00+03:00",
+    "version": "1.2.0",
+    "updated": "2025-11-10T19:40:00+03:00",
     "status": "active"
   },
   "goals": [
@@ -101,7 +101,7 @@
     {
       "id": "workflow",
       "path": "./manifests/workflow.manifest.json",
-      "checksum": "6d6793178106ae3eb1ea49701657717ccbd12ec8c94c91a8027f68b5b9e57862",
+      "checksum": "4467c0c40646e6d94408f3b5dbe37b9197fee4ab1ca545981245dec3cdd0578b",
       "description": "Operational workflow, tools, servers, and policies."
     }
   ]
