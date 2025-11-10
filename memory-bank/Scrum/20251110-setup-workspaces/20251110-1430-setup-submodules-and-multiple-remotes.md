@@ -1,6 +1,6 @@
 ---
 created: 2025-11-10 14:30
-updated: 2025-11-10 14:30
+updated: 2025-11-10 15:22
 type: [planning, execution-report]
 sphere: [devops, repositories]
 topic: [submodules, mirrors, symlinks, eywa1]
@@ -31,11 +31,14 @@ Kickoff Tasks
    - [x] Добавить `Makefile` цели и скрипты (`scripts/git_mirror.sh`, `scripts/symlinks_rewire.sh`)
    - [x] Обновить `manifests/repositories.manifest.json`
 2) Сервер `eywa1`
-   - [ ] Клонировать/синхронизировать монорепо в: `/home/user/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets`
-   - [ ] `git checkout main && git submodule update --init --recursive`
-   - [ ] `make mirror/setup` (создаст локальные pushurl в origin и `alex` remotes)
-   - [ ] `make symlinks/auto` (на Linux создаст относительные симлинки)
-   - [ ] Тест: `make mirror/push` (необязательно; убедиться, что пушится в GitLab и зеркалится в GitHub)
+   - [x] Клонировать/синхронизировать монорепо в: `/home/user/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets`
+   - [x] `git checkout main && git submodule update --init --recursive`
+   - [x] `make mirror/setup` (создаст локальные pushurl в origin и `alex` remotes)
+   - [x] `make symlinks/auto` (на Linux создаст относительные симлинки)
+   - [x] Тест: `make mirror/push` (необязательно; убедиться, что пушится в GitLab и зеркалится в GitHub)
+3) macOS (локально)
+   - [x] Выравнять remotes: монорепо `origin=GitHub:cfa-exchange-assets`, `alex=GitHub:cfa-exchange-assets`; субмодули `origin=GitLab`, `alex=GitHub`
+   - [x] `git submodule update --init --recursive` и `git checkout main && git pull` для субмодулей
 
 Что сделано (детали)
 - Merge: `codex/jump-into-project-20251030` → `codex/yougile-mcp-export` (уже включено), затем → `main`.
@@ -73,6 +76,10 @@ make symlinks/auto
 make mirror/push
 ```
 
+Post‑mortem (сервер)
+- На первых шагах на `eywa1` попали некорректные pushurl вида `developerisnow/<repo>.git` (без `git@github.com:`) из-за ручной правки до выката скрипта. Это ломало зеркальный push.
+- Исправлено: подчистил `remote.origin.pushurl` в обоих субмодулях и задал ровно 2 значения: GitLab и GitHub. Повторный `make mirror/push` — без ошибок.
+
 Симлинки: подход
 - В кодовой базе храним симлинки как артефакт структуры, но не полагаемся на абсолютные пути.
 - На macOS (Darwin) можно использовать абсолютный путь внутри рабочей машины (KISS). На серверах — относительные (`ln -sfn <rel>`).
@@ -91,4 +98,3 @@ Next Actions
 - [ ] Проверить доступы GitLab (второй ключ добавлен) и тестовый пуш субмодулей
 - [ ] Принять решение: нормализовать ли Unicode имена (NFC) на сервере и закоммитить
 - [ ] (Опционально) pre-push hook для авто-настройки зеркал у разработчиков (`core.hooksPath`)
-
