@@ -10,44 +10,48 @@
     "servers": [
       {
         "id": "eywa1",
+        "aliases": ["AVA1"],
         "os": "Ubuntu",
         "role": ["primary-workhorse", "agent-orchestration"],
-        "auth": ["password-protected GUI for Vibe Diffuse Kanban", "SSH"],
-        "notes": "Main remote machine. Hosts Vibe Diffuse Kanban; used predominantly over CLI. Codex and Cline authorizations installed."
+        "auth": ["password-protected Web GUI", "SSH"],
+        "notes": "Main remote machine. Hosts Vibe‑Kanban; used predominantly over TUI/Web GUI. Codex and Claude Code authorizations installed."
       },
       {
         "id": "CFA1",
+        "aliases": [],
         "os": "Ubuntu",
         "role": ["demo-hosting"],
         "notes": "Used for spinning demos (Velvet Node.js exchange, .NET services)."
       },
       {
         "id": "macOS-local",
+        "aliases": ["macbook-pro"],
         "os": "macOS",
         "role": ["initial-sessions"],
-        "notes": "Early work with CLI agents (Cline, Codeium, Codex CLI) and web UIs. ~8–15 sessions." 
+        "notes": "Early work with CLI agents and web UIs. ~8–15 sessions."
       }
     ],
     "orchestrator": {
       "name": "Vibe-Kanban",
+      "aka": ["Vibe Diffuse Kanban"],
       "type": "TUI",
+      "interfaces": ["TUI", "Web GUI"],
       "access": "password-protected",
       "behavior": {
         "session_model": "each step = new session",
         "session_volume": "tens to hundreds per task",
         "persistence": "do not mirror all raw sessions into repo; index only high-signal artefacts"
       },
-      "agents": ["Claude Code", "Codex", "Gemini", "Opencode", "Qwen_Code", "AMP", "COPILOT", "Cursor_Agent" ],
+      "agents": ["Claude Code", "Codex", "Gemini", "Opencode", "Qwen_Code", "AMP", "COPILOT", "Cursor_Agent"],
       "notes": "Primary interface for coding agents; accessed even from mobile."
     }
   },
   "tools": {
     "providers": ["OpenAI", "Google", "Anthropic", "Perplexity"],
     "wrappers": [
-      { "name": "Claude Code", "kind": "coding-agent" },
+      { "name": "Claude Code", "kind": "coding-agent", "aliases": ["Cline"] },
       { "name": "Codex CLI", "kind": "coding-agent" },
-      { "name": "GeminiCli", "kind": "coding-agent", "status": "testing" },
-      { "name": "Droid", "kind": "coding-agent", "status": "testing" },
+      { "name": "Gemini CLI", "kind": "coding-agent", "status": "testing", "aliases": ["GeminiCli"] },
       { "name": "Droid", "kind": "coding-agent", "status": "testing" },
       { "name": "Opencode", "kind": "coding-agent", "status": "testing" },
       { "name": "Crush", "kind": "coding-agent", "status": "testing" },
@@ -55,10 +59,10 @@
     ],
     "deep_research": [
       { "name": "chatgpt.com", "use": "deepresearch" },
-      { "name": "Claude.ai", "use": "deepresearch" },
-      { "name": "Gemini.google.com", "use": "deepresearch" },
-      { "name": "Perplexity.ai", "use": "deepresearch" },
-      { "name": "Parallel.ai", "use": "deepresearch" }
+      { "name": "claude.ai", "use": "deepresearch" },
+      { "name": "gemini.google.com", "use": "deepresearch" },
+      { "name": "perplexity.ai", "use": "deepresearch" },
+      { "name": "parallel.ai", "use": "deepresearch" }
     ],
     "cli": [
       { "name": "Claude CLI", "use": "coding + analysis" },
@@ -75,7 +79,9 @@
       "naming": {
         "session": "p-<project>-<optional-session-name>",
         "windows": ["code", "agents", "logs", "services"],
-        "example": "p-cfa"
+        "example": "p-cfa",
+        "legacy_pattern": "<project>-<env>-<date>",
+        "legacy_example": "cfa-main-20251110"
       }
     },
     "session_storage": {
