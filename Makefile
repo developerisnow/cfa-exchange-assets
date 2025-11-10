@@ -42,3 +42,21 @@ symlinks/relative:
 
 symlinks/absolute:
 	bash scripts/symlinks_rewire.sh absolute
+
+# --- Manifests helpers ---
+.PHONY: manifests/lint manifests/update manifests/validate manifests/check manifests/regen
+
+manifests/lint:
+	./scripts/lint-manifests.sh
+
+manifests/update:
+	./scripts/update-checksums.sh
+
+manifests/validate:
+	./scripts/validate-manifests.sh
+
+manifests/check:
+	python3 scripts/check-manifest-paths.py
+
+manifests/regen:
+	./scripts/regen-repositories-manifest.sh && ./scripts/update-checksums.sh
