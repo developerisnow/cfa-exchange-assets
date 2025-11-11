@@ -4,10 +4,7 @@ Artifacts generated: 2025-11-11 13:36
 
 Contents
 - ois-cfa.shtgn.reposcan.json — Shotgun-Pro reposcan (shtgn-1.0)
-- diagrams/C1-Context.md — C4 Context (Mermaid)
-- diagrams/C2-Containers.md — C4 Container (Mermaid)
-- diagrams/C3-Components.md — C4 Component (Mermaid)
-- diagrams/C4-Code-Outbox.md — C4 Code view (Outbox pattern)
+- 20251111-1336-c4-diagrams.md — All C4 diagrams (Context/Containers/Components/Code)
 
 Notes
 - JSON populated from repo structure and OpenAPI specs.
