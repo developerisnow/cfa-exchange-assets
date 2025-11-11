@@ -58,6 +58,9 @@ tags: [ssot, index, navigation]
 - Reposcan JSON + C4+ERD: memory-bank/Scrum/20251111-cfa-c4-reposcan-domains/20251111-1336-co-3a68/
 - DoD MVP: memory-bank/Scrum/20251111-cfa-c4-reposcan-domains/20251111-1336-co-3a68/20251111-1413-dod-mvp-ois-cfa.md
 
+## JTBD (Senior Eng/Architect)
+- memory-bank/Scrum/20251111-tbl-setup/20251111-1430-co-3a68/20251111-1438-jtbd-senior-eng-architect.md
+
 ## Process Guards
 - Validate JSON: scripts/validate-manifests.sh
 - Lint manifests/links: scripts/lint-manifests.sh
