@@ -1,0 +1,345 @@
+{
+  "meta": {
+    "project": "ois-cfa",
+    "generated_at": "2025-11-11T13:36:00Z",
+    "source": [
+      "./repositories/customer-gitlab/ois-cfa",
+      "./repositories/customer-gitlab/ois-cfa/packages/contracts",
+      "./repositories/customer-gitlab/ois-cfa/docs",
+      "./repositories/customer-gitlab/ois-cfa/ops"
+    ],
+    "version": "shtgn-1.0"
+  },
+  "contexts": {
+    "OIS_CFA_Platform": {
+      "description": "Operator Information System for Russian Digital Financial Assets (RWA). MVP scope: issuance, purchase, payouts, redemption.",
+      "c4_level": "Context"
+    },
+    "External_Systems": {
+      "description": "Keycloak (OIDC), ESIA eID, EDO provider, Bank Nominal API, Hyperledger Fabric network, PostgreSQL, Kafka, Minio.",
+      "c4_level": "Context"
+    }
+  },
+  "containers": {
+    "api_gateway": {
+      "name": "API Gateway",
+      "description": ".NET 9 gateway exposing REST to UIs and routing to backend services.",
+      "technology": ".NET 9 / REST",
+      "c4_level": "Container"
+    },
+    "identity_service": {
+      "name": "Identity Service",
+      "description": "OIDC/OAuth2 proxy to Keycloak; ESIA integration surface.",
+      "technology": ".NET 9 / OIDC",
+      "c4_level": "Container"
+    },
+    "issuance_service": {
+      "name": "Issuance Service",
+      "description": "Manages lifecycle of issuances; outbox pattern; optional Fabric integration via adapter.",
+      "technology": ".NET 9 / EF Core / Kafka",
+      "c4_level": "Container"
+    },
+    "registry_service": {
+      "name": "Registry Service",
+      "description": "Orders, wallets, balances; integrates with Bank Nominal and ledger.",
+      "technology": ".NET 9 / EF Core / Kafka",
+      "c4_level": "Container"
+    },
+    "settlement_service": {
+      "name": "Settlement Service",
+      "description": "DvP flows, payouts, reconciliation; orchestrates bank interactions.",
+      "technology": ".NET 9 / EF Core",
+      "c4_level": "Container"
+    },
+    "compliance_service": {
+      "name": "Compliance Service",
+      "description": "KYC/AML checks, investor status, qualification policies.",
+      "technology": ".NET 9 / EF Core",
+      "c4_level": "Container"
+    },
+    "fabric_gateway": {
+      "name": "Fabric Gateway",
+      "description": "Service boundary for Hyperledger Fabric chaincode operations.",
+      "technology": ".NET 9",
+      "c4_level": "Container"
+    },
+    "integration_bank_nominal": {
+      "name": "Bank Nominal Integration",
+      "description": "Adapter/client for bank nominal API.",
+      "technology": ".NET 9",
+      "c4_level": "Container"
+    },
+    "integration_edo": {
+      "name": "EDO Connector",
+      "description": "Electronic document exchange connector.",
+      "technology": ".NET 9",
+      "c4_level": "Container"
+    },
+    "integration_esia": {
+      "name": "ESIA Adapter",
+      "description": "Adapter for ESIA eID provider.",
+      "technology": ".NET 9",
+      "c4_level": "Container"
+    },
+    "frontend_portal_investor": {
+      "name": "Portal Investor",
+      "description": "Investor UI.",
+      "technology": "Next.js 15 / TS / Tailwind",
+      "c4_level": "Container"
+    },
+    "frontend_portal_issuer": {
+      "name": "Portal Issuer",
+      "description": "Issuer UI.",
+      "technology": "Next.js 15 / TS / Tailwind",
+      "c4_level": "Container"
+    },
+    "frontend_backoffice": {
+      "name": "Backoffice",
+      "description": "Admin/ops UI.",
+      "technology": "Next.js 15 / TS / Tailwind",
+      "c4_level": "Container"
+    },
+    "frontend_broker_portal": {
+      "name": "Broker Portal",
+      "description": "Broker UI (if enabled).",
+      "technology": "Next.js 15 / TS / Tailwind",
+      "c4_level": "Container"
+    },
+    "chaincode_issuance": {
+      "name": "Chaincode Issuance",
+      "description": "Hyperledger Fabric smart contract for issuance domain.",
+      "technology": "Go / HLF 2.2+",
+      "c4_level": "Container"
+    },
+    "chaincode_registry": {
+      "name": "Chaincode Registry",
+      "description": "Hyperledger Fabric smart contract for registry domain.",
+      "technology": "Go / HLF 2.2+",
+      "c4_level": "Container"
+    }
+  },
+  "components": {
+    "gateway_endpoints": {
+      "name": "Gateway Endpoints",
+      "description": "REST handlers for health, issuances CRUD, orders, wallets, settlement triggers, compliance endpoints.",
+      "technology": ".NET Minimal APIs/Controllers",
+      "dependencies": ["identity_client", "issuance_client", "registry_client", "settlement_client", "compliance_client"],
+      "c4_level": "Component"
+    },
+    "identity_oidc": {
+      "name": "OIDC Proxy",
+      "description": "/.well-known OIDC, authorize, token, userinfo; proxies to Keycloak/ESIA.",
+      "technology": ".NET 9",
+      "dependencies": ["keycloak"],
+      "c4_level": "Component"
+    },
+    "issuance_core": {
+      "name": "IssuanceService",
+      "description": "Create/publish/close/redeem issuance; uses EF Core and Outbox for events.",
+      "technology": ".NET 9 / EF Core",
+      "dependencies": ["issuance_db", "kafka", "fabric_adapter"],
+      "c4_level": "Component"
+    },
+    "registry_core": {
+      "name": "RegistryService",
+      "description": "Place orders, manage wallets/holdings; integrates Bank Nominal.",
+      "technology": ".NET 9 / EF Core",
+      "dependencies": ["registry_db", "kafka", "bank_nominal_client"],
+      "c4_level": "Component"
+    },
+    "settlement_core": {
+      "name": "SettlementService",
+      "description": "Runs payout and DvP cycles; calls bank and internal services.",
+      "technology": ".NET 9 / EF Core",
+      "dependencies": ["settlement_db", "bank_nominal_client", "issuance_client", "registry_client"],
+      "c4_level": "Component"
+    },
+    "compliance_core": {
+      "name": "ComplianceService",
+      "description": "KYC checks, investor status, qualification policy evaluation.",
+      "technology": ".NET 9 / EF Core",
+      "dependencies": ["compliance_db"],
+      "c4_level": "Component"
+    },
+    "fabric_adapter": {
+      "name": "LedgerIssuanceAdapter",
+      "description": "Adapter to submit issuance ops to Fabric via Fabric Gateway.",
+      "technology": ".NET 9",
+      "dependencies": ["fabric_gateway"],
+      "c4_level": "Component"
+    },
+    "bank_nominal_client": {
+      "name": "BankNominalClient",
+      "description": "HTTP client for bank nominal platform.",
+      "technology": ".NET 9 / HttpClient",
+      "dependencies": ["bank_nominal_api"],
+      "c4_level": "Component"
+    },
+    "issuance_db": {
+      "name": "IssuanceDbContext",
+      "description": "EF Core DbContext for issuance.",
+      "technology": "PostgreSQL / EF Core",
+      "dependencies": [],
+      "c4_level": "Code"
+    },
+    "registry_db": {
+      "name": "RegistryDbContext",
+      "description": "EF Core DbContext for registry.",
+      "technology": "PostgreSQL / EF Core",
+      "dependencies": [],
+      "c4_level": "Code"
+    },
+    "settlement_db": {
+      "name": "SettlementDbContext",
+      "description": "EF Core DbContext for settlement.",
+      "technology": "PostgreSQL / EF Core",
+      "dependencies": [],
+      "c4_level": "Code"
+    },
+    "compliance_db": {
+      "name": "ComplianceDbContext",
+      "description": "EF Core DbContext for compliance.",
+      "technology": "PostgreSQL / EF Core",
+      "dependencies": [],
+      "c4_level": "Code"
+    }
+  },
+  "domain_glossary": {
+    "CFA": {"description": "Digital Financial Asset (ЦФА).", "c4_level": "Context"},
+    "Issuance": {"description": "Lifecycle of creating and publishing a CFA issuance.", "c4_level": "Context"},
+    "Order": {"description": "Investor request to buy CFA.", "c4_level": "Context"},
+    "Wallet": {"description": "Investor holdings and balances.", "c4_level": "Context"},
+    "Payout": {"description": "Scheduled payment to investors.", "c4_level": "Context"},
+    "KYC": {"description": "Know Your Customer verification.", "c4_level": "Context"},
+    "ESIA": {"description": "Russian eID provider.", "c4_level": "Context"},
+    "Bank Nominal": {"description": "Custody/broker API used for fiat legs.", "c4_level": "Context"}
+  },
+  "deployment_topology": {
+    "local_docker": {
+      "name": "Local Docker Compose",
+      "description": "Local development topology using docker-compose.",
+      "relationships": [
+        {"source": "frontend_portal_investor", "destination": "api_gateway", "description": "HTTP REST"},
+        {"source": "frontend_portal_issuer", "destination": "api_gateway", "description": "HTTP REST"},
+        {"source": "frontend_backoffice", "destination": "api_gateway", "description": "HTTP REST"},
+        {"source": "api_gateway", "destination": "identity_service", "description": "Auth/OIDC"},
+        {"source": "api_gateway", "destination": "issuance_service", "description": "REST gRPC/HTTP"},
+        {"source": "api_gateway", "destination": "registry_service", "description": "REST gRPC/HTTP"},
+        {"source": "api_gateway", "destination": "settlement_service", "description": "REST gRPC/HTTP"},
+        {"source": "api_gateway", "destination": "compliance_service", "description": "REST gRPC/HTTP"},
+        {"source": "identity_service", "destination": "keycloak", "description": "OIDC"},
+        {"source": "issuance_service", "destination": "postgres", "description": "EF Core"},
+        {"source": "registry_service", "destination": "postgres", "description": "EF Core"},
+        {"source": "settlement_service", "destination": "postgres", "description": "EF Core"},
+        {"source": "compliance_service", "destination": "postgres", "description": "EF Core"},
+        {"source": "issuance_service", "destination": "kafka", "description": "Outbox/Event publish"},
+        {"source": "registry_service", "destination": "kafka", "description": "Outbox/Event publish"},
+        {"source": "issuance_service", "destination": "fabric_gateway", "description": "Ledger ops"},
+        {"source": "registry_service", "destination": "fabric_gateway", "description": "Ledger ops"},
+        {"source": "fabric_gateway", "destination": "fabric_network", "description": "HLF client"},
+        {"source": "settlement_service", "destination": "integration_bank_nominal", "description": "Bank API"},
+        {"source": "api_gateway", "destination": "integration_esia", "description": "ESIA flows"},
+        {"source": "api_gateway", "destination": "integration_edo", "description": "EDO flows"},
+        {"source": "any_service", "destination": "minio", "description": "Object storage (optional)"}
+      ],
+      "c4_level": "Container"
+    }
+  },
+  "data_schema": {
+    "description": "Service-per-database EF Core model on PostgreSQL. Separate schemas for issuance, registry, settlement, compliance.",
+    "tables": {
+      "Issuance": {
+        "description": "Issuance aggregate root",
+        "columns": ["Id (uuid pk)", "Code (string unique)", "Name (string)", "Status (enum)", "Schedule (json)"]
+      },
+      "Order": {
+        "description": "Investor orders",
+        "columns": ["Id (uuid pk)", "InvestorId (uuid)", "IssuanceId (uuid fk)", "Status (enum)", "Amount (numeric)", "CreatedAt (timestamp)" ]
+      },
+      "Wallet": {
+        "description": "Holdings per investor",
+        "columns": ["Id (uuid pk)", "InvestorId (uuid)", "Balance (numeric)", "UpdatedAt (timestamp)"]
+      },
+      "Payout": {
+        "description": "Scheduled payouts",
+        "columns": ["Id (uuid pk)", "IssuanceId (uuid fk)", "DueDate (date)", "Amount (numeric)", "Status (enum)"]
+      },
+      "KycResult": {
+        "description": "Compliance KYC results",
+        "columns": ["Id (uuid pk)", "InvestorId (uuid)", "Decision (enum)", "Reason (string)", "CheckedAt (timestamp)"]
+      }
+    },
+    "relationships": [
+      {"from": "Issuance", "to": "Order", "type": "One-to-Many", "description": "Orders per issuance"},
+      {"from": "Issuance", "to": "Payout", "type": "One-to-Many", "description": "Scheduled payouts per issuance"},
+      {"from": "Order", "to": "Wallet", "type": "Many-to-One", "description": "Wallet updates from executed orders"}
+    ]
+  },
+  "api_endpoints": [
+    {
+      "name": "Gateway API",
+      "prefix": "/",
+      "description": "Public REST surface for UIs.",
+      "endpoints": [
+        {"method": "GET", "path": "/health", "description": "Health", "authentication": "none"},
+        {"method": "POST", "path": "/issuances", "description": "Create issuance", "authentication": "jwt"},
+        {"method": "GET", "path": "/issuances/{id}", "description": "Get issuance", "authentication": "jwt"},
+        {"method": "POST", "path": "/issuances/{id}/publish", "description": "Publish issuance", "authentication": "jwt"},
+        {"method": "POST", "path": "/v1/orders", "description": "Place order", "authentication": "jwt"},
+        {"method": "GET", "path": "/v1/orders/{id}", "description": "Get order", "authentication": "jwt"},
+        {"method": "GET", "path": "/v1/wallets/{investorId}", "description": "Get wallet", "authentication": "jwt"},
+        {"method": "POST", "path": "/v1/settlement/run", "description": "Run settlement", "authentication": "jwt"},
+        {"method": "POST", "path": "/v1/compliance/kyc/check", "description": "KYC check", "authentication": "jwt"}
+      ]
+    },
+    {
+      "name": "Identity API",
+      "prefix": "/",
+      "description": "OIDC endpoints.",
+      "endpoints": [
+        {"method": "GET", "path": "/.well-known/openid-configuration", "description": "OIDC config", "authentication": "none"},
+        {"method": "GET", "path": "/authorize", "description": "Authorize", "authentication": "none"},
+        {"method": "POST", "path": "/token", "description": "Token", "authentication": "client"},
+        {"method": "GET", "path": "/userinfo", "description": "Userinfo", "authentication": "jwt"}
+      ]
+    }
+  ],
+  "external_services": {
+    "postgres": {"type": "db", "description": "PostgreSQL 16 database(s) per service", "technology": "PostgreSQL"},
+    "kafka": {"type": "queue", "description": "Event streaming bus (outbox consumers)", "technology": "Apache Kafka 3.6"},
+    "zookeeper": {"type": "queue", "description": "Kafka coordination", "technology": "Zookeeper"},
+    "keycloak": {"type": "auth", "description": "Identity provider (OIDC)", "technology": "Keycloak 25.0"},
+    "minio": {"type": "object-storage", "description": "S3-compatible object storage", "technology": "Minio"},
+    "fabric_network": {"type": "platform", "description": "Hyperledger Fabric network", "technology": "HLF 2.2+"},
+    "bank_nominal_api": {"type": "third-party", "description": "Bank nominal API for fiat legs", "technology": "HTTP"},
+    "esia": {"type": "third-party", "description": "ESIA eID provider", "technology": "OIDC"},
+    "edo_provider": {"type": "third-party", "description": "Electronic document operator", "technology": "HTTP"}
+  },
+  "sources": [
+    {"path": "apps/api-gateway/Program.cs", "role": "api", "anchors": ["health", "issuances", "orders", "wallets", "settlement", "compliance"]},
+    {"path": "apps/api-gateway/Dockerfile", "role": "deployment", "anchors": ["Dockerfile"]},
+    {"path": "services/identity/Program.cs", "role": "api", "anchors": ["OIDC", "authorize", "token", "userinfo"]},
+    {"path": "services/issuance/IssuanceDbContext.cs", "role": "data_schema", "anchors": ["IssuanceDbContext"]},
+    {"path": "services/issuance/Services/IssuanceService.cs", "role": "component", "anchors": ["IssuanceService", "OutboxService", "LedgerIssuanceAdapter"]},
+    {"path": "services/registry/RegistryDbContext.cs", "role": "data_schema", "anchors": ["RegistryDbContext"]},
+    {"path": "services/registry/Services/RegistryService.cs", "role": "component", "anchors": ["RegistryService", "BankNominalClient"]},
+    {"path": "services/settlement/SettlementDbContext.cs", "role": "data_schema", "anchors": ["SettlementDbContext"]},
+    {"path": "services/settlement/Services/SettlementService.cs", "role": "component", "anchors": ["SettlementService"]},
+    {"path": "services/compliance/ComplianceDbContext.cs", "role": "data_schema", "anchors": ["ComplianceDbContext"]},
+    {"path": "services/compliance/Services/ComplianceService.cs", "role": "component", "anchors": ["ComplianceService", "QualificationPolicyService"]},
+    {"path": "services/fabric-gateway/FabricGatewayService.cs", "role": "component", "anchors": ["FabricGatewayService"]},
+    {"path": "packages/contracts/openapi-gateway.yaml", "role": "api", "anchors": ["/health", "/issuances", "/v1/orders", "/v1/wallets", "/v1/settlement/run", "/v1/compliance/kyc/check"]},
+    {"path": "packages/contracts/openapi-identity.yaml", "role": "api", "anchors": ["/.well-known/openid-configuration", "/authorize", "/token", "/userinfo"]},
+    {"path": "packages/contracts/openapi-issuance.yaml", "role": "api", "anchors": ["issuance endpoints"]},
+    {"path": "packages/contracts/openapi-registry.yaml", "role": "api", "anchors": ["registry endpoints"]},
+    {"path": "packages/contracts/asyncapi.yaml", "role": "api", "anchors": ["Kafka topics"]},
+    {"path": "packages/contracts/schemas/*.json", "role": "schema", "anchors": ["CFA", "Order", "Wallet", "Payout"]},
+    {"path": "docker-compose.yml", "role": "deployment", "anchors": ["postgres", "kafka", "zookeeper", "keycloak", "minio"]},
+    {"path": "ops/helm/**", "role": "deployment", "anchors": ["fabric-ca", "orderer", "peer", "chaincode-build"]},
+    {"path": "chaincode/issuance/issuance.go", "role": "component", "anchors": ["Invoke", "Init", "Issuance ops"]},
+    {"path": "chaincode/registry/registry.go", "role": "component", "anchors": ["Invoke", "Init", "Registry ops"]},
+    {"path": "docs/architecture/10-HighLevel-Architecture.md", "role": "context", "anchors": ["C1", "C2", "C3", "C4"]},
+    {"path": "README.md", "role": "context", "anchors": ["MVP", "Quick start", "Requirements"]}
+  ]
+}
+

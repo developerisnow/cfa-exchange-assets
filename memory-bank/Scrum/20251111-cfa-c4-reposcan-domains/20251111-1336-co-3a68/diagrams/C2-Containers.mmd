@@ -1,0 +1,60 @@
+%% OIS-CFA · C2 Container Diagram (Mermaid)
+flowchart TB
+  subgraph Boundary[OIS CFA Platform]
+    API[API Gateway\n.NET 9]
+    ID[Identity Service\n.NET 9]
+    ISS[Issuance Service\n.NET 9 + EF]
+    REG[Registry Service\n.NET 9 + EF]
+    SET[Settlement Service\n.NET 9 + EF]
+    CMP[Compliance Service\n.NET 9 + EF]
+    FGW[Fabric Gateway\n.NET 9]
+    INT_BNK[Bank Nominal Integration\n.NET 9]
+    INT_EDO[EDO Connector\n.NET 9]
+    INT_ESIA[ESIA Adapter\n.NET 9]
+    UI_INV[Portal Investor\nNext.js 15]
+    UI_ISR[Portal Issuer\nNext.js 15]
+    UI_BO[Backoffice\nNext.js 15]
+    UI_BRK[Broker Portal\nNext.js 15]
+  end
+
+  KC[(Keycloak 25.0)]
+  ESIA[(ESIA)]
+  EDO[(EDO Provider)]
+  BNK[(Bank Nominal API)]
+  HLF[(HLF Network)]
+  PG_Iss[(Postgres: issuance)]
+  PG_Reg[(Postgres: registry)]
+  PG_Set[(Postgres: settlement)]
+  PG_Cmp[(Postgres: compliance)]
+  KAFKA[(Kafka 3.6)]
+  MINIO[(Minio)]
+
+  UI_INV --> API
+  UI_ISR --> API
+  UI_BO --> API
+  UI_BRK --> API
+
+  API --> ID
+  API --> ISS
+  API --> REG
+  API --> SET
+  API --> CMP
+
+  ID --> KC
+  API --> INT_ESIA --> ESIA
+  API --> INT_EDO --> EDO
+
+  ISS --> FGW --> HLF
+  REG --> FGW
+
+  ISS --> PG_Iss
+  REG --> PG_Reg
+  SET --> PG_Set
+  CMP --> PG_Cmp
+
+  ISS --> KAFKA
+  REG --> KAFKA
+
+  API -. uploads .-> MINIO
+  SET --> INT_BNK --> BNK
+
