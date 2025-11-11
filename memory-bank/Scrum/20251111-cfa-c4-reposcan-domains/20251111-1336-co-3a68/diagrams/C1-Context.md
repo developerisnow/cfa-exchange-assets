@@ -1,3 +1,6 @@
+# C1 — Context
+
+```mermaid
 %% OIS-CFA · C1 Context Diagram Mermaid
 graph TB
   %% Actors
@@ -64,4 +67,4 @@ graph TB
 
   SET --> BNK
   API -. optional .-> MINIO
-
+```
