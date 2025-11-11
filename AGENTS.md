@@ -1,7 +1,7 @@
 ---
 created: 2025-10-30
-updated: 2025-10-31 15:20
-version: 1.2.1
+updated: 2025-11-11 13:29
+version: 1.3.0
 type: project-rules
 partAgentID: [co-76ca, cc-171f, cc-e4ee, cc-03-0f8f]
 symlink_note: CLAUDE.md is a symlink to this file for SSOT
@@ -102,18 +102,95 @@ tags: [relevant, tags]
 - Update version and agent info when modifying
  - Use scripts: `scripts/lint-manifests.sh`, `scripts/update-checksums.sh`, `scripts/validate-manifests.sh`, `scripts/regen-repositories-manifest.sh`
 
+#### Manifests Quick Reference (SSOT)
+| id | version | updated | path | purpose |
+|---|---|---|---|---|
+| project | 1.2.0 | 2025-11-10 19:40 | `project.manifest.json` | Root index; goals, indices, submodules |
+| people | 1.1.0 | 2025-11-10 19:04 | `manifests/people.manifest.json` | Members/stakeholders registry |
+| repositories | 1.1.0 | 2025-11-10 19:04 | `manifests/repositories.manifest.json` | Code repos and roles |
+| domains | 1.1.0 | 2025-11-10 19:04 | `manifests/domains.manifest.json` | Business domains and ownership |
+| communication | 1.1.0 | 2025-11-10 19:04 | `manifests/communication.manifest.json` | Calls/chats index (high-signal) |
+| docs | 1.1.0 | 2025-11-10 19:04 | `manifests/docs.manifest.json` | Critical docs and research |
+| repo-structure | 1.1.0 | 2025-11-10 19:04 | `manifests/repo-structure.manifest.json` | Folder map for navigation |
+| workflow | 1.0.0 | 2025-11-10 19:25 | `manifests/workflow.manifest.json` | Workplace, tools, policies |
+
+Notes
+- Indices and checksums are authoritative. After editing any `*.manifest.json`, run validation and checksum update (see Runbook below).
+- Paths in manifests are repo-relative unless otherwise stated.
+
+#### Runbook: Edit/Validate Manifests
+1) Validate JSON syntax for all manifests
+   - `scripts/validate-manifests.sh`
+2) Lint logical links/paths and ids
+   - `scripts/lint-manifests.sh`
+   - Optional: `python3 scripts/check-manifest-paths.py`
+3) Update `project.manifest.json` checksums for indices
+   - `scripts/update-checksums.sh`
+4) If submodules changed, regenerate repositories manifest
+   - `scripts/regen-repositories-manifest.sh`
+5) Re-run validation; commit with scoped message per rules
+
+#### Project Goals (from manifest)
+- Prepare demos for OSCVA and Velvet on AVA1
+- Stabilize manifests as machine-readable SSOT
+- Align submodules and repository mirrors
+
+### People (Key Roles)
+- yury-m — Customer / Founder / Visionary. Decisions, deadlines, legal, weekly syncs.
+- alex-a — AI Architect / Context Engineer / System Architect / DX / Evangelist. Bridges business ↔ tech; agent workflows.
+- aleksandr-o — Technical Director / DevOps / Backend Lead (.NET). Keycloak/Kubernetes owner.
+- boris-m — Coordinator / Assistant. Access, credentials, competitor platforms.
+- alex-s — Legacy Velvet (Node.js) code expert/consultant.
+
+### Domains & Ownership
+- identity — Owner: aleksandr-o. KYC/KYB, Keycloak (authn), RBAC/ABAC (authz). Repos: ois-cfa, main-docs.
+- tokenization — Owner: alex-a. Minting, issuance, corp-actions. Repos: ois-cfa, main-docs.
+- exchange — Owner: alex-a. Orderbook, matching, market-data (primary issuance first). Repos: ois-cfa, velvet, main-docs.
+- settlement — Owner: aleksandr-o. DvP, bank integration, reconciliation. Repos: ois-cfa, main-docs.
+- compliance — Owner: yury-m. AML/CFT, rule engine, sanctions, reporting. Repos: main-docs.
+- custody — Owner: aleksandr-o. Wallets, keys, HSM. Repos: ois-cfa, main-docs.
+
+For domain work, notify the owner in commit description and cross-link relevant `critical_docs` from the docs repo.
+
 ### Workflow & AI Workplace
-The actual operational setup spans macOS and two Ubuntu VPS servers with GUI orchestration:
+The operational setup spans macOS and two Ubuntu servers with orchestration:
 - Servers
-  - `eywa1` aka `AVA1` (Ubuntu): primary workhorse, runs Vibe‑Kanban (password-protected), Codex & Claude Code auth installed
-  - `CFA1` (Ubuntu): demo hosting for Velvet (Node.js exchange) and .NET services
-  - `macOS-local`: initial sessions (8–15) with CLI agents and web tools
-- Orchestrator: Vibe Diffuse Kanban (GUI). Each step = new session; sessions can reach hundreds per task. Do not mirror all raw sessions into the repo; only index high‑signal artefacts to `memory-bank` using `YYYYMMDD-HHMM-*` naming
-- Coding agents/wrappers: Cline, Codex CLI, Codeium; testing OpenHands, Kodu, Droid, JustCode
-- Deep Research: OpenAI DR, Anthropic DR, Gemini DR; Perplexity/Perlexity used only for research
-- CLI: Gemini CLI (coding + analysis)
-- Assistants: AI Studio as evaluator/teacher with large context (~1M tokens)
-- tmux policy: per‑project tmux session; tabs for tools/tasks when working via CLI
+  - eywa1 aka AVA1 (Ubuntu): primary workhorse; hosts Vibe‑Kanban (password-protected). Codex & Claude Code auth installed.
+  - CFA1 (Ubuntu): demo hosting for Velvet (Node.js exchange) and .NET services.
+  - macOS-local: initial sessions (8–15) with CLI agents and web tools.
+- Orchestrator: Vibe‑Kanban (TUI/Web GUI). Each step = new session; session volume can be high. Do not mirror raw sessions into repo; index only high‑signal artefacts under `memory-bank` with `YYYYMMDD-HHMM-*` naming.
+- Coding agents/wrappers: Claude Code (Cline), Codex CLI, Gemini CLI; testing: Droid, Opencode, Crush, JustCode, Qwen_Code, AMP, COPILOT, Cursor_Agent.
+- Deep Research: chatgpt.com, claude.ai, gemini.google.com, perplexity.ai, parallel.ai.
+- Assistants: AI Studio as evaluator/teacher with large context (~1M tokens).
+- tmux policy: per‑project tmux session; windows: code, agents, logs, services.
+
+### Repositories (Submodules)
+- main-docs — `repositories/customer-gitlab/docs-cfa-rwa` (origin: GitLab). SSOT for docs/specs/architecture.
+- ois-cfa — `repositories/customer-gitlab/ois-cfa` (origin: GitLab; GH mirror). Core application (ОИС ЦФА).
+- velvet — `repositories/customer-gitlab/velvet` (origin: GitLab; GH mirror). Legacy Node.js exchange.
+
+Regenerate repositories manifest from `.gitmodules` when submodules change:
+- `scripts/regen-repositories-manifest.sh`
+
+### Git Remote Policy — This Repo
+- Root repo remotes: `origin` and `alex` both point to GitHub `developerisnow/cfa-exchange-assets`.
+- Submodules: `origin` points to Customer GitLab; GitHub is an additional pushurl/mirror.
+- Mirror helper:
+  - Setup remotes/pushurls: `scripts/git_mirror.sh setup`
+  - Push submodules then root: `scripts/git_mirror.sh push`
+
+### Symlink Strategy (Repo specifics)
+- SSOT: `CLAUDE.md` is a symlink to `AGENTS.md` (absolute path under `/Users/user/...`).
+- Docs convenience link: `memory-bank/repo-cfa-rwa` → `repositories/customer-gitlab/docs-cfa-rwa`.
+- Use `scripts/symlinks_rewire.sh` to set absolute links on macOS (`auto` picks absolute on Darwin) and relative elsewhere.
+
+### Validation Checklist (DoD for config/docs updates)
+- JSON valid: `scripts/validate-manifests.sh` returns 0.
+- Manifests lint clean: `scripts/lint-manifests.sh` returns 0.
+- Checksums updated in `project.manifest.json`: `scripts/update-checksums.sh` executed.
+- Repositories manifest rebuilt if submodules changed: `scripts/regen-repositories-manifest.sh` executed.
+- High‑signal artefacts indexed to `memory-bank` with `YYYYMMDD-HHMM-*` naming.
+- Commit style per rules; include full `agentID` in commit footer.
 
 ### Git Remote Policy
 - Multi‑remote setup per repository is expected:
