@@ -1,0 +1,652 @@
+{
+  "meta": {
+    "project": "OIS-CFA",
+    "generated_at": "2025-11-11T10:25:34Z",
+    "source": [
+      "repositories/customer-gitlab/ois-cfa",
+      "packages/contracts/*.yaml",
+      "ops/infra/*",
+      "docs/architecture/*"
+    ],
+    "version": "shtgn-1.0"
+  },
+  "contexts": {
+    "OIS Platform": {
+      "description": "Digital Financial Assets (CFA) platform: issuance, trading/transfer, redemption, payouts, audit & reporting; portals for Issuer/Investor, Backoffice for Operator.",
+      "c4_level": "Context"
+    },
+    "External Systems": {
+      "description": "Bank Nominal Account (payments & reserve), ESIA (OIDC identity), EDO (document signing), HLF network for ledger.",
+      "c4_level": "Context"
+    },
+    "Regulatory": {
+      "description": "KYC/AML, Investor Qualification, Audit logging; compliance with 259-ФЗ, 746‑П, 5635‑У.",
+      "c4_level": "Context"
+    }
+  },
+  "containers": {
+    "portal": {
+      "name": "Portal (Issuer/Investor)",
+      "description": "Public web app for issuers/investors flows (create/publish issuance, buy orders, portfolio).",
+      "technology": "Next.js 15 / TypeScript",
+      "c4_level": "Container"
+    },
+    "backoffice": {
+      "name": "Backoffice (Operator)",
+      "description": "Admin UI for compliance, payouts, audit; OIDC via Keycloak.",
+      "technology": "Next.js 15 / TypeScript",
+      "c4_level": "Container"
+    },
+    "api-gateway": {
+      "name": "API Gateway",
+      "description": "Edge API + routing to internal services; rate limiting and auth integration.",
+      "technology": ".NET 9 (ASP.NET Core + YARP)",
+      "c4_level": "Container"
+    },
+    "issuance-service": {
+      "name": "Issuance Service",
+      "description": "Manage CFA issuances lifecycle; ledger integration (issue/close/get).",
+      "technology": ".NET 9 (ASP.NET Core)",
+      "c4_level": "Container"
+    },
+    "registry-service": {
+      "name": "Registry Service",
+      "description": "Orders, wallets, holdings, transactions; calls Bank and Ledger; outbox pattern.",
+      "technology": ".NET 9 (ASP.NET Core)",
+      "c4_level": "Container"
+    },
+    "settlement-service": {
+      "name": "Settlement Service",
+      "description": "Batch payouts & reconciliation; deterministic IDs; reports.",
+      "technology": ".NET 9 (ASP.NET Core)",
+      "c4_level": "Container"
+    },
+    "compliance-service": {
+      "name": "Compliance Service",
+      "description": "KYC/Qualification checks, complaints; stores investor compliance status.",
+      "technology": ".NET 9 (ASP.NET Core)",
+      "c4_level": "Container"
+    },
+    "identity": {
+      "name": "Identity Provider",
+      "description": "Realm/clients, RBAC and OIDC tokens.",
+      "technology": "Keycloak",
+      "c4_level": "Container"
+    },
+    "esia-adapter": {
+      "name": "ESIA Adapter",
+      "description": "OIDC endpoints and profile (dev mock).",
+      "technology": "HTTP service (OpenAPI 3.1)",
+      "c4_level": "Container"
+    },
+    "bank-adapter": {
+      "name": "Bank Nominal Adapter",
+      "description": "Nominal account open, transfer, batch payouts; idempotent operations.",
+      "technology": "HTTP service (OpenAPI 3.1)",
+      "c4_level": "Container"
+    },
+    "edo-connector": {
+      "name": "EDO Connector",
+      "description": "Send documents for signing (UKEP), track status.",
+      "technology": "HTTP service (OpenAPI 3.0)",
+      "c4_level": "Container"
+    },
+    "ledger": {
+      "name": "HLF Network",
+      "description": "Hyperledger Fabric (orderer, peers, CA, CouchDB); chaincode: issuance, registry.",
+      "technology": "Kubernetes + Helm (fabric-tools)",
+      "c4_level": "Container"
+    },
+    "postgres": {
+      "name": "PostgreSQL",
+      "description": "Primary relational database for services (registry/compliance/settlement).",
+      "technology": "PostgreSQL 14+",
+      "c4_level": "Container"
+    },
+    "observability": {
+      "name": "Observability Stack",
+      "description": "OpenTelemetry collector; Prometheus metrics; Grafana dashboards.",
+      "technology": "OTel + Prometheus + Grafana",
+      "c4_level": "Container"
+    },
+    "kafka": {
+      "name": "Event Bus (planned)",
+      "description": "Kafka topics for issuance/settlement/outbox.",
+      "technology": "Kafka (AsyncAPI defined)",
+      "c4_level": "Container"
+    }
+  },
+  "components": {
+    "gateway.yarp": {
+      "name": "Reverse Proxy Routes",
+      "description": "YARP routes/clusters to identity, issuance, registry, settlement, compliance.",
+      "technology": ".NET YARP",
+      "dependencies": [
+        "identity",
+        "issuance-service",
+        "registry-service",
+        "settlement-service",
+        "compliance-service"
+      ],
+      "c4_level": "Component"
+    },
+    "issuance.ledger-adapter": {
+      "name": "LedgerIssuance Adapter",
+      "description": "Issue/Close/Get against chaincode 'issuance' (mock/real).",
+      "technology": "HttpClient + retry policy",
+      "dependencies": [
+        "ledger"
+      ],
+      "c4_level": "Component"
+    },
+    "registry.core": {
+      "name": "Registry Service Core",
+      "description": "Orders workflow, wallets/holdings updates, idempotency, outbox.",
+      "technology": "C#",
+      "dependencies": [
+        "registry.db",
+        "bank.client",
+        "compliance.client",
+        "registry.ledger-adapter",
+        "kafka"
+      ],
+      "c4_level": "Component"
+    },
+    "registry.db": {
+      "name": "RegistryDbContext",
+      "description": "EF Core models & migrations for wallets, holdings, orders, tx, outbox.",
+      "technology": "EF Core + Npgsql",
+      "dependencies": [
+        "postgres"
+      ],
+      "c4_level": "Component"
+    },
+    "registry.ledger-adapter": {
+      "name": "LedgerRegistry Adapter",
+      "description": "Transfer/Redeem against chaincode 'registry' (mock/real).",
+      "technology": "HttpClient + retry policy",
+      "dependencies": [
+        "ledger"
+      ],
+      "c4_level": "Component"
+    },
+    "bank.client": {
+      "name": "Bank Nominal Client",
+      "description": "Reserve funds / execute payouts; idempotent calls via Idempotency-Key.",
+      "technology": "HttpClient",
+      "dependencies": [
+        "bank-adapter"
+      ],
+      "c4_level": "Component"
+    },
+    "compliance.client": {
+      "name": "Compliance Client",
+      "description": "KYC & Qualification checks; complaints API.",
+      "technology": "HttpClient",
+      "dependencies": [
+        "compliance-service"
+      ],
+      "c4_level": "Component"
+    },
+    "compliance.db": {
+      "name": "ComplianceDbContext",
+      "description": "Investor compliance status, complaints, outbox.",
+      "technology": "EF Core + Npgsql",
+      "dependencies": [
+        "postgres"
+      ],
+      "c4_level": "Component"
+    },
+    "settlement.engine": {
+      "name": "Settlement Engine",
+      "description": "Calculate due payouts, create batch, call bank & mark on ledger, emit event.",
+      "technology": "C#",
+      "dependencies": [
+        "registry-service",
+        "issuance-service",
+        "bank-adapter",
+        "ledger",
+        "postgres"
+      ],
+      "c4_level": "Component"
+    },
+    "sdks.ts": {
+      "name": "TypeScript SDK",
+      "description": "Generated API client for frontends.",
+      "technology": "TypeScript / Axios",
+      "dependencies": [
+        "api-gateway"
+      ],
+      "c4_level": "Component"
+    },
+    "chaincode.issuance": {
+      "name": "Chaincode Issuance",
+      "description": "Issue, Close, Get methods.",
+      "technology": "Go (HLF)",
+      "dependencies": [],
+      "c4_level": "Component"
+    },
+    "chaincode.registry": {
+      "name": "Chaincode Registry",
+      "description": "Transfer, Redeem, GetHistory methods.",
+      "technology": "Go (HLF)",
+      "dependencies": [],
+      "c4_level": "Component"
+    }
+  },
+  "domain_glossary": {
+    "CFA": {
+      "description": "Digital Financial Asset unit.",
+      "c4_level": "Context"
+    },
+    "Issuance": {
+      "description": "CFA issuance (total amount, nominal, schedule, lifecycle: draft→published→closed).",
+      "c4_level": "Context"
+    },
+    "Investor": {
+      "description": "Holder/buyer of CFA; has wallet and holdings.",
+      "c4_level": "Context"
+    },
+    "Issuer": {
+      "description": "Creates and publishes CFA issuances.",
+      "c4_level": "Context"
+    },
+    "NominalAccount": {
+      "description": "Bank account used for custody/settlement operations.",
+      "c4_level": "Context"
+    },
+    "UKEP": {
+      "description": "Qualified electronic signature used for documents (EDO).",
+      "c4_level": "Context"
+    },
+    "Payout": {
+      "description": "Periodic payments to holders per schedule (coupon/dividend).",
+      "c4_level": "Context"
+    },
+    "Settlement": {
+      "description": "Batch execution of payouts & reconciliation.",
+      "c4_level": "Context"
+    }
+  },
+  "deployment_topology": {
+    "k8s-dev": {
+      "name": "Kubernetes · ois-dev",
+      "description": "Services run in K8s; HLF network with NLB; OTel→Prometheus→Grafana; Postgres stateful.",
+      "relationships": [
+        {
+          "source": "portal",
+          "destination": "api-gateway",
+          "description": "HTTPS"
+        },
+        {
+          "source": "backoffice",
+          "destination": "api-gateway",
+          "description": "HTTPS"
+        },
+        {
+          "source": "api-gateway",
+          "destination": "identity",
+          "description": "OIDC"
+        },
+        {
+          "source": "api-gateway",
+          "destination": "issuance-service",
+          "description": "HTTP"
+        },
+        {
+          "source": "api-gateway",
+          "destination": "registry-service",
+          "description": "HTTP"
+        },
+        {
+          "source": "api-gateway",
+          "destination": "settlement-service",
+          "description": "HTTP"
+        },
+        {
+          "source": "api-gateway",
+          "destination": "compliance-service",
+          "description": "HTTP"
+        },
+        {
+          "source": "registry-service",
+          "destination": "postgres",
+          "description": "Npgsql"
+        },
+        {
+          "source": "compliance-service",
+          "destination": "postgres",
+          "description": "Npgsql"
+        },
+        {
+          "source": "settlement-service",
+          "destination": "postgres",
+          "description": "Npgsql"
+        },
+        {
+          "source": "issuance-service",
+          "destination": "ledger",
+          "description": "Chaincode: issuance"
+        },
+        {
+          "source": "registry-service",
+          "destination": "ledger",
+          "description": "Chaincode: registry"
+        },
+        {
+          "source": "registry-service",
+          "destination": "bank-adapter",
+          "description": "Reserve/transfer"
+        },
+        {
+          "source": "settlement-service",
+          "destination": "bank-adapter",
+          "description": "Batch payouts"
+        },
+        {
+          "source": "api-gateway",
+          "destination": "observability",
+          "description": "OTel metrics"
+        },
+        {
+          "source": "issuance-service",
+          "destination": "observability",
+          "description": "OTel metrics"
+        },
+        {
+          "source": "registry-service",
+          "destination": "observability",
+          "description": "OTel metrics"
+        },
+        {
+          "source": "settlement-service",
+          "destination": "observability",
+          "description": "OTel metrics"
+        },
+        {
+          "source": "compliance-service",
+          "destination": "observability",
+          "description": "OTel metrics"
+        },
+        {
+          "source": "api-gateway",
+          "destination": "esia-adapter",
+          "description": "OIDC flows (dev mock)"
+        },
+        {
+          "source": "api-gateway",
+          "destination": "edo-connector",
+          "description": "Document signing (UKEP)"
+        },
+        {
+          "source": "kafka",
+          "destination": "observability",
+          "description": "Future: metrics"
+        },
+        {
+          "source": "registry-service",
+          "destination": "kafka",
+          "description": "Outbox events (planned)"
+        },
+        {
+          "source": "settlement-service",
+          "destination": "kafka",
+          "description": "Events (payout executed)"
+        }
+      ],
+      "c4_level": "Container"
+    }
+  },
+  "data_schema": {
+    "description": "PostgreSQL schemas for registry/compliance/settlement (numeric(20,8) for monetary fields).",
+    "tables": {
+      "wallets": {
+        "description": "Balances per owner (investor or issuer).",
+        "columns": [
+          "id uuid PK",
+          "owner_type varchar(50) NOT NULL",
+          "owner_id uuid NOT NULL UNIQUE WITH owner_type",
+          "balance numeric(20,8) NOT NULL",
+          "blocked numeric(20,8) NOT NULL",
+          "updated_at timestamptz NOT NULL"
+        ]
+      },
+      "holdings": {
+        "description": "Investor positions per issuance.",
+        "columns": [
+          "id uuid PK",
+          "investor_id uuid NOT NULL",
+          "issuance_id uuid NOT NULL",
+          "quantity numeric(20,8) NOT NULL",
+          "updated_at timestamptz NOT NULL",
+          "UNIQUE(investor_id, issuance_id)"
+        ]
+      },
+      "orders": {
+        "description": "Buy orders with idempotency and ledger tx hash.",
+        "columns": [
+          "id uuid PK",
+          "investor_id uuid NOT NULL",
+          "issuance_id uuid NOT NULL",
+          "amount numeric(20,8) NOT NULL",
+          "status varchar(50) NOT NULL",
+          "wallet_id uuid NULL",
+          "dlt_tx_hash text NULL",
+          "idem_key varchar(255) UNIQUE",
+          "created_at timestamptz NOT NULL",
+          "updated_at timestamptz NOT NULL",
+          "confirmed_at timestamptz NULL"
+        ]
+      },
+      "tx": {
+        "description": "Ledger-related transfers/redemptions with status and references.",
+        "columns": [
+          "id uuid PK",
+          "issuance_id uuid NOT NULL",
+          "from_wallet_id uuid NULL",
+          "to_wallet_id uuid NULL",
+          "amount numeric(20,8) NOT NULL",
+          "status varchar(50) NOT NULL",
+          "completed_at timestamptz NULL"
+        ]
+      },
+      "outbox_messages": {
+        "description": "Outbox pattern for reliable events.",
+        "columns": [
+          "id uuid PK",
+          "topic varchar(255) NOT NULL",
+          "payload jsonb NOT NULL",
+          "created_at timestamptz NOT NULL",
+          "processed_at timestamptz NULL",
+          "INDEX(processed_at, created_at)"
+        ]
+      },
+      "investors_compliance": {
+        "description": "KYC & qualification state for investor.",
+        "columns": [
+          "investor_id uuid PK",
+          "kyc varchar(50) NOT NULL",
+          "qualification_tier varchar(50) NOT NULL",
+          "qual_limit numeric(20,8)",
+          "qual_used numeric(20,8)",
+          "updated_at timestamptz NOT NULL"
+        ]
+      },
+      "reconciliation_log": {
+        "description": "Settlement reconciliation log per batch.",
+        "columns": [
+          "id uuid PK",
+          "batch_id uuid NOT NULL",
+          "payload_json jsonb NOT NULL",
+          "created_at timestamptz NOT NULL"
+        ]
+      }
+    },
+    "relationships": [
+      {
+        "from": "wallets",
+        "to": "holdings",
+        "type": "One-to-Many",
+        "description": "Investor wallet → many holdings by issuance"
+      },
+      {
+        "from": "orders",
+        "to": "tx",
+        "type": "One-to-Many",
+        "description": "Order may create multiple tx records (transfers/redemptions)"
+      },
+      {
+        "from": "investors_compliance",
+        "to": "orders",
+        "type": "One-to-Many",
+        "description": "Compliance gate before confirming orders"
+      }
+    ]
+  },
+  "api_endpoints": {
+    "gateway": {
+      "routes": [
+        "GET /health",
+        "/* → clusters: identity, issuance, registry, settlement, compliance"
+      ]
+    },
+    "issuance-service": {
+      "endpoints": [
+        "POST /v1/issuances",
+        "GET /v1/issuances/{id}",
+        "POST /v1/issuances/{id}/publish",
+        "POST /v1/issuances/{id}/close",
+        "GET /v1/issuances/{id}/status"
+      ]
+    },
+    "registry-service": {
+      "endpoints": [
+        "POST /v1/orders  (Idempotency-Key)",
+        "GET /wallets/{investorId}",
+        "POST /issuances/{id}/redeem",
+        "GET /v1/market/issuances  (via gateway)"
+      ]
+    },
+    "settlement-service": {
+      "endpoints": [
+        "POST /v1/settlement/run?date=YYYY-MM-DD",
+        "GET /v1/reports/payouts?from&to"
+      ]
+    },
+    "compliance-service": {
+      "endpoints": [
+        "POST /v1/compliance/kyc/check",
+        "POST /v1/compliance/qualification/evaluate",
+        "GET /v1/complaints",
+        "GET /v1/complaints/{id}"
+      ]
+    },
+    "esia-adapter": {
+      "endpoints": [
+        "GET /oidc/authorize",
+        "POST /oidc/callback",
+        "GET /userinfo",
+        "GET /profile"
+      ]
+    },
+    "bank-adapter": {
+      "endpoints": [
+        "POST /nominal/accounts",
+        "GET /nominal/accounts/{accountId}",
+        "POST /nominal/transfer",
+        "POST /nominal/payouts/batch",
+        "GET /nominal/payouts/{batchId}/status"
+      ]
+    },
+    "edo-connector": {
+      "endpoints": [
+        "POST /documents",
+        "GET /documents/{id}/status"
+      ]
+    }
+  },
+  "external_services": [
+    {
+      "name": "Hyperledger Fabric",
+      "type": "ledger",
+      "notes": "chaincode: issuance, registry"
+    },
+    {
+      "name": "PostgreSQL",
+      "type": "db",
+      "notes": "registry/compliance/settlement schemas"
+    },
+    {
+      "name": "Keycloak",
+      "type": "idp",
+      "notes": "OIDC, RBAC"
+    },
+    {
+      "name": "ESIA",
+      "type": "oidc",
+      "notes": "public identity provider (mock for dev)"
+    },
+    {
+      "name": "Bank Nominal API",
+      "type": "payments",
+      "notes": "reserve, transfers, payouts"
+    },
+    {
+      "name": "EDO",
+      "type": "signing",
+      "notes": "UKEP document workflow"
+    },
+    {
+      "name": "Prometheus",
+      "type": "monitoring",
+      "notes": "metrics scraping"
+    },
+    {
+      "name": "Grafana",
+      "type": "dashboards",
+      "notes": "visualization"
+    },
+    {
+      "name": "OpenTelemetry Collector",
+      "type": "tracing",
+      "notes": "ingest traces/metrics/logs"
+    },
+    {
+      "name": "Kafka",
+      "type": "events",
+      "notes": "AsyncAPI defined; planned"
+    }
+  ],
+  "sources": {
+    "services/registry/Program.cs": [
+      "DbContext: RegistryDbContext; HttpClient for Bank/Compliance; OTel setup"
+    ],
+    "services/registry/DTOs/*.cs": [
+      "OrderResponse, RedeemRequest/Response, WalletResponse"
+    ],
+    "services/registry/Migrations/*InitialCreate*.cs": [
+      "wallets, holdings tables; indexes and precision numeric(20,8)"
+    ],
+    "services/compliance/ComplianceDbContext.cs": [
+      "investors_compliance table; complaints; outbox"
+    ],
+    "packages/contracts/openapi-*.yaml": [
+      "OpenAPI endpoints for issuance, registry, settlement, compliance, ESIA, Bank, EDO"
+    ],
+    "ops/infra/helm/chaincode-build/*": [
+      "Helm jobs for install/approve/commit/rollback chaincode"
+    ],
+    "ops/fabric/scripts/*.sh": [
+      "approve/commit chaincode; peer CLI usage"
+    ],
+    "ops/infra/*prometheus*.yml + grafana-dashboards.json": [
+      "Metrics scraping & dashboards"
+    ],
+    "docs/architecture/c4/*": [
+      "C1-Context, C2-Containers, C4-Code drawio sources"
+    ],
+    "packages/sdks/ts/src/*.ts": [
+      "Typed API client for frontends"
+    ]
+  }
+}

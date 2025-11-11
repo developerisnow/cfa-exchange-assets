@@ -1,0 +1,115 @@
+{
+  "id": "workflow",
+  "description": "Workplace, orchestration, tools, and operational workflow for AI-assisted development and research.",
+  "meta": {
+    "version": "1.0.0",
+    "updated": "2025-11-10T19:25:00+03:00",
+    "edited_by": ["co-76ca"]
+  },
+  "workplaces": {
+    "servers": [
+      {
+        "id": "eywa1",
+        "aliases": ["AVA1"],
+        "os": "Ubuntu",
+        "role": ["primary-workhorse", "agent-orchestration"],
+        "auth": ["password-protected Web GUI", "SSH"],
+        "notes": "Main remote machine. Hosts Vibe‑Kanban; used predominantly over TUI/Web GUI. Codex and Claude Code authorizations installed."
+      },
+      {
+        "id": "CFA1",
+        "aliases": [],
+        "os": "Ubuntu",
+        "role": ["demo-hosting"],
+        "notes": "Used for spinning demos (Velvet Node.js exchange, .NET services)."
+      },
+      {
+        "id": "macOS-local",
+        "aliases": ["macbook-pro"],
+        "os": "macOS",
+        "role": ["initial-sessions"],
+        "notes": "Early work with CLI agents and web UIs. ~8–15 sessions."
+      }
+    ],
+    "orchestrator": {
+      "name": "Vibe-Kanban",
+      "aka": ["Vibe Diffuse Kanban"],
+      "type": "TUI",
+      "interfaces": ["TUI", "Web GUI"],
+      "access": "password-protected",
+      "behavior": {
+        "session_model": "each step = new session",
+        "session_volume": "tens to hundreds per task",
+        "persistence": "do not mirror all raw sessions into repo; index only high-signal artefacts"
+      },
+      "agents": ["Claude Code", "Codex", "Gemini", "Opencode", "Qwen_Code", "AMP", "COPILOT", "Cursor_Agent"],
+      "notes": "Primary interface for coding agents; accessed even from mobile."
+    }
+  },
+  "tools": {
+    "providers": ["OpenAI", "Google", "Anthropic", "Perplexity"],
+    "wrappers": [
+      { "name": "Claude Code", "kind": "coding-agent", "aliases": ["Cline"] },
+      { "name": "Codex CLI", "kind": "coding-agent" },
+      { "name": "Gemini CLI", "kind": "coding-agent", "status": "testing", "aliases": ["GeminiCli"] },
+      { "name": "Droid", "kind": "coding-agent", "status": "testing" },
+      { "name": "Opencode", "kind": "coding-agent", "status": "testing" },
+      { "name": "Crush", "kind": "coding-agent", "status": "testing" },
+      { "name": "JustCode", "kind": "coding-agent", "status": "testing" }
+    ],
+    "deep_research": [
+      { "name": "chatgpt.com", "use": "deepresearch" },
+      { "name": "claude.ai", "use": "deepresearch" },
+      { "name": "gemini.google.com", "use": "deepresearch" },
+      { "name": "perplexity.ai", "use": "deepresearch" },
+      { "name": "parallel.ai", "use": "deepresearch" }
+    ],
+    "cli": [
+      { "name": "Claude CLI", "use": "coding + analysis" },
+      { "name": "Codex CLI", "use": "coding + analysis" },
+      { "name": "Gemini CLI", "use": "coding + analysis" }
+    ],
+    "assistants": [
+      { "name": "AI Studio", "role": "evaluator/teacher/buddy", "context_window": "~1M tokens", "use": "large-context analysis" }
+    ]
+  },
+  "dev_practices": {
+    "tmux": {
+      "policy": "Create dedicated tmux session per project; organize by tabs for tools and tasks",
+      "naming": {
+        "session": "p-<project>-<optional-session-name>",
+        "windows": ["code", "agents", "logs", "services"],
+        "example": "p-cfa",
+        "legacy_pattern": "<project>-<env>-<date>",
+        "legacy_example": "cfa-main-20251110"
+      }
+    },
+    "session_storage": {
+      "raw": "kept in orchestrator/runtime; not all checked-in",
+      "indexing": "link only essential artefacts into memory-bank with YYYYMMDD-HHMM prefix",
+      "retention": {
+        "orchestrator_sessions": "rotate by age/volume; keep high-signal references",
+        "memory_bank": "immutable timestamps; edits append-only with version bump"
+      }
+    },
+    "manifests": {
+      "role": "SSOT for agents; indices drive navigation",
+      "update_cadence": "incremental, checksum-updated"
+    }
+  },
+  "git_policy": {
+    "structure": ["monorepo", "submodules"],
+    "zones": [
+      { "id": "most-private", "audience": "owner-only" },
+      { "id": "pet-projects-teammates", "audience": "teammates" },
+      { "id": "customer-devs", "audience": "customer-engineering" },
+      { "id": "customer", "audience": "customer" }
+    ],
+    "remotes": {
+      "origin": "Customer GitLab (authoritative for customer)",
+      "monorepo": "DeveloperIsNow monorepo mirror (owner’s SSOT)",
+      "webfree-stealth": "Third-party service access; limited, purpose-bound"
+    },
+    "notes": "Repositories may have multiple remotes configured; origin points to customer GitLab, additional mirrors used for owner workflows and third-party service integrations."
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "schemaVersion": "1.2",
+  "project": {
+    "id": "prj_Cifra-rwa-exachange-assets",
+    "name": "Cifra RWA Exchange Assets",
+    "description": "Root project manifest (SSOT) for agents and operators.",
+    "version": "1.2.0",
+    "updated": "2025-11-10T19:40:00+03:00",
+    "status": "active"
+  },
+  "goals": [
+    "Prepare demos for OSCVA and Velvet on AVA1",
+    "Stabilize manifests as machine-readable SSOT",
+    "Align submodules and repository mirrors"
+  ],
+  "conventions": {
+    "agents_md": "./AGENTS.md",
+    "notes": "Follow commit style and folder naming from AGENTS.md."
+  },
+  "git": {
+    "root": ".",
+    "submodules": [
+      {
+        "id": "main-docs",
+        "path": "repositories/customer-gitlab/docs-cfa-rwa",
+        "remotes": {
+          "origin": "git@git.telex.global:cfa/docs-cfa.git"
+        }
+      },
+      {
+        "id": "ois-cfa",
+        "path": "repositories/customer-gitlab/ois-cfa",
+        "remotes": {
+          "origin": "git@git.telex.global:npk/ois-cfa.git",
+          "github-mirror": "git@github.com:developerisnow/cfa-ois-cfa.git"
+        }
+      },
+      {
+        "id": "velvet",
+        "path": "repositories/customer-gitlab/velvet",
+        "remotes": {
+          "origin": "git@git.telex.global:npk/velvet.git",
+          "github-mirror": "git@github.com:developerisnow/cfa-velvet.git"
+        }
+      },
+      {
+        "id": "sdd-shotgun-pro",
+        "path": "repositories/ai/SDD-shotgun-pro",
+        "remotes": {
+          "origin": "git@github.com:developerisnow/SDD-shotgun-pro.git"
+        }
+      }
+    ]
+  },
+  "environments": {
+    "servers": [
+      {
+        "id": "AVA1",
+        "purpose": "demos",
+        "notes": "Hosts OSCVA and Velvet demo services."
+      }
+    ]
+  },
+  "indices": [
+    {
+      "id": "people",
+      "path": "./manifests/people.manifest.json",
+      "checksum": "42101920df33f13fe507306cff306ee5c8bb80a1c775d0b90c6978f16bf05d3f",
+      "description": "Registry of project members and stakeholders."
+    },
+    {
+      "id": "repositories",
+      "path": "./manifests/repositories.manifest.json",
+      "checksum": "2cd229a431f244b9f66fd60d7baad47a6f687a2dc7cdca56ce3d9f429aed8492",
+      "description": "All code repositories and roles."
+    },
+    {
+      "id": "domains",
+      "path": "./manifests/domains.manifest.json",
+      "checksum": "f785757259983a8f61a0c5864129927068172edba87f37bc0f50a23f3474a5fd",
+      "description": "Business domains and ownership."
+    },
+    {
+      "id": "communication",
+      "path": "./manifests/communication.manifest.json",
+      "checksum": "f59d78caff66ff854be58e6390526d987ab3509e47908acb94e7daedf59f863e",
+      "description": "Key communication logs and transcripts."
+    },
+    {
+      "id": "docs",
+      "path": "./manifests/docs.manifest.json",
+      "checksum": "09d069a46d41b4610fe19595522e0a2c737c7dace3547d16eadc1c83d027eef8",
+      "description": "Critical documents and research."
+    },
+    {
+      "id": "repo-structure",
+      "path": "./manifests/repo-structure.manifest.json",
+      "checksum": "32cb6d5473a1daaeb57a172aaaabf7f60e4f051c956d9f9906aa973511e7b834",
+      "description": "Folder map for agent navigation."
+    },
+    {
+      "id": "workflow",
+      "path": "./manifests/workflow.manifest.json",
+      "checksum": "78e4b105085c3f5e4450e930670136e29e71dd15be2afdce235561e666f68b1f",
+      "description": "Operational workflow, tools, servers, and policies."
+    }
+  ]
+}

@@ -1,0 +1,622 @@
+{
+  "meta": {
+    "project": "ois-cfa",
+    "generated_at": "2025-11-11T10:24:13Z",
+    "source": [
+      "repositories/customer-gitlab/ois-cfa",
+      "packages/contracts (OpenAPI/AsyncAPI/JSON Schemas)",
+      "docs/architecture/*",
+      "apps/*",
+      "services/*",
+      "chaincode/*"
+    ],
+    "version": "shtgn-1.0"
+  },
+  "contexts": {
+    "OIS-CFA": {
+      "description": "Operator platform for Digital Financial Assets: issue/buy/payout/redeem; Identity via OIDC; DLT on Hyperledger Fabric; portals for issuer/investor/backoffice.",
+      "c4_level": "Context"
+    }
+  },
+  "containers": {
+    "api-gateway": {
+      "name": "API Gateway",
+      "description": "Reverse proxy + security headers + token bucket rate limiting; exposes Swagger; routes /v1/* to backend services.",
+      "technology": ".NET 9 + YARP",
+      "c4_level": "Container"
+    },
+    "identity-service": {
+      "name": "Identity Service",
+      "description": "AuthN/AuthZ service (with Keycloak as IdP); OIDC integration for portals.",
+      "technology": ".NET 9 (Keycloak OIDC)",
+      "c4_level": "Container"
+    },
+    "issuance-service": {
+      "name": "Issuance Service",
+      "description": "Issue/publish/close issuances; interacts with ledger adapter for chaincode 'issuance'.",
+      "technology": ".NET 9",
+      "c4_level": "Container"
+    },
+    "registry-service": {
+      "name": "Registry Service",
+      "description": "Orders, wallets, transfers, redeem; outbox publishing; validators.",
+      "technology": ".NET 9",
+      "c4_level": "Container"
+    },
+    "settlement-service": {
+      "name": "Settlement Service",
+      "description": "Payouts, reconciliation and DvP, reporting endpoints.",
+      "technology": ".NET 9",
+      "c4_level": "Container"
+    },
+    "compliance-service": {
+      "name": "Compliance Service",
+      "description": "KYC/AML, investor qualification policy, watchlists.",
+      "technology": ".NET 9",
+      "c4_level": "Container"
+    },
+    "esia-adapter": {
+      "name": "ESIA Adapter",
+      "description": "Mock OIDC profile retrieval for ESIA integration.",
+      "technology": ".NET 9",
+      "c4_level": "Container"
+    },
+    "bank-nominal-adapter": {
+      "name": "Bank Nominal Adapter",
+      "description": "Mock nominal account operations (open account, transfers).",
+      "technology": ".NET 9",
+      "c4_level": "Container"
+    },
+    "edo-connector": {
+      "name": "EDO Connector",
+      "description": "UKEP docs routing for signing and status.",
+      "technology": ".NET 9",
+      "c4_level": "Container"
+    },
+    "portal-issuer": {
+      "name": "Portal Issuer",
+      "description": "Next.js 15 app for issuers (dashboard, manage issuances, reports).",
+      "technology": "Next.js 15 + TypeScript",
+      "c4_level": "Container"
+    },
+    "portal-investor": {
+      "name": "Portal Investor",
+      "description": "Next.js 15 app for investors (portfolio, orders, history).",
+      "technology": "Next.js 15 + TypeScript",
+      "c4_level": "Container"
+    },
+    "backoffice": {
+      "name": "Backoffice",
+      "description": "Next.js 15 admin: KYC, qualification, payouts, audit.",
+      "technology": "Next.js 15 + TypeScript",
+      "c4_level": "Container"
+    },
+    "shared-ui": {
+      "name": "Shared UI",
+      "description": "Reusable UI components (charts, tables, forms, timeline, theme).",
+      "technology": "React + Tailwind + Recharts",
+      "c4_level": "Container"
+    },
+    "chaincode-issuance": {
+      "name": "Chaincode — Issuance",
+      "description": "Go chaincode: Issue(id, assetID, issuerID, total, nominal, dates, schedule), Close(), Get().",
+      "technology": "Go + Fabric Contract API",
+      "c4_level": "Container"
+    },
+    "chaincode-registry": {
+      "name": "Chaincode — Registry",
+      "description": "Go chaincode: Transfer(from?, to, issuanceId, amount), Redeem(holder, issuanceId, amount), GetHistory(issuanceId).",
+      "technology": "Go + Fabric Contract API",
+      "c4_level": "Container"
+    },
+    "postgres": {
+      "name": "PostgreSQL",
+      "description": "Primary relational database for services.",
+      "technology": "PostgreSQL 16 (Dev)",
+      "c4_level": "Container"
+    },
+    "kafka": {
+      "name": "Kafka",
+      "description": "Event bus for audit/events.",
+      "technology": "Apache Kafka 3.6 (Dev)",
+      "c4_level": "Container"
+    },
+    "keycloak": {
+      "name": "Keycloak",
+      "description": "IdP/realm for OIDC; dev profile.",
+      "technology": "Keycloak 25 (Dev)",
+      "c4_level": "Container"
+    },
+    "minio": {
+      "name": "MinIO",
+      "description": "Object storage for artifacts.",
+      "technology": "MinIO (Dev)",
+      "c4_level": "Container"
+    }
+  },
+  "components": {
+    "gateway:ratelimiter": {
+      "name": "TokenBucket RateLimiter",
+      "description": "Per-IP token bucket; 100 token limit, 10 tokens/sec; 429 on reject.",
+      "technology": ".NET RateLimiting",
+      "dependencies": [
+        "ReverseProxy"
+      ],
+      "c4_level": "Component"
+    },
+    "gateway:reverseproxy": {
+      "name": "ReverseProxy",
+      "description": "YARP with path transforms to services; CORS; security headers.",
+      "technology": "YARP",
+      "dependencies": [
+        "identity-service",
+        "issuance-service",
+        "registry-service",
+        "settlement-service",
+        "compliance-service"
+      ],
+      "c4_level": "Component"
+    },
+    "issuance:service": {
+      "name": "IssuanceService",
+      "description": "Business logic to publish/close issuances.",
+      "technology": "C#",
+      "dependencies": [
+        "ledger:issuance-adapter",
+        "postgres",
+        "kafka"
+      ],
+      "c4_level": "Component"
+    },
+    "issuance:ledger-adapter": {
+      "name": "LedgerIssuanceAdapter",
+      "description": "Adapter to call Fabric chaincode 'issuance'.",
+      "technology": "C# + Fabric SDK",
+      "dependencies": [
+        "chaincode-issuance"
+      ],
+      "c4_level": "Component"
+    },
+    "registry:service": {
+      "name": "RegistryService",
+      "description": "Orders, wallets, idempotency, outbox.",
+      "technology": "C#",
+      "dependencies": [
+        "ledger:registry-adapter",
+        "postgres",
+        "kafka"
+      ],
+      "c4_level": "Component"
+    },
+    "registry:validators": {
+      "name": "Validators",
+      "description": "DTO validation for CreateOrder/Redeem.",
+      "technology": "FluentValidation",
+      "dependencies": [],
+      "c4_level": "Component"
+    },
+    "settlement:service": {
+      "name": "SettlementService",
+      "description": "Payout scheduling/execution; bank integration; reports.",
+      "technology": "C#",
+      "dependencies": [
+        "bank-nominal-adapter",
+        "issuance-service",
+        "registry-service",
+        "postgres"
+      ],
+      "c4_level": "Component"
+    },
+    "compliance:qualification": {
+      "name": "QualificationPolicyService",
+      "description": "Investor qualification & watchlists service.",
+      "technology": "C#",
+      "dependencies": [
+        "postgres"
+      ],
+      "c4_level": "Component"
+    },
+    "frontends:api-client": {
+      "name": "TypeScript API Client",
+      "description": "Auth-aware SDK wrapper around generated clients for portals.",
+      "technology": "TypeScript",
+      "dependencies": [
+        "api-gateway"
+      ],
+      "c4_level": "Component"
+    },
+    "ui:kit": {
+      "name": "Shared UI Kit",
+      "description": "AppShell, DataTable, Charts, Timeline, etc.",
+      "technology": "React + Tailwind + Recharts",
+      "dependencies": [],
+      "c4_level": "Component"
+    }
+  },
+  "domain_glossary": {
+    "CFA": {
+      "description": "Digital Financial Asset representation.",
+      "c4_level": "Context"
+    },
+    "Issuance": {
+      "description": "Offering of CFA with amount/nominal/schedule.",
+      "c4_level": "Context"
+    },
+    "Order": {
+      "description": "Investor order to purchase CFA.",
+      "c4_level": "Context"
+    },
+    "Payout": {
+      "description": "Scheduled payment from issuer to holders.",
+      "c4_level": "Context"
+    },
+    "Wallet": {
+      "description": "Investor wallet holdings and blocked balance.",
+      "c4_level": "Context"
+    },
+    "AuditEvent": {
+      "description": "Security/audit trail event.",
+      "c4_level": "Context"
+    }
+  },
+  "deployment_topology": {
+    "docker-compose": {
+      "name": "Dev Compose Stack",
+      "description": "Local dev stack: Postgres, Kafka+ZK, Keycloak, MinIO; .NET services and portals proxied by gateway.",
+      "relationships": [
+        {
+          "source": "api-gateway",
+          "destination": "identity-service",
+          "description": "ReverseProxy /identity/*"
+        },
+        {
+          "source": "api-gateway",
+          "destination": "issuance-service",
+          "description": "ReverseProxy /v1/issuances/*"
+        },
+        {
+          "source": "api-gateway",
+          "destination": "registry-service",
+          "description": "ReverseProxy /v1/orders, /v1/wallets, /v1/issuances/*/redeem"
+        },
+        {
+          "source": "api-gateway",
+          "destination": "settlement-service",
+          "description": "ReverseProxy /v1/settlement, /v1/reports"
+        },
+        {
+          "source": "api-gateway",
+          "destination": "compliance-service",
+          "description": "ReverseProxy /v1/compliance, /v1/complaints"
+        },
+        {
+          "source": "services/*",
+          "destination": "postgres",
+          "description": "EF Core connections"
+        },
+        {
+          "source": "services/*",
+          "destination": "kafka",
+          "description": "Async events (AsyncAPI)"
+        },
+        {
+          "source": "portals",
+          "destination": "api-gateway",
+          "description": "HTTPS calls + OIDC via Keycloak"
+        },
+        {
+          "source": "identity-service",
+          "destination": "keycloak",
+          "description": "OIDC realm/provider"
+        },
+        {
+          "source": "issuance/registry",
+          "destination": "chaincode-*",
+          "description": "Fabric chaincode invocations"
+        }
+      ],
+      "c4_level": "Container"
+    }
+  },
+  "data_schema": {
+    "description": "Logical schema inferred from JSON Schemas and DTOs; concrete RDBMS schema via EF migrations under each service.",
+    "tables": {
+      "CFA": {
+        "description": "Asset master",
+        "columns": [
+          "id (uuid, pk)",
+          "code (unique)",
+          "name",
+          "type",
+          "status"
+        ]
+      },
+      "Issuance": {
+        "description": "Issuance terms",
+        "columns": [
+          "id (uuid, pk)",
+          "assetId (uuid, fk CFA)",
+          "totalAmount (decimal)",
+          "nominal (decimal)",
+          "status",
+          "schedule (json)"
+        ]
+      },
+      "Order": {
+        "description": "Investor orders",
+        "columns": [
+          "id (uuid, pk)",
+          "investorId (uuid)",
+          "issuanceId (uuid, fk)",
+          "amount (decimal>0)",
+          "status",
+          "walletId (uuid?)",
+          "dltTxHash (string)",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "Wallet": {
+        "description": "Investor wallet",
+        "columns": [
+          "investorId (uuid, pk)",
+          "balance (decimal)",
+          "blocked (decimal)"
+        ]
+      },
+      "Holding": {
+        "description": "Per-issuance position",
+        "columns": [
+          "investorId (uuid, fk)",
+          "issuanceId (uuid, fk)",
+          "quantity (decimal)",
+          "updatedAt"
+        ]
+      },
+      "Payout": {
+        "description": "Payout items/batches",
+        "columns": [
+          "id (uuid, pk)",
+          "issuanceId (uuid, fk)",
+          "amount (decimal)",
+          "status",
+          "executedAt (ts)"
+        ]
+      },
+      "AuditEvent": {
+        "description": "Audit log",
+        "columns": [
+          "id (uuid, pk)",
+          "actor",
+          "action",
+          "entity",
+          "entityId",
+          "timestamp (ts)",
+          "ip",
+          "ua",
+          "metadata (json)"
+        ]
+      }
+    },
+    "relationships": [
+      {
+        "from": "CFA",
+        "to": "Issuance",
+        "type": "One-to-Many",
+        "description": "Asset to issuances"
+      },
+      {
+        "from": "Issuance",
+        "to": "Holding",
+        "type": "One-to-Many",
+        "description": "Holders per issuance"
+      },
+      {
+        "from": "Investor(User)",
+        "to": "Wallet",
+        "type": "One-to-One",
+        "description": "Wallet per investor"
+      },
+      {
+        "from": "Wallet",
+        "to": "Holding",
+        "type": "One-to-Many",
+        "description": "Per-issuance positions"
+      },
+      {
+        "from": "Issuance",
+        "to": "Payout",
+        "type": "One-to-Many",
+        "description": "Scheduled or executed payouts"
+      },
+      {
+        "from": "Issuance",
+        "to": "Order",
+        "type": "One-to-Many",
+        "description": "Orders on offering"
+      }
+    ]
+  },
+  "api_endpoints": [
+    {
+      "name": "Gateway Proxy",
+      "prefix": "/",
+      "description": "Routes to microservices",
+      "endpoints": [
+        {
+          "method": "ANY",
+          "path": "/identity/**",
+          "description": "Identity service endpoints",
+          "authentication": "jwt"
+        },
+        {
+          "method": "ANY",
+          "path": "/v1/issuances/**",
+          "description": "Issuance endpoints",
+          "authentication": "jwt"
+        },
+        {
+          "method": "ANY",
+          "path": "/v1/orders/**",
+          "description": "Orders endpoints",
+          "authentication": "jwt"
+        },
+        {
+          "method": "ANY",
+          "path": "/v1/wallets/**",
+          "description": "Wallet endpoints",
+          "authentication": "jwt"
+        },
+        {
+          "method": "ANY",
+          "path": "/v1/issuances/**/redeem",
+          "description": "Redeem endpoints",
+          "authentication": "jwt"
+        },
+        {
+          "method": "ANY",
+          "path": "/v1/settlement/**",
+          "description": "Settlement endpoints",
+          "authentication": "jwt"
+        },
+        {
+          "method": "ANY",
+          "path": "/v1/reports/**",
+          "description": "Reports endpoints",
+          "authentication": "jwt"
+        },
+        {
+          "method": "ANY",
+          "path": "/v1/compliance/**",
+          "description": "Compliance endpoints",
+          "authentication": "jwt"
+        },
+        {
+          "method": "ANY",
+          "path": "/v1/complaints/**",
+          "description": "Complaints endpoints",
+          "authentication": "jwt"
+        }
+      ]
+    }
+  ],
+  "external_services": {
+    "PostgreSQL": {
+      "type": "db",
+      "description": "RDBMS for services",
+      "technology": "postgres:16-alpine"
+    },
+    "Kafka": {
+      "type": "queue",
+      "description": "Event bus (dev)",
+      "technology": "apache/kafka:3.6"
+    },
+    "Keycloak": {
+      "type": "auth/idp",
+      "description": "OIDC realm",
+      "technology": "quay.io/keycloak/keycloak:25.0"
+    },
+    "MinIO": {
+      "type": "object-storage",
+      "description": "S3-compatible storage",
+      "technology": "minio/minio:latest"
+    }
+  },
+  "sources": [
+    {
+      "path": "README.md",
+      "role": "context",
+      "anchors": [
+        "Основные функции (Выпуск, Покупка, Выплаты, Погашение)"
+      ]
+    },
+    {
+      "path": "apps/api-gateway/Program.cs",
+      "role": "component",
+      "anchors": [
+        "Serilog JSON",
+        "Security headers",
+        "TokenBucket RateLimiter",
+        "YARP ReverseProxy"
+      ]
+    },
+    {
+      "path": "apps/api-gateway/appsettings.json",
+      "role": "component",
+      "anchors": [
+        "/identity/*",
+        "/v1/issuances/*",
+        "/v1/orders/*",
+        "/v1/wallets/*",
+        "/v1/settlement/*",
+        "/v1/compliance/*",
+        "/v1/complaints/*",
+        "/v1/reports/*"
+      ]
+    },
+    {
+      "path": "docker-compose.yml",
+      "role": "deployment",
+      "anchors": [
+        "postgres:16-alpine",
+        "apache/kafka:3.6",
+        "confluentinc/cp-zookeeper:7.5.0",
+        "keycloak:25.0",
+        "minio/minio:latest"
+      ]
+    },
+    {
+      "path": "packages/contracts/README.md",
+      "role": "api",
+      "anchors": [
+        "openapi-*.yaml list",
+        "asyncapi.yaml",
+        "schemas/*.json"
+      ]
+    },
+    {
+      "path": "packages/contracts/asyncapi.yaml",
+      "role": "api",
+      "anchors": [
+        "ois.audit.logged",
+        "ois.issuance.published",
+        "ois.order.placed",
+        "ois.payout.executed"
+      ]
+    },
+    {
+      "path": "services/registry/DTOs/*.cs",
+      "role": "code",
+      "anchors": [
+        "OrderResponse",
+        "RedeemRequest",
+        "WalletResponse"
+      ]
+    },
+    {
+      "path": "chaincode/issuance/issuance.go",
+      "role": "code",
+      "anchors": [
+        "Issue()",
+        "Close()",
+        "Get()"
+      ]
+    },
+    {
+      "path": "chaincode/registry/registry.go",
+      "role": "code",
+      "anchors": [
+        "Transfer()",
+        "Redeem()",
+        "GetHistory()"
+      ]
+    },
+    {
+      "path": "docs/architecture/*",
+      "role": "context",
+      "anchors": [
+        "C4, DFD, UML, Security mappings"
+      ]
+    }
+  ]
+}
