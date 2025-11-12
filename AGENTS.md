@@ -1,7 +1,7 @@
 ---
 created: 2025-10-30
-updated: 2025-11-11 17:24
-version: 1.4.0
+updated: 2025-11-11 13:29
+version: 1.3.0
 type: project-rules
 partAgentID: [co-76ca, cc-171f, cc-e4ee, cc-03-0f8f]
 symlink_note: CLAUDE.md is a symlink to this file for SSOT
@@ -191,40 +191,6 @@ Regenerate repositories manifest from `.gitmodules` when submodules change:
 - Repositories manifest rebuilt if submodules changed: `scripts/regen-repositories-manifest.sh` executed.
 - High‑signal artefacts indexed to `memory-bank` with `YYYYMMDD-HHMM-*` naming.
 - Commit style per rules; include full `agentID` in commit footer.
-
-## Deployment (CFA1) Quick Runbook
-- Host: `cfa1` (Ubuntu), project path: `/opt/ois-cfa`.
-- Compose: `docker-compose.yml`, `docker-compose.override.yml`, `docker-compose.kafka.override.yml`, `docker-compose.services.yml`.
-- Env: `.env` (non‑standard ports, dev creds). Key ports: gateway `55000`, identity `55001`, issuance `55005`, registry `55006`, settlement `55007`, compliance `55008`; infra: postgres `55432`, kafka `59092`, zookeeper `52181`, keycloak `58080`, minio `59000/59001`.
-- Start infra: `docker compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.kafka.override.yml up -d`.
-- Build services sequentially (low‑RAM host):
-  - `docker compose -f ... build identity-service && docker compose -f ... up -d identity-service`
-  - `docker compose -f ... build registry-service && MIGRATE_ON_STARTUP=false docker compose -f ... up -d registry-service`
-  - `docker compose -f ... build compliance-service && MIGRATE_ON_STARTUP=false docker compose -f ... up -d compliance-service`
-  - Then: `issuance-service`, `settlement-service`, `bank-nominal`, and `api-gateway` last
-- Health checks:
-  - `curl http://<cfa1-ip>:55001/health` (identity → 200)
-  - `curl http://<cfa1-ip>:55006/health` (registry → 200)
-  - `curl http://<cfa1-ip>:55008/health` (compliance → 503 until checks added)
-  - Keycloak: `http://<cfa1-ip>:58080` (admin/admin123); Minio: `http://<cfa1-ip>:59001` (minioadmin/minioadmin)
-
-Notes
-- EF migrations are gated by env `MIGRATE_ON_STARTUP=true`. Default skips migrations to avoid startup failures in dev.
-- On small VMs (≤2GB RAM), create swap (2G) before heavy .NET builds.
-
-## Architecture Outputs (C4/ERD)
-- Combined MD (Mermaid): `memory-bank/Scrum/20251111-cfa-c4-reposcan-domains/20251111-1336-co-3a68/20251111-1336-c4-diagrams.md`.
-- Shotgun reposcan JSON and published copies: `repositories/customer-gitlab/temp-ai-ois-cfa-20251111-1243/reposcan/shtgn/20251111-1336-co-3a68/`.
-
-## Main Docs (TBL orientation)
-- Trunk: `project.manifest.json`, `AGENTS.md`.
-- Branch: `manifests/*` (people, repositories, domains, docs, workflow).
-- Leaves (per sprint/output): `memory-bank/Scrum/<date>-*/{agent}/...` (C4/ERD, DoD MVP, runbooks).
-  - DoD MVP: `.../20251111-1413-dod-mvp-ois-cfa.md`.
-  - Junior runbooks: `.../20251111-1440-junior-runbook-local-deploy.md`, `.../20251111-1450-docker-local-full.md`.
-
-## Drawio Artifacts
-- Some docs reference `.drawio` (e.g., `ops/infra/Network-Zones.drawio`), but no `.drawio` files are present now. If needed, keep original in `docs/` or `ops/infra/` and mirror a single Mermaid MD per folder.
 
 ### Git Remote Policy
 - Multi‑remote setup per repository is expected:

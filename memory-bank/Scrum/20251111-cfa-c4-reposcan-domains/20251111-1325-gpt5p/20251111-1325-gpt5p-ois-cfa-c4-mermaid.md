@@ -1,1 +1,0 @@
-/Users/user/__Repositories/prj_Cifra-rwa-exachange-assets/repositories/customer-gitlab/wt-ois-cfa-agents/.ai/reposcan/20251111-1325-gpt5p-ois-cfa-c4-mermaid.md
