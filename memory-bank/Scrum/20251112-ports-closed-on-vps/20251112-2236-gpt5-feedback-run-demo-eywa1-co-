@@ -1,0 +1,267 @@
+**TL;DR**
+
+* У тебя всё ломалось из‑за HTTPS. На `:8080` сейчас **HTTP**, поэтому `curl https://87.249.49.56:8080` даёт *wrong version number* — это нормальная TLS‑ошибка при обращении к чистому HTTP. Ходить нужно по `http://87.249.49.56:8080` или включить TLS на прокси. 
+* Health Keycloak по уму живёт на mgmt‑интерфейсе `:9000`, а не на `:8080`. Ты уже сделал nginx‑proxy, прокидывающий `/health/ready` с `8080` на `9000` → `http://87.249.49.56:8080/health/ready` должно отдавать `200`. Если не отдаёт — ниже даю проверку и фикс. ([Keycloak][1])
+* Для браузерного логина добиваем консистентность URL: IP‑адрес в **NEXTAUTH_URL / NEXT_PUBLIC_KEYCLOAK_URL**, клиенты в Keycloak с IP‑redirects, и перезапуск фронтов с `pm2 --update-env`. При желании — ставим TLS на прокси. 
+
+---
+
+## Steps
+
+### 1) Быстрая валидация (HTTP vs HTTPS) — **выполни на eywa1**
+
+```bash
+# 1. Проверка health через прокси (ожидаем 200)
+curl -s -o /dev/null -w "kc8080:%{http_code}\n" http://87.249.49.56:8080/health/ready
+
+# 2. Это ожидаемо падает (tls к http-порту): wrong version number
+curl -v https://87.249.49.56:8080/ | head -n5
+
+# 3. Админ‑UI: редирект (302) на /admin
+curl -s -o /dev/null -w "admin:%{http_code}\n" -L http://87.249.49.56:8080/admin
+
+# 4. Порталы: редирект на login (307) — ок для NextAuth
+for p in 3001 3002 3003; do curl -s -o /dev/null -w "p$p:%{http_code}\n" -L http://87.249.49.56:$p/; done
+```
+
+**Если (1) ≠ 200:** прокси не поднят/конфиг не тот. Ниже — эталон.
+
+> Пояснение: начиная с Keycloak Quarkus, health/metrics вынесены на management‑порт по умолчанию (9000). Это сделано специально, чтобы закрывать тех. эндпойнты наружу и держать их под отдельной секьюрностью. ([Keycloak][1])
+
+---
+
+### 2) Прокси для Keycloak (единственный внешний порт `:8080`, health сшит на mgmt)
+
+**docker‑compose.override (keycloak‑proxy)** — положи в репо (например, `ops/compose/keycloak-proxy.yml`) и используй в `docker compose -f ... up -d`:
+
+```yaml
+services:
+  keycloak:
+    # НЕ публикуем 8080 на хост (ports удаляем),
+    # mgmt-порт 9000 тоже НЕ публикуем наружу
+    environment:
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: xforwarded
+      KC_HOSTNAME_URL: "http://87.249.49.56:8080"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HOSTNAME_STRICT: "false"
+
+  keycloak-proxy:
+    image: nginx:alpine
+    container_name: ois-keycloak-proxy
+    depends_on: [keycloak]
+    ports: ["8080:8080"]         # единственный внешний порт
+    networks: ["ois-network"]
+    volumes:
+      - ./ops/keycloak/nginx.conf:/etc/nginx/nginx.conf:ro
+```
+
+**Nginx конфиг** (`ops/keycloak/nginx.conf`) — минимальный, без нестандартных log‑форматов:
+
+```nginx
+worker_processes auto;
+events { worker_connections 1024; }
+http {
+  sendfile on;
+  server {
+    listen 8080;
+    # Health → mgmt 9000
+    location = /health/ready { proxy_pass http://keycloak:9000/health/ready; }
+    location = /health       { proxy_pass http://keycloak:9000/health; }
+
+    # Всё остальное → UI на 8080
+    location / {
+      proxy_pass http://keycloak:8080;
+      proxy_set_header Host              $host;
+      proxy_set_header X-Real-IP         $remote_addr;
+      proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+      proxy_redirect off;
+    }
+  }
+}
+```
+
+> Почему так: health по умолчанию на mgmt‑интерфейсе (9000), а UI — на 8080. Документация Keycloak прямо это указывает; прокси даёт «единый» внешний порт и возможность позже добавить HTTPS. ([Keycloak][1])
+
+---
+
+### 3) Консистентные публичные URL (фронты и клиенты)
+
+**Фронты** (`apps/portal-*/.env.local` — IP, не localhost):
+
+```dotenv
+# общее
+NEXT_PUBLIC_API_BASE_URL=http://87.249.49.56:5000
+NEXT_PUBLIC_KEYCLOAK_URL=http://87.249.49.56:8080
+NEXT_PUBLIC_KEYCLOAK_REALM=ois-dev
+
+# per-app
+# Issuer
+NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=portal-issuer
+NEXTAUTH_URL=http://87.249.49.56:3001
+# Investor
+# NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=portal-investor
+# NEXTAUTH_URL=http://87.249.49.56:3002
+# Backoffice
+# NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=backoffice
+# NEXTAUTH_URL=http://87.249.49.56:3003
+
+# опционально (но лучше задать)
+NEXTAUTH_SECRET=<сгенерируй_строку>
+```
+
+**Перезапуск фронтов** (чтобы .env.local точно перечитались):
+
+```bash
+pm2 restart portal-issuer portal-investor portal-backoffice --update-env && pm2 save
+```
+
+> В твоих логах был намёк «Use --update-env to update environment variables» — добавляй этот флаг на рестарте. 
+
+**Keycloak клиенты** (уже сделал, но даю эталон, на случай повторного прогона):
+
+```bash
+# login админа
+docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh \
+  config credentials --server http://localhost:8080 --realm master \
+  --user admin --password admin123
+
+# issuer / investor / backoffice
+for c in portal-issuer:3001 portal-investor:3002 backoffice:3003; do
+  IFS=: read id port <<EOF
+$c
+EOF
+  docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh update clients -r ois-dev \
+    -q clientId=$id -s "redirectUris=[\"http://87.249.49.56:$port/*\"]" \
+    -s "webOrigins=[\"http://87.249.49.56:$port\"]"
+done
+```
+
+> Hostname/Proxy параметры Keycloak: придерживаемся `KC_HOSTNAME_URL` и `KC_PROXY_HEADERS=xforwarded`. Это современная схема вместо старого `KC_PROXY=edge`. ([Keycloak][2])
+
+---
+
+### 4) Проверка браузером (если curl мало) — **Playwright на eywa1**
+
+Глобальная установка (Ubuntu):
+
+```bash
+sudo apt-get update -y
+sudo apt-get install -y curl git ca-certificates
+# Node 20
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
+# Playwright + deps для Chromium
+sudo npm i -g @playwright/test
+npx playwright install --with-deps chromium
+```
+
+Мини‑тест логина Issuer (`/opt/checks/issuer-login.spec.ts`):
+
+```ts
+import { test, expect } from '@playwright/test';
+test('issuer login', async ({ page }) => {
+  await page.goto('http://87.249.49.56:3001/');
+  await page.getByRole('link', { name: /login/i }).click().catch(()=>{});
+  await page.getByLabel(/username/i).fill('issuer@test.com');
+  await page.getByLabel(/password/i).fill('password123');
+  await page.getByRole('button', { name: /sign in|войти/i }).click();
+  await expect(page).toHaveURL(/87\.249\.49\.56:3001/);
+  await expect(page.locator('body')).toContainText(/logout|выход|dashboard/i);
+});
+```
+
+Запуск:
+
+```bash
+mkdir -p /opt/checks && cd /opt/checks
+npm init -y >/dev/null
+npm i -D @playwright/test
+npx playwright install chromium
+npx playwright test issuer-login.spec.ts --browser=chromium --headed=false
+```
+
+---
+
+### 5) (Опционально) TLS на прокси
+
+Когда решишь делать HTTPS:
+
+* добавь в nginx сервер `listen 443 ssl;` + сертификаты (self‑signed на демо либо Let’s Encrypt/Cloudflare Tunnel), и сделай `return 301 https://$host$request_uri;` c 80 на 443;
+* выставь `KC_HOSTNAME_URL="https://<домен или IP>:443"` и `X-Forwarded-Proto $scheme` в nginx (уже есть).
+  Док по реверс‑прокси и hostname для Keycloak: ([Keycloak][3])
+
+---
+
+## Table (коротко)
+
+| Problem                                          | Root cause                            | Fix                                                                        |
+| ------------------------------------------------ | ------------------------------------- | -------------------------------------------------------------------------- |
+| `curl https://...:8080` → *wrong version number* | `:8080` = HTTP, а не HTTPS            | Ходить по `http://...:8080` или включить TLS на nginx                      |
+| `/health/ready` путаница                         | health по умолчанию на mgmt `:9000`   | Прокси `/health/ready` с `8080` → `9000`                                   |
+| После логина редирект на `localhost`             | Фронты/клиенты настроены на localhost | Задать IP в `.env.local` + в клиентах Keycloak, `pm2 --update-env`         |
+| Несогласованный hostname у KC                    | Нет `KC_HOSTNAME_URL`/proxy‑headers   | Включить `KC_HOSTNAME_URL` и `KC_PROXY_HEADERS=xforwarded`                 |
+| HTTPS нужен заказчику                            | Сейчас HTTP‑только                    | Включить TLS на nginx‑proxy (certs), опционально `KC_HOSTNAME_*` под HTTPS |
+
+(Части уже выполнены и зафиксированы в твоём логе; см. обновления и статус‑снимки.) 
+
+---
+
+## Next actions (чёткий чек‑лист)
+
+1. **Проверка сейчас (5 мин)**
+
+   * `curl http://87.249.49.56:8080/health/ready` ⇒ **200**
+   * `for p in 3001 3002 3003; do curl -IL http://87.249.49.56:$p/ | head; done` ⇒ **307** на login.
+2. **Зафиксировать прокси как код (IaC‑минимум)**
+
+   * Закоммить `ops/compose/keycloak-proxy.yml` и `ops/keycloak/nginx.conf` в репо; запуск через `docker compose -f docker-compose.yml -f docker-compose.override.yml -f ops/compose/keycloak-proxy.yml up -d`.
+3. **Фронты/клиенты — финализация**
+
+   * Проверить `.env.local` на IP в трёх порталах; `pm2 restart ... --update-env && pm2 save`.
+   * В KC убедиться, что у `portal-issuer|investor|backoffice` Redirect/WebOrigins на IP (команды выше).
+4. **Браузерный smoke**
+
+   * Залогиниться как `issuer@test.com`/`password123` и `investor@test.com`/`password123`.
+   * Приложить скрины в memory‑bank. (Админ: `admin/admin123`, поменять после демо.) 
+5. **Playwright для агентов (на eywa1)**
+
+   * Выполнить установку из шага 4 и запустить `issuer-login.spec.ts`. Результат приложить в лог.
+6. **MinIO (если нужно позже)**
+
+   * Теперь `9000` снаружи не занят — можно поднимать MinIO; либо оставить на `59000/59001` отдельным override.
+7. **TLS (по готовности)**
+
+   * Добавить сертификаты в nginx и поменять `KC_HOSTNAME_URL` на `https://…`.
+
+---
+
+### Что было «криво» у агента и как не повторять (коррективы)
+
+* **HTTPS к HTTP‑порту** → всегда сначала проверяй схему/порт `curl -v http://…` и только потом `https://…`.
+* **Health на 8080** → в KC 25 health живёт на mgmt, не пытайся «включать» его на 8080 внутри KC; шейпится на прокси. ([Keycloak][1])
+* **Смешанные URL** (localhost ↔ IP) → единый источник правды: `.env.local` фронтов + `KC_HOSTNAME_URL` + Redirect/WebOrigins клиентов. ([Keycloak][2])
+* **pm2 без `--update-env`** → при правке env всегда рестартуй с обновлением окружения. 
+* **Порт‑конфликты** → не публикуй внутри KC 8080 наружу, когда поверх стоит proxy; наружу — один порт 8080 у nginx, всё остальное во внутренней сети.
+
+---
+
+### Схема (traffic flow)
+
+```mermaid
+flowchart LR
+  B[Browser http://87.249.49.56:8080] --> P[Nginx proxy :8080]
+  P -->|/health/ready| M[keycloak:9000 (mgmt)]
+  P -->|UI /admin /realms/...| K[keycloak:8080 (app)]
+  B -->|Issuer/Investor| F1[Next.js :3001/:3002/:3003]
+  F1 -->|OIDC| P
+```
+
+---
+
+Если хочешь, могу подготовить **готовый набор файлов** (`ops/compose/*`, `Makefile` с `make demo-up/down`, и e2e‑тест Playwright) — это будет первый шаг к твоему IaC для демо окружения. Сейчас главное — быстро подтвердить `200` на `/health/ready` по `HTTP` и завершить логин‑флоу по IP. 
+
+[1]: https://www.keycloak.org/server/management-interface?utm_source=chatgpt.com "Configuring the Management Interface"
+[2]: https://www.keycloak.org/server/hostname?utm_source=chatgpt.com "Configuring the hostname (v2)"
+[3]: https://www.keycloak.org/server/reverseproxy?utm_source=chatgpt.com "Configuring a reverse proxy"
