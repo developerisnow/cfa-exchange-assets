@@ -26,3 +26,4 @@ exchange-assets-tokenization-rwa/
 repositories/customer-gitlab/**
 data/
 
+.specstory/
