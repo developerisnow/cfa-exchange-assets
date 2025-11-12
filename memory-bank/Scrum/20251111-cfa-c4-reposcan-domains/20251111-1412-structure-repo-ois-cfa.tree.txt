@@ -1,0 +1,264 @@
+repositories/customer-gitlab/ois-cfa
+├── .editorconfig
+├── .git
+├── .github
+│   └── workflows
+│       ├── ci.yml
+│       ├── e2e.yml
+│       └── security-scan.yml
+├── .gitignore
+├── apps
+│   ├── _theme
+│   │   ├── package.json
+│   │   ├── README.md
+│   │   ├── tailwind-preset.js
+│   │   └── tokens.css
+│   ├── api-gateway
+│   │   ├── api-gateway.csproj
+│   │   ├── appsettings.json
+│   │   ├── Dockerfile
+│   │   └── Program.cs
+│   ├── backoffice
+│   │   ├── next-env.d.ts
+│   │   ├── next.config.js
+│   │   ├── package-lock.json
+│   │   ├── package.json
+│   │   ├── postcss.config.js
+│   │   ├── README.md
+│   │   ├── src
+│   │   ├── tailwind.config.ts
+│   │   └── tsconfig.json
+│   ├── broker-portal
+│   │   ├── .eslintrc.json
+│   │   ├── next-env.d.ts
+│   │   ├── next.config.js
+│   │   ├── package-lock.json
+│   │   ├── package.json
+│   │   ├── postcss.config.js
+│   │   ├── src
+│   │   ├── tailwind.config.ts
+│   │   └── tsconfig.json
+│   ├── portal-investor
+│   │   ├── next-env.d.ts
+│   │   ├── next.config.js
+│   │   ├── package-lock.json
+│   │   ├── package.json
+│   │   ├── postcss.config.js
+│   │   ├── README.md
+│   │   ├── src
+│   │   ├── tailwind.config.ts
+│   │   └── tsconfig.json
+│   ├── portal-issuer
+│   │   ├── next-env.d.ts
+│   │   ├── next.config.js
+│   │   ├── package-lock.json
+│   │   ├── package.json
+│   │   ├── postcss.config.js
+│   │   ├── README.md
+│   │   ├── src
+│   │   ├── tailwind.config.ts
+│   │   └── tsconfig.json
+│   └── shared-ui
+│       ├── package-lock.json
+│       ├── package.json
+│       ├── README.md
+│       ├── src
+│       ├── tailwind.config.ts
+│       └── tsconfig.json
+├── ARCHIVE
+│   ├── assumptions.md
+│   └── build-log.md
+├── chaincode
+│   ├── issuance
+│   │   ├── go.mod
+│   │   ├── issuance_test.go
+│   │   ├── issuance.go
+│   │   └── README.md
+│   └── registry
+│       ├── go.mod
+│       ├── README.md
+│       ├── registry_test.go
+│       └── registry.go
+├── docker-compose.yml
+├── docs
+│   ├── 00-Дорожная-карта-проекта.md
+│   ├── 00-Проверка-готовности-ЦБ.md
+│   ├── 00-Структура-проекта-создана.md
+│   ├── apps
+│   │   ├── backoffice.md
+│   │   ├── portal-investor.md
+│   │   └── portal-issuer.md
+│   ├── architecture
+│   │   ├── 10-HighLevel-Architecture.md
+│   │   ├── 11-Sequence-ESIA-OIDC.md
+│   │   ├── 12-DataModel.md
+│   │   ├── 13-HLF-Network-Design.md
+│   │   ├── 14-NonFunctional-Targets.md
+│   │   ├── api
+│   │   ├── c4
+│   │   ├── contracts
+│   │   ├── dfd
+│   │   ├── infra
+│   │   ├── ontology
+│   │   ├── security
+│   │   ├── threat
+│   │   └── uml
+│   ├── assumptions.md
+│   ├── dlt
+│   │   ├── dev-network.md
+│   │   └── k8s-deploy.md
+│   ├── glossary.md
+│   ├── legal
+│   │   ├── 01-Заявление-в-ЦБ.md
+│   │   ├── 01-ПравилаИС-template.md
+│   │   ├── 02-ОписаниеИС-template.md
+│   │   ├── 03-Матрица-соответствия_259ФЗ-746П.md
+│   │   ├── 04-Структура-владения.md
+│   │   ├── 05-Руководители.md
+│   │   ├── 06-Учредительные-документы.md
+│   │   ├── 07-Реестр-пользователей.md
+│   │   └── 08-Артефакты-для-ЦБ-746П.md
+│   ├── README-ARCH.md
+│   ├── security
+│   │   ├── 04-ПолитикаИБ.md
+│   │   ├── 05-ПолитикаНепрерывности-DRP.md
+│   │   ├── 20-ГОСТ57580-Чеклист.md
+│   │   └── 21-СТОБР-Чеклист.md
+│   ├── services
+│   │   ├── compliance.md
+│   │   ├── issuance.md
+│   │   ├── registry.md
+│   │   └── settlement.md
+│   ├── source
+│   │   ├── Описание ИС vs Правила ИС.md
+│   │   └── kniga_cfa.pdf
+│   ├── sources
+│   │   ├── FRONTEND-FUNCTIONALITY-ANALYSIS.md
+│   │   └── sources.md
+│   ├── testing
+│   │   ├── 30-Perf-Test-Plan.md
+│   │   └── 31-DR-Drill-Runbook.md
+│   └── ui
+│       └── design-system.md
+├── Makefile
+├── ops
+│   ├── CODEOWNERS
+│   ├── CONTRIBUTING.md
+│   ├── fabric
+│   │   ├── configtx.yaml
+│   │   ├── crypto-config.yaml
+│   │   ├── dev-down.sh
+│   │   ├── dev-reset.sh
+│   │   ├── dev-up.sh
+│   │   ├── docker-compose.yml
+│   │   ├── README.md
+│   │   └── scripts
+│   ├── infra
+│   │   ├── grafana-dashboards.json
+│   │   ├── helm
+│   │   ├── k8s
+│   │   ├── otel-collector-config.yaml
+│   │   └── prometheus.yml
+│   ├── scripts
+│   │   ├── backup.sh
+│   │   ├── restore.md
+│   │   └── test-restore.sh
+│   └── SECURITY.md
+├── packages
+│   ├── contracts
+│   │   ├── asyncapi.yaml
+│   │   ├── openapi-compliance.yaml
+│   │   ├── openapi-gateway.yaml
+│   │   ├── openapi-identity.yaml
+│   │   ├── openapi-integrations-bank.yaml
+│   │   ├── openapi-integrations-edo.yaml
+│   │   ├── openapi-integrations-esia.yaml
+│   │   ├── openapi-issuance.yaml
+│   │   ├── openapi-registry.yaml
+│   │   ├── openapi-settlement.yaml
+│   │   ├── README.md
+│   │   └── schemas
+│   ├── domain
+│   │   ├── domain.csproj
+│   │   ├── domain.Tests
+│   │   ├── domain.Tests.csproj
+│   │   ├── IssuanceId.cs
+│   │   ├── IssuanceStatus.cs
+│   │   ├── Money.cs
+│   │   └── ScheduleItem.cs
+│   └── sdks
+│       └── ts
+├── README.md
+├── services
+│   ├── compliance
+│   │   ├── appsettings.json
+│   │   ├── compliance.csproj
+│   │   ├── compliance.Tests
+│   │   ├── ComplianceDbContext.cs
+│   │   ├── Dockerfile
+│   │   ├── DTOs
+│   │   ├── Migrations
+│   │   ├── Program.cs
+│   │   └── Services
+│   ├── fabric-gateway
+│   │   ├── FabricGatewayService.cs
+│   │   └── Program.cs
+│   ├── identity
+│   │   ├── appsettings.json
+│   │   ├── Dockerfile
+│   │   ├── identity.csproj
+│   │   └── Program.cs
+│   ├── integrations
+│   │   ├── bank-nominal
+│   │   ├── edo-connector
+│   │   └── esia-adapter
+│   ├── issuance
+│   │   ├── appsettings.json
+│   │   ├── Dockerfile
+│   │   ├── DTOs
+│   │   ├── issuance.csproj
+│   │   ├── issuance.Tests
+│   │   ├── issuance.Tests.csproj
+│   │   ├── IssuanceDbContext.cs
+│   │   ├── Migrations
+│   │   ├── Program.cs
+│   │   ├── Services
+│   │   └── Validators
+│   ├── registry
+│   │   ├── appsettings.json
+│   │   ├── Dockerfile
+│   │   ├── DTOs
+│   │   ├── Migrations
+│   │   ├── Program.cs
+│   │   ├── registry.csproj
+│   │   ├── registry.Tests
+│   │   ├── RegistryDbContext.cs
+│   │   ├── Services
+│   │   └── Validators
+│   └── settlement
+│       ├── appsettings.json
+│       ├── Dockerfile
+│       ├── DTOs
+│       ├── Migrations
+│       ├── Program.cs
+│       ├── Services
+│       ├── settlement.csproj
+│       ├── settlement.Tests
+│       └── SettlementDbContext.cs
+└── tests
+    ├── contracts
+    │   ├── pact-consumer
+    │   └── pact-provider
+    ├── e2e
+    │   ├── helpers
+    │   ├── package.json
+    │   ├── playwright.config.ts
+    │   ├── README.md
+    │   └── tests
+    ├── k6
+    │   ├── gateway-critical-paths.js
+    │   └── payouts-report.js
+    └── load
+        └── README.md
+
+91 directories, 170 files
