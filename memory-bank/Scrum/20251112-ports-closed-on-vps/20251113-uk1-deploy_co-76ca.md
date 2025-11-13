@@ -1,6 +1,6 @@
 ---
 created: 2025-11-13 08:05
-updated: 2025-11-13 11:55
+updated: 2025-11-13 13:45
 type: operations-log
 sphere: devops
 topic: uk1 replica deploy (OIS CFA)
