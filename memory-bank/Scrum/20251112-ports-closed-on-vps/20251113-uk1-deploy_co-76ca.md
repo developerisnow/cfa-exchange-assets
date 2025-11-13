@@ -1,13 +1,12 @@
----
 created: 2025-11-13 08:05
-updated: 2025-11-13 13:45
+updated: 2025-11-13 15:25
 type: operations-log
 sphere: devops
 topic: uk1 replica deploy (OIS CFA)
 author: Alex (co-76ca)
 agentID: co-76ca
 partAgentID: [co-76ca]
-version: 0.2.0
+version: 0.3.0
 tags: [deployment, uk1, keycloak, portals]
 ---
 
@@ -79,3 +78,22 @@ tags: [deployment, uk1, keycloak, portals]
   - Investor → `https://investor.cfa.llmneighbors.com/portfolio`
   - Assets: `memory-bank/Scrum/20251112-ports-closed-on-vps/playwright-{issuer,investor}.png`.
 - Nginx Health: `curl -I https://auth.cfa.llmneighbors.com` → 302 `/admin/`; `curl https://api.cfa.llmneighbors.com/health` → `Healthy`.
+
+## 2025-11-13 15:20 MSK — SMTP stack + self-registration
+- Развернул Postfix + OpenDKIM на UK1:
+  - `postconf -e 'inet_interfaces = all'`, `mynetworks = 127.0.0.0/8 172.17.0.0/16 172.18.0.0/16`, `smtpd_{relay,recipient}_restrictions = permit_mynetworks, reject_unauth_destination`.
+  - Права на `/etc/opendkim/keys` и конфиг приведены к `opendkim:opendkim`, `KeyTable/SigningTable` настроены на селектор `mail`.
+  - Сервисы `postfix` и `opendkim` переведены в `enabled`, health проверен (`systemctl status` + `tail -f /var/log/mail.log`).
+- Cloudflare DNS:
+  - `mail.cfa.llmneighbors.com` (A), `cfa.llmneighbors.com` (MX), SPF (`v=spf1 ip4:185.168.192.214 ~all`), DKIM (`mail._domainkey`), DMARC (`p=none`).
+- Keycloak realm `ois-dev`:
+  - `verifyEmail=true`, `registrationAllowed=true`, SMTP host `172.18.0.1:25`, `from=no-reply@cfa.llmneighbors.com`, STARTTLS отключён (локальный relay).
+- Smoke через `mail.tm`:
+  - `echo "Test" | mail -s "SMTP ok" cfaYYYY@2200freefonts.com` → письма видны через `curl https://api.mail.tm/messages ...`.
+  - Playwright self-registration (`tests/e2e-playwright/tests/self-registration.spec.ts`) создаёт временную почту, проходит регистрацию, читает verify-link через API и завершает первый вход.
+- Итоговый `npm test`:
+  - issuer/investor OAuth → PASS.
+  - investor self-registration → PASS (см. `tests/e2e-playwright/test-results/self-registration-*/`).
+- Открытые вопросы:
+  - Postfix сейчас открыт в интернет на 25 порту; при переносе в прод нужно добавить fail2ban/ufw и сменить `compatibility_level`.
+  - SMTP-пароль не нужен (локальный relay). Если потребуется внешний SMTP, придётся включить auth/TLS.
