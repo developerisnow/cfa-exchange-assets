@@ -1,5 +1,5 @@
 created: 2025-11-13 08:05
-updated: 2025-11-13 15:25
+updated: 2025-11-13 17:05
 type: operations-log
 sphere: devops
 topic: uk1 replica deploy (OIS CFA)
@@ -97,3 +97,14 @@ tags: [deployment, uk1, keycloak, portals]
 - Открытые вопросы:
   - Postfix сейчас открыт в интернет на 25 порту; при переносе в прод нужно добавить fail2ban/ufw и сменить `compatibility_level`.
   - SMTP-пароль не нужен (локальный relay). Если потребуется внешний SMTP, придётся включить auth/TLS.
+
+## 2025-11-13 17:00 MSK — SMTP lockdown + backoffice smoke
+- Postfix теперь слушает только `127.0.0.1` и `172.18.0.1`:
+  - `postconf -e 'inet_interfaces = 127.0.0.1, 172.18.0.1'` → `systemctl restart postfix`.
+  - Снаружи порт 25 закрыт (`telnet 185.168.192.214 25` → connection refused).
+  - Локальная отправка (`echo ... | mail -s ...`) доставляется через mail.tm; логи → `/var/log/mail.log` (dsn=2.0.0).
+  - DKIM milter переведён на `127.0.0.1:8891`, Keycloak продолжает слать verifyEmail.
+- Playwright:
+  - Добавлен сценарий `tests/e2e-playwright/tests/backoffice-auth.spec.ts` (admin@test.com/password123).
+  - `npm test` теперь прогоняет 4 спека: issuer, investor, investor self-registration, backoffice admin — все PASS.
+- Скрин консоли `backoffice.png` (виджет “Sign in with Keycloak”) лежит в `tests/e2e-playwright/backoffice.png` для quick reference.
