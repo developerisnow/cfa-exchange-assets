@@ -53,6 +53,16 @@
         "--local-timezone",
         "Europe/Istanbul"
       ]
+    },
+    "oracle-gpt5": {
+      "command": "python3",
+      "args": [
+        "/Users/user/__Repositories/LLMs-gpt5pro-oracle__steipete/mcp_server/oracle_mcp.py"
+      ],
+      "env": {
+        "ORACLE_HOME_DIR": "/Users/user/.oracle",
+        "PROJECT_CONTEXT": "cifra-rwa-exchange"
+      }
     }
   }
 }
