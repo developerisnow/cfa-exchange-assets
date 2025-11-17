@@ -76,13 +76,13 @@
     {
       "id": "repositories",
       "path": "./manifests/repositories.manifest.json",
-      "checksum": "2afe34afb50293a6c03839fe889ecf862b5c00d76d99e7465b37f789f5125ab1",
+      "checksum": "06d565720e40642004e4e3af19d2d0f6209c927baf24c15ea6139c465e686a41",
       "description": "All code repositories and roles."
     },
     {
       "id": "domains",
       "path": "./manifests/domains.manifest.json",
-      "checksum": "28201220de91f53f668d07afa5d243437866da195e091e394859cd425e02e58f",
+      "checksum": "166d30de6f44c085ffb8d32997cf19925fd3be167efd1e0ad9b03425acc13ea9",
       "description": "Business domains and ownership."
     },
     {
@@ -94,7 +94,7 @@
     {
       "id": "docs",
       "path": "./manifests/docs.manifest.json",
-      "checksum": "3b5464c358633c9252471cb38a47ff87c6401fccfd96ed2c7a7a890f2bea220d",
+      "checksum": "50be4104beced40e75ae90400121fb372a62b98bd74eba6c93c9afe5f68a0737",
       "description": "Critical documents and research."
     },
     {
@@ -106,7 +106,7 @@
     {
       "id": "workflow",
       "path": "./manifests/workflow.manifest.json",
-      "checksum": "38d08c4fdb49a4033baea678d93c0027831d29a3bdb08fc1e666a9f6468aea8f",
+      "checksum": "9373d23b0a09aafd4a23de7cba372b257f8ccf0a4c02b775ab987b21d94e5368",
       "description": "Operational workflow, tools, servers, and policies."
     }
   ]

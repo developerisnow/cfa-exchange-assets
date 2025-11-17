@@ -1,10 +1,10 @@
 {
     "id": "docs",
     "description": "Catalog of critical project documents.",
-    "meta": {
-      "version": "1.2.0",
-      "updated": "2025-11-17T13:40:00+03:00",
-      "edited_by": ["co-76ca"]
+  "meta": {
+      "version": "1.2.1",
+      "updated": "2025-11-17T15:12:00+03:00",
+      "edited_by": ["co-76ca", "co-3c63"]
     },
     "documents": [
       {
@@ -48,12 +48,36 @@
         "summary": "Infra branch audit and timeline for ois-cfa, including scope, cadence, risks, and merge recommendations (infra vs deploy)."
       },
       {
+        "id": "infra-merge-strategy-20251114",
+        "path": "./memory-bank/Scrum/20251114-discovery-infra-branch/20251114-1055-analysis-merge-strategy-infra-vs-deploy.md",
+        "type": "analysis",
+        "owner": "alex-a",
+        "tags": ["devops", "merge-strategy", "infra"],
+        "summary": "Analysis of merge strategy between infra and deploy branches, with options, risks, and recommended approach."
+      },
+      {
+        "id": "infra-defis-deploy-progress-20251114",
+        "path": "./memory-bank/Scrum/20251114-discovery-infra-branch/20251114-1230-report-infra-defis-deploy-progress.md",
+        "type": "progress-log",
+        "owner": "alex-a",
+        "tags": ["devops", "merge", "progress-log"],
+        "summary": "Practical progress log for the infra.defis.deploy branch, capturing conflicts, resolutions, and resulting state."
+      },
+      {
         "id": "billing-yury-20251115",
         "path": "./memory-bank/Scrum/20251115-billing-Yury/20251115-1115-gem2.5p-help-with-Billing-Reporting-Results-STAR-Yury.md",
         "type": "billing-report",
         "owner": "alex-a",
         "tags": ["reporting", "billing", "client-management"],
         "summary": "Value-driven report for Yury covering work from 25.10.2025 to 15.11.2025, including infra/demos and negotiation context."
+      },
+      {
+        "id": "billing-yury-strategy-v4-20251115",
+        "path": "./memory-bank/Scrum/20251115-billing-Yury/20251115-1344-gpt5p-msg6-billing-Yury.md",
+        "type": "strategy",
+        "owner": "alex-a",
+        "tags": ["billing", "negotiation", "scope-management"],
+        "summary": "Consolidated Version 4 strategy message for Yury, framing blocks-of-hours model, epics map, and negotiation stance."
       },
       {
         "id": "context-snapshot-week47-20251117",

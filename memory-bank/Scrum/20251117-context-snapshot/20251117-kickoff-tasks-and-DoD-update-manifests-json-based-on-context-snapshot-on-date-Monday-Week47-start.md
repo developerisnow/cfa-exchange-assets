@@ -1,13 +1,13 @@
 ---
 created: 2025-11-17 13:32
-updated: 2025-11-17 13:32
+updated: 2025-11-17 15:12
 type: planning
 sphere: project
 topic: manifests-update
 author: Alex (co-3c63)
 agentID: co-019a915c-3c63-7311-b21c-af448053d646
 partAgentID: [co-3c63]
-version: 0.1.0
+version: 0.1.1
 tags: [manifests, DoD, context-snapshot, SSOT]
 prompt: "Определить DoD и чек-листы для обновления *.manifest.json на основе контекстного слепка на дату 2025-11-17 (Week47 start), с привязкой к scripts/*.sh."
 ---
@@ -32,35 +32,35 @@ What you asked for (часть 2 — manifests):
 
 ## 1. Definition of Done (DoD) — Manifest Refresh Pass
 
-- [ ] `project.manifest.json`:
-  - [ ] `project.version` инкрементирован (1.2.0 → 1.2.1 или 1.3.0 в зависимости от масштабности правок).
-  - [ ] `project.updated` обновлён на актуальную дату/время (2025-11-17, +03:00).
-  - [ ] Блок `environments.servers` дополнен сервером `uk1` с кратким описанием.
+- [x] `project.manifest.json`:
+  - [x] `project.version` инкрементирован (1.2.0 → 1.2.1 или 1.3.0 в зависимости от масштабности правок).
+  - [x] `project.updated` обновлён на актуальную дату/время (2025-11-17, +03:00).
+  - [x] Блок `environments.servers` дополнен сервером `uk1` с кратким описанием.
   - [ ] При необходимости уточнены `goals` (связь с Epics/Features/Stories по KYC/Agentification).
-  - [ ] После всех правок запущен `scripts/update-checksums.sh` и checksums в `indices[*].checksum` обновлены.
+  - [x] После всех правок запущен `scripts/update-checksums.sh` и checksums в `indices[*].checksum` обновлены.
 
-- [ ] `manifests/docs.manifest.json`:
-  - [ ] `meta.version` инкрементирована (1.1.0 → 1.2.0), `meta.updated` = 2025-11-17T…+03:00.
-  - [ ] Добавлен документ/пакет `infra-discovery-20251114` c ссылкой на `memory-bank/Scrum/20251114-discovery-infra-branch/*` и резюме.
-  - [ ] Добавлен документ/пакет `billing-yury-20251115` c ссылкой на `memory-bank/Scrum/20251115-billing-Yury/*` и резюме.
-  - [ ] Добавлен документ `context-snapshot-week47` с путём на `memory-bank/Scrum/20251117-context-snapshot/20251117-context-snapshot-on-date-Monday-Week47-start.md`.
+- [x] `manifests/docs.manifest.json`:
+  - [x] `meta.version` инкрементирована (1.1.0 → 1.2.0), `meta.updated` = 2025-11-17T…+03:00.
+  - [x] Добавлен документ/пакет `infra-discovery-20251114` c ссылкой на `memory-bank/Scrum/20251114-discovery-infra-branch/*` и резюме.
+  - [x] Добавлен документ/пакет `billing-yury-20251115` c ссылкой на `memory-bank/Scrum/20251115-billing-Yury/*` и резюме.
+  - [x] Добавлен документ `context-snapshot-week47` с путём на `memory-bank/Scrum/20251117-context-snapshot/20251117-context-snapshot-on-date-Monday-Week47-start.md`.
 
-- [ ] `manifests/repositories.manifest.json`:
-  - [ ] `meta.version` инкрементирована, `meta.updated` = 2025-11-17T…+03:00.
-  - [ ] Добавлен репозиторий `sdd-shotgun-pro` в соответствии с `project.manifest.git.submodules`:
+- [x] `manifests/repositories.manifest.json`:
+  - [x] `meta.version` инкрементирована, `meta.updated` = 2025-11-17T…+03:00.
+  - [x] Добавлен репозиторий `sdd-shotgun-pro` в соответствии с `project.manifest.git.submodules`:
     - `path`: `./repositories/ai/SDD-shotgun-pro`
     - `remotes.origin`: `git@github.com:developerisnow/SDD-shotgun-pro.git`
     - `role`: AI-инструмент для C4/репосканов.
     - `submodule`: true.
 
-- [ ] `manifests/domains.manifest.json`:
-  - [ ] `meta.version` инкрементирована, `meta.updated` = 2025-11-17T…+03:00.
-  - [ ] Для домена `exchange` статус обновлён с `planned` на `in-progress` (учитывая объём работ в ветке `infra` и `infra.defis.deploy`).
-  - [ ] При необходимости добавлена ссылка на infra-discovery pack как `critical_docs` для `exchange`.
+- [x] `manifests/domains.manifest.json`:
+  - [x] `meta.version` инкрементирована, `meta.updated` = 2025-11-17T…+03:00.
+  - [x] Для домена `exchange` статус обновлён с `planned` на `in-progress` (учитывая объём работ в ветке `infra` и `infra.defis.deploy`).
+  - [x] При необходимости добавлена ссылка на infra-discovery pack как `critical_docs` для `exchange`.
 
-- [ ] `manifests/workflow.manifest.json`:
-  - [ ] `meta.version` инкрементирована (1.0.0 → 1.1.0), `meta.updated` = 2025-11-17T…+03:00.
-  - [ ] Добавлен раздел `git_flow`, описывающий:
+- [x] `manifests/workflow.manifest.json`:
+  - [x] `meta.version` инкрементирована (1.0.0 → 1.1.0), `meta.updated` = 2025-11-17T…+03:00.
+  - [x] Добавлен раздел `git_flow`, описывающий:
     - ветки `main`/`develop`/`tasks` и их роли;
     - практику feature-branch-per-task + MR → `develop`;
     - связь с agentification (задачи в `.md` в ветке/папке `tasks`).
@@ -74,10 +74,10 @@ What you asked for (часть 2 — manifests):
     - `memory-bank/Scrum/` подкаталогов с явно высокой ценностью (`20251114-*`, `20251115-*`, `20251117-*`).
   - [ ] `meta.version`/`meta.updated` обновлены, если структура расширялась.
 
-- [ ] Валидация/линт:
-  - [ ] `scripts/validate-manifests.sh` возвращает 0.
-  - [ ] `scripts/lint-manifests.sh` возвращает 0.
-  - [ ] `scripts/update-checksums.sh` отработал без ошибок.
+- [x] Валидация/линт:
+  - [x] `scripts/validate-manifests.sh` возвращает 0.
+  - [x] `scripts/lint-manifests.sh` возвращает 0.
+  - [x] `scripts/update-checksums.sh` отработал без ошибок.
 
 ## 2. Tasks Breakdown (для агента/человека, кто правит)
 
@@ -124,8 +124,8 @@ What you asked for (часть 2 — manifests):
 ## 4. Next Actions (для этой сессии)
 
 - [x] Заполнить этот файл (DoD/Tasks) и контекстный слепок.
-- [ ] Применить правки к *.manifest.json согласно плану.
-- [ ] Прогнать валидацию/линты/обновление checksums.
-- [ ] Сделать коммит в соответствии с правилами AGENTS.md.
+- [x] Применить правки к *.manifest.json согласно плану.
+- [x] Прогнать валидацию/линты/обновление checksums.
+- [x] Сделать коммит в соответствии с правилами AGENTS.md.
 
 Этот документ — точка входа для любых последующих апдейтов manifests: новые агенты могут свериться с DoD, не перечитывая весь Scrum-лог.
