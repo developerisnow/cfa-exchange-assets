@@ -52,7 +52,7 @@ flowchart TD
     A[Prep] --> B[Create branch infra.defis.deploy]
     B --> C[Merge origin/deploy --no-commit]
     C --> D{Conflicts buckets}
-    D -->|services| E[Resolve .NET services (api-gateway, compliance,...)]
+    D -->|services| E[Resolve .NET services api-gateway, compliance,...]
     D -->|packages| F[Align contracts/domain DTO]
     D -->|ops/docs| G[Keep infra versions]
     E --> H[dotnet test + npm test]

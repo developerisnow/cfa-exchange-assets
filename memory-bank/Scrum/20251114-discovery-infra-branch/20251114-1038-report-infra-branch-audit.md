@@ -54,15 +54,15 @@ gantt
 ```
 
 ### 2. Scope of Changes vs `main`
-| Workstream | Примеры файлов | Объём diff | Комментарий |
-| --- | --- | --- | --- |
-| CI/CD pipeline | `.gitlab-ci.yml`, `audit/09_Artifacts/ci/*` | 600+ LOC | Введены стадии infra/build/test/deploy, reusable templates, Kaniko TODO упомянут но пока Docker dind. |
-| GitOps & Terraform | `ops/gitops/gitlab-agent/*`, `ops/infra/timeweb/*`, `tools/timeweb/*` | 30+ файлов | Полная документация и Helm/terraform scaffold под Timeweb Cloud + GitLab Agent. |
-| Observability | `ops/infra/prometheus.yml`, `ops/infra/otel-collector-config.yaml`, `ops/infra/grafana-dashboards*.json` | 6 артефактов | Настроен OTLP pipeline, prebuilt dashboards. |
-| Domain contracts | `packages/contracts/asyncapi.yaml`, `packages/domain/*` | 200+ сообщений/DTO | AsyncAPI для Kafka + обновлённые DTO (order, issuance, compliance). |
-| .NET services | `services/compliance/Program.cs`, `services/settlement/Program.cs`, `services/registry/...` | 30+ файлов | Массовое добавление OpenTelemetry, MassTransit, health/rate-limiters. |
-| Audit & Runbooks | `audit/00_Executive_Summary.md` … `08_Runbooks.md` | 9 файлов (≈60 страниц) | Private отчёт по CI/K8s состоянию с рекомендациями. |
-| Testing | `tests/e2e/tests/*.spec.ts`, `tests/k6/*` | 5 новых spec, 2 k6 скрипта | Journey-based playwright, k6 smoke.
+| Workstream         | Примеры файлов                                                                                           | Объём diff                 | Комментарий                                                                                           |
+| ------------------ | -------------------------------------------------------------------------------------------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------- |
+| CI/CD pipeline     | `.gitlab-ci.yml`, `audit/09_Artifacts/ci/*`                                                              | 600+ LOC                   | Введены стадии infra/build/test/deploy, reusable templates, Kaniko TODO упомянут но пока Docker dind. |
+| GitOps & Terraform | `ops/gitops/gitlab-agent/*`, `ops/infra/timeweb/*`, `tools/timeweb/*`                                    | 30+ файлов                 | Полная документация и Helm/terraform scaffold под Timeweb Cloud + GitLab Agent.                       |
+| Observability      | `ops/infra/prometheus.yml`, `ops/infra/otel-collector-config.yaml`, `ops/infra/grafana-dashboards*.json` | 6 артефактов               | Настроен OTLP pipeline, prebuilt dashboards.                                                          |
+| Domain contracts   | `packages/contracts/asyncapi.yaml`, `packages/domain/*`                                                  | 200+ сообщений/DTO         | AsyncAPI для Kafka + обновлённые DTO (order, issuance, compliance).                                   |
+| .NET services      | `services/compliance/Program.cs`, `services/settlement/Program.cs`, `services/registry/...`              | 30+ файлов                 | Массовое добавление OpenTelemetry, MassTransit, health/rate-limiters.                                 |
+| Audit & Runbooks   | `audit/00_Executive_Summary.md` … `08_Runbooks.md`                                                       | 9 файлов (≈60 страниц)     | Private отчёт по CI/K8s состоянию с рекомендациями.                                                   |
+| Testing            | `tests/e2e/tests/*.spec.ts`, `tests/k6/*`                                                                | 5 новых spec, 2 k6 скрипта | Journey-based playwright, k6 smoke.                                                                   |
 
 ### 3. Quality & Effort Evaluation
 | Область | Наблюдения | Экспертность | Effort (часы) |
