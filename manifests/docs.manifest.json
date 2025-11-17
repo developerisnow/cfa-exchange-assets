@@ -2,8 +2,8 @@
     "id": "docs",
     "description": "Catalog of critical project documents.",
     "meta": {
-      "version": "1.1.0",
-      "updated": "2025-11-10T19:04:00+03:00",
+      "version": "1.2.0",
+      "updated": "2025-11-17T13:40:00+03:00",
       "edited_by": ["co-76ca"]
     },
     "documents": [
@@ -38,6 +38,30 @@
         "owner": "boris-m",
         "tags": ["competitor", "atomyze"],
         "summary": "Official book from Atomyze, another key competitor."
+      },
+      {
+        "id": "infra-discovery-20251114",
+        "path": "./memory-bank/Scrum/20251114-discovery-infra-branch/20251114-1038-report-infra-branch-audit.md",
+        "type": "analysis-pack",
+        "owner": "alex-a",
+        "tags": ["devops", "infra", "git-audit"],
+        "summary": "Infra branch audit and timeline for ois-cfa, including scope, cadence, risks, and merge recommendations (infra vs deploy)."
+      },
+      {
+        "id": "billing-yury-20251115",
+        "path": "./memory-bank/Scrum/20251115-billing-Yury/20251115-1115-gem2.5p-help-with-Billing-Reporting-Results-STAR-Yury.md",
+        "type": "billing-report",
+        "owner": "alex-a",
+        "tags": ["reporting", "billing", "client-management"],
+        "summary": "Value-driven report for Yury covering work from 25.10.2025 to 15.11.2025, including infra/demos and negotiation context."
+      },
+      {
+        "id": "context-snapshot-week47-20251117",
+        "path": "./memory-bank/Scrum/20251117-context-snapshot/20251117-context-snapshot-on-date-Monday-Week47-start.md",
+        "type": "context-snapshot",
+        "owner": "alex-a",
+        "tags": ["context-snapshot", "week47", "onboarding"],
+        "summary": "Week47 context snapshot for new agents: people/domains, repositories/branches, environments, infra and billing state, and manifest gaps."
       }
     ]
   }

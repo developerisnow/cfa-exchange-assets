@@ -2,8 +2,8 @@
   "id": "repositories",
   "description": "Code repositories relevant to the project.",
   "meta": {
-    "version": "1.1.0",
-    "updated": "2025-11-10T19:04:00+03:00",
+    "version": "1.2.0",
+    "updated": "2025-11-17T13:40:00+03:00",
     "edited_by": [
       "co-76ca"
     ]
@@ -41,6 +41,17 @@
       },
       "role": "Node.js Exchange (Velvet)",
       "notes": "Legacy 2017–2018 codebase; serves as reference for Node.js exchange functionality.",
+      "default_branch": "main",
+      "submodule": true
+    },
+    {
+      "id": "sdd-shotgun-pro",
+      "path": "./repositories/ai/SDD-shotgun-pro",
+      "remotes": {
+        "origin": "git@github.com:developerisnow/SDD-shotgun-pro.git"
+      },
+      "role": "AI tooling for structured reposcan and C4/SDD extraction.",
+      "notes": "Used to generate C4 and repository structure reports for ois-cfa (see 20251111 C4 reposcan artifacts).",
       "default_branch": "main",
       "submodule": true
     }

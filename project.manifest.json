@@ -4,8 +4,8 @@
     "id": "prj_Cifra-rwa-exachange-assets",
     "name": "Cifra RWA Exchange Assets",
     "description": "Root project manifest (SSOT) for agents and operators.",
-    "version": "1.2.0",
-    "updated": "2025-11-10T19:40:00+03:00",
+    "version": "1.2.1",
+    "updated": "2025-11-17T13:40:00+03:00",
     "status": "active"
   },
   "goals": [
@@ -58,6 +58,11 @@
         "id": "AVA1",
         "purpose": "demos",
         "notes": "Hosts OSCVA and Velvet demo services."
+      },
+      {
+        "id": "uk1",
+        "purpose": "interim demo host",
+        "notes": "Temporary demo environment where the OIS-CFA stack was successfully deployed with HTTPS/SMTP during November 2025 while CFA1 issues were investigated."
       }
     ]
   },
@@ -71,13 +76,13 @@
     {
       "id": "repositories",
       "path": "./manifests/repositories.manifest.json",
-      "checksum": "2cd229a431f244b9f66fd60d7baad47a6f687a2dc7cdca56ce3d9f429aed8492",
+      "checksum": "2afe34afb50293a6c03839fe889ecf862b5c00d76d99e7465b37f789f5125ab1",
       "description": "All code repositories and roles."
     },
     {
       "id": "domains",
       "path": "./manifests/domains.manifest.json",
-      "checksum": "f785757259983a8f61a0c5864129927068172edba87f37bc0f50a23f3474a5fd",
+      "checksum": "28201220de91f53f668d07afa5d243437866da195e091e394859cd425e02e58f",
       "description": "Business domains and ownership."
     },
     {
@@ -89,7 +94,7 @@
     {
       "id": "docs",
       "path": "./manifests/docs.manifest.json",
-      "checksum": "09d069a46d41b4610fe19595522e0a2c737c7dace3547d16eadc1c83d027eef8",
+      "checksum": "3b5464c358633c9252471cb38a47ff87c6401fccfd96ed2c7a7a890f2bea220d",
       "description": "Critical documents and research."
     },
     {
@@ -101,7 +106,7 @@
     {
       "id": "workflow",
       "path": "./manifests/workflow.manifest.json",
-      "checksum": "78e4b105085c3f5e4450e930670136e29e71dd15be2afdce235561e666f68b1f",
+      "checksum": "38d08c4fdb49a4033baea678d93c0027831d29a3bdb08fc1e666a9f6468aea8f",
       "description": "Operational workflow, tools, servers, and policies."
     }
   ]

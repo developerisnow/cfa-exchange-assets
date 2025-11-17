@@ -2,8 +2,8 @@
     "id": "domains",
     "description": "Core business domains of the RWA platform.",
     "meta": {
-      "version": "1.1.0",
-      "updated": "2025-11-10T19:04:00+03:00",
+      "version": "1.2.0",
+      "updated": "2025-11-17T13:40:00+03:00",
       "edited_by": ["co-76ca"]
     },
     "domains": [
@@ -29,10 +29,13 @@
         "id": "exchange",
         "description": "Core trading functionality: order book, matching engine, market data. Initially focused on primary issuance.",
         "owner": "alex-a",
-        "status": "planned",
+        "status": "in-progress",
         "capabilities": ["orderbook", "matching", "market-data"],
         "repos": ["ois-cfa", "velvet", "main-docs"],
-        "critical_docs": ["docs-cfa-rwa/architecture/10-HighLevel-Architecture.md"]
+        "critical_docs": [
+          "docs-cfa-rwa/architecture/10-HighLevel-Architecture.md",
+          "memory-bank/Scrum/20251114-discovery-infra-branch/20251114-1038-report-infra-branch-audit.md"
+        ]
       },
       {
         "id": "settlement",

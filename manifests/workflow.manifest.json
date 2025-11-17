@@ -2,8 +2,8 @@
   "id": "workflow",
   "description": "Workplace, orchestration, tools, and operational workflow for AI-assisted development and research.",
   "meta": {
-    "version": "1.0.0",
-    "updated": "2025-11-10T19:25:00+03:00",
+    "version": "1.1.0",
+    "updated": "2025-11-17T13:40:00+03:00",
     "edited_by": ["co-76ca"]
   },
   "workplaces": {
@@ -95,6 +95,37 @@
     "manifests": {
       "role": "SSOT for agents; indices drive navigation",
       "update_cadence": "incremental, checksum-updated"
+    }
+  },
+  "git_flow": {
+    "branches": {
+      "main": {
+        "role": "release",
+        "notes": "Stable branch for demos and tagged releases."
+      },
+      "develop": {
+        "role": "integration",
+        "deploys_to": ["dev", "pre-prod"],
+        "notes": "Target branch for feature merges; auto-deployed to dev/pre-prod environments."
+      },
+      "tasks": {
+        "role": "backlog-md",
+        "notes": "Markdown tasks with full context and DoD for agents; feature branches are cut from here or from develop depending on task."
+      }
+    },
+    "practices": [
+      "Each task is described in a .md file (with context, DoD, and links) under the tasks branch or directory.",
+      "For each task, create a dedicated feature branch derived from develop (or from the indicated base branch).",
+      "Feature branches must be covered by tests and basic linting before opening a merge request.",
+      "Merge to develop only via Merge Request with review and passing CI.",
+      "Develop is the only branch auto-deployed to dev/pre-prod; main is updated from develop after release review."
+    ],
+    "agent_integration": {
+      "roles": [
+        "Claude Code / Codex CLI / Gemini CLI act as coding agents working inside feature branches.",
+        "Agents must respect AGENTS.md: no direct pushes to main/develop, only MR-based changes.",
+        "Agent-produced work is always reviewed and, when needed, edited by a human owner before merge."
+      ]
     }
   },
   "git_policy": {
