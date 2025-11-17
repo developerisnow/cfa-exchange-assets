@@ -1,0 +1,4 @@
+Date	TxId	HoursPaid	Rate	Amount	Accumulated	PeriodCovered	MainOutcome
+2025-10-25	sberbank-50kRUB	16.7	40	667	667	2025-10-25..2025-10-31	Research, competitors map, initial architecture draft (C4, domain model, MVP roadmap)
+2025-11-01	trx-23f35b6...b83f	50.0	40	2000	2667	2025-11-01..2025-11-10	Setup OIS stack, CI/CD/GitOps baseline, first demo readiness, KYC flow scoping
+2025-11-11	internal-overrun	25.0	40	0	2667	2025-11-11..2025-11-15	Infra crisis management (cfa1/uk1), Keycloak/NextAuth, infra.defis.deploy merge-strategy, infra audit
