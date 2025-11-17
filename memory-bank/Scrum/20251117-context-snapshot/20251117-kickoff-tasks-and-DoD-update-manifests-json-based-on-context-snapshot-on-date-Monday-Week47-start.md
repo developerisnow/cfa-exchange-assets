@@ -4,9 +4,9 @@ updated: 2025-11-17 13:32
 type: planning
 sphere: project
 topic: manifests-update
-author: Alex (co-76ca)
-agentID: co-76ca
-partAgentID: [co-76ca]
+author: Alex (co-3c63)
+agentID: co-019a915c-3c63-7311-b21c-af448053d646
+partAgentID: [co-3c63]
 version: 0.1.0
 tags: [manifests, DoD, context-snapshot, SSOT]
 prompt: "Определить DoD и чек-листы для обновления *.manifest.json на основе контекстного слепка на дату 2025-11-17 (Week47 start), с привязкой к scripts/*.sh."
@@ -119,7 +119,7 @@ What you asked for (часть 2 — manifests):
    - `scripts/update-checksums.sh`
 4. Повторно запустить `scripts/validate-manifests.sh` для контроля.
 5. Зафиксировать изменения одним коммитом в стиле:
-   - `docs(manifests): [co-76ca] - Week47 context snapshot & manifests refresh`
+   - `docs(manifests): [co-3c63] - Week47 context snapshot & manifests refresh`
 
 ## 4. Next Actions (для этой сессии)
 

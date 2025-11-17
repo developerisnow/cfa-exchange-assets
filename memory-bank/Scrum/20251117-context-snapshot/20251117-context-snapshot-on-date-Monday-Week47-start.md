@@ -4,9 +4,9 @@ updated: 2025-11-17 13:31
 type: analysis
 sphere: project
 topic: context-snapshot
-author: Alex (co-76ca)
-agentID: co-76ca
-partAgentID: [co-76ca]
+author: Alex (co-3c63)
+agentID: co-019a915c-3c63-7311-b21c-af448053d646
+partAgentID: [co-3c63]
 version: 0.1.0
 tags: [context-snapshot, week47, manifests, onboarding]
 prompt: "Собрать цельный слепок контекста проекта и состояния монорепо/веток на начало недели 47 (2025-11-17) для новых агентов, опираясь на AGENTS.md, *.manifest.json и свежие Scrum-артефакты."
@@ -175,4 +175,4 @@ What you asked for (часть 1 — контекст):
    - `scripts/validate-manifests.sh`,
    - `scripts/lint-manifests.sh`,
    - `scripts/update-checksums.sh`.
-3. Зафиксировать результат в Git с понятным коммитом вида `docs(manifests): [co-76ca] - Week47 context snapshot & manifests refresh`.
+3. Зафиксировать результат в Git с понятным коммитом вида `docs(manifests): [co-3c63] - Week47 context snapshot & manifests refresh`.
