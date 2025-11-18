@@ -1,0 +1,4371 @@
+Project Path: reposcan
+
+Source Tree:
+
+```txt
+reposcan
+├── 20251006-1213-hypetrain-backend.reposcan.shtgn.json
+└── 20251111-1325-gpt5p-ois-cfa.shtgn.reposcan.json
+
+```
+
+`reposcan/20251006-1213-hypetrain-backend.reposcan.shtgn.json`:
+
+```json
+{
+    "contexts": {
+        "HypeTrain": {
+            "description": "The HypeTrain Platform Backend is a microservices-based system designed for influencer campaign management, social media analytics, and outreach. It follows an 'Orbital Monolith' pattern, with a core API service (`hypetrain-api`) handling main business logic, and several specialized satellite microservices for tasks like storage, search, billing, and notifications. Communication is handled both synchronously via HTTP/REST and asynchronously via NATS JetStream.",
+            "c4_level": "Context"
+        }
+    },
+    "containers": {
+        "hypetrain-api": {
+            "name": "hypetrain-api",
+            "description": "The core API service and central monolith. Acts as an API gateway and handles main business logic including authentication, user/workspace management, and campaign orchestration.",
+            "type": "NestJS Application",
+            "c4_level": "Container",
+            "api_surface": {
+                "description": "The API surface of the hypetrain-api container, inferred from the CQRS commands and queries in the application layer. Commands typically map to POST/PUT/PATCH/DELETE endpoints, while Queries map to GET endpoints.",
+                "c4_level": "Component",
+                "domains": {
+                    "Authentication": {
+                        "description": "Handles user sign-up, sign-in, and session management.",
+                        "commands": [
+                            {
+                                "name": "SignInCommand",
+                                "description": "Authenticates a user with email and password.",
+                                "payload": "SignInRequestDto",
+                                "handler": "SignInHandler"
+                            },
+                            {
+                                "name": "SignUpCommand",
+                                "description": "Registers a new user.",
+                                "payload": "CreateUserDto",
+                                "handler": "SignUpHandler"
+                            },
+                            {
+                                "name": "RefreshTokensCommand",
+                                "description": "Issues a new access token using a refresh token.",
+                                "payload": "RefreshTokenPayload",
+                                "handler": "RefreshTokensHandler"
+                            }
+                        ],
+                        "queries": []
+                    },
+                    "User": {
+                        "description": "Manages user profiles and data.",
+                        "commands": [],
+                        "queries": [
+                            {
+                                "name": "GetUserProfileQuery",
+                                "description": "Retrieves the profile of the currently authenticated user.",
+                                "payload": "null",
+                                "response": "GetUserProfileResponseDto",
+                                "handler": "GetUserProfileHandler"
+                            }
+                        ]
+                    },
+                    "Workspace": {
+                        "description": "Manages workspaces, which are the primary multi-tenancy entity.",
+                        "commands": [
+                            {
+                                "name": "CreateCollaborativeWorkspaceCommand",
+                                "description": "Creates a new workspace for a user.",
+                                "payload": "CreateCollaborativeWorkspaceDto",
+                                "handler": "CreateCollaborativeWorkspaceHandler"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "GetWorkspaceInfoQuery",
+                                "description": "Retrieves information about a specific workspace.",
+                                "payload": "WorkspaceInfoRequestDto",
+                                "response": "WorkspaceInfoResponseDto",
+                                "handler": "GetWorkspaceInfoHandler",
+                                "permissions": [
+                                    "GetWorkspaceInfo"
+                                ]
+                            }
+                        ]
+                    },
+                    "Campaign": {
+                        "description": "Manages marketing campaigns and deals.",
+                        "commands": [
+                            {
+                                "name": "CreateCampaignCommand",
+                                "description": "Creates a new marketing campaign and schedules the creation of associated deals.",
+                                "payload": "CreateCampaignDto",
+                                "handler": "CreateCampaignHandler",
+                                "permissions": [
+                                    "CreateCampaign",
+                                    "CreateAndAssignCampaign"
+                                ]
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "GetCampaignByIdQuery",
+                                "description": "Retrieves detailed information about a single campaign.",
+                                "payload": "CampaignInfoRequestDto",
+                                "response": "CampaignFullInfoDto",
+                                "handler": "GetCampaignByIdHandler",
+                                "permissions": [
+                                    "GetWorkspaceCampaignById",
+                                    "GetAssignedCampaignById"
+                                ]
+                            }
+                        ]
+                    },
+                    "Communication": {
+                        "description": "Handles messaging within campaign deals.",
+                        "commands": [
+                            {
+                                "name": "SendMessageCommand",
+                                "description": "Sends a message within a deal chat.",
+                                "payload": "SendMessageRequestDto",
+                                "handler": "SendMessageHandler",
+                                "permissions": [
+                                    "GetWorkspaceCampaignById",
+                                    "GetAssignedCampaignById"
+                                ]
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "GetMessagesByChatIdQuery",
+                                "description": "Retrieves all messages for a given deal chat.",
+                                "payload": "GetMessagesByChatIdRequestDto",
+                                "handler": "GetMessagesByChatIdHandler",
+                                "permissions": [
+                                    "GetWorkspaceCampaignById",
+                                    "GetAssignedCampaignById"
+                                ]
+                            }
+                        ]
+                    },
+                    "Subscription": {
+                        "description": "Manages workspace subscriptions and billing.",
+                        "commands": [
+                            {
+                                "name": "CreateCheckoutSessionCommand",
+                                "description": "Creates a Stripe checkout session for a new subscription.",
+                                "payload": "CreateCheckoutSessionRequestDto",
+                                "handler": "CreateCheckoutSessionHandler",
+                                "permissions": [
+                                    "CreateSubscription"
+                                ]
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "GetSubscriptionQuery",
+                                "description": "Retrieves the current subscription details for the workspace.",
+                                "payload": "Record<string, never>",
+                                "response": "SubscriptionInfoResponseDto",
+                                "handler": "GetSubscriptionHandler",
+                                "permissions": [
+                                    "GetFullSubscriptionInfo"
+                                ]
+                            }
+                        ]
+                    },
+                    "Payment": {
+                        "description": "Manages outgoing payments to influencers.",
+                        "commands": [
+                            {
+                                "name": "ExecutePaymentsCommand",
+                                "description": "Executes a batch of payments to influencers.",
+                                "payload": "ExecutePaymentsRequestDto",
+                                "handler": "ExecutePaymentsHandler",
+                                "permissions": [
+                                    "ManagePayments"
+                                ]
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "GetPaymentsListQuery",
+                                "description": "Retrieves a list of payments with filtering and sorting.",
+                                "payload": "PaymentsFilteringRequestDto",
+                                "handler": "GetPaymentsListHandler",
+                                "permissions": [
+                                    "ManagePayments"
+                                ]
+                            }
+                        ]
+                    },
+                    "AI Bridge": {
+                        "description": "Interfaces with the external AI service for influencer selection.",
+                        "commands": [
+                            {
+                                "name": "CreateAISelectionCommand",
+                                "description": "Initiates a new AI-powered influencer selection task.",
+                                "payload": "CreateAISelectionDto",
+                                "handler": "CreateAISelectionHandler"
+                            }
+                        ],
+                        "queries": [
+                            {
+                                "name": "GetAISelectionsQuery",
+                                "description": "Retrieves a paginated list of AI selections for the workspace.",
+                                "payload": "{ page: number; limit: number; includeDeleted: boolean; }",
+                                "handler": "GetAISelectionsHandler"
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "hypetrain-billing-service": {
+            "name": "hypetrain-billing-service",
+            "description": "Handles subscriptions and payments, integrating with Stripe. Manages subscription lifecycle, quota tracking, and payment processing.",
+            "type": "NestJS Application",
+            "c4_level": "Container"
+        },
+        "hypetrain-contracting-service": {
+            "name": "hypetrain-contracting-service",
+            "description": "Manages contract generation and e-signatures, integrating with PandaDoc.",
+            "type": "NestJS Application",
+            "c4_level": "Container"
+        },
+        "hypetrain-exploration-service": {
+            "name": "hypetrain-exploration-service",
+            "description": "Responsible for influencer discovery and data fetching from external providers like IQData and social media APIs.",
+            "type": "NestJS Application",
+            "c4_level": "Container"
+        },
+        "hypetrain-external-api-service": {
+            "name": "hypetrain-external-api-service",
+            "description": "Acts as a proxy for third-party integrations, centralizing external dependencies.",
+            "type": "NestJS Application",
+            "c4_level": "Container"
+        },
+        "hypetrain-message-processing-service": {
+            "name": "hypetrain-message-processing-service",
+            "description": "Manages email outreach, communication templates, bulk sending, and tracking. Integrates with external email engines like Unipile.",
+            "type": "NestJS Application",
+            "c4_level": "Container"
+        },
+        "hypetrain-migration-runner": {
+            "name": "hypetrain-migration-runner",
+            "description": "A containerized job responsible for running database migrations against the various PostgreSQL databases.",
+            "type": "Job/Task",
+            "c4_level": "Container"
+        },
+        "hypetrain-notification-service": {
+            "name": "hypetrain-notification-service",
+            "description": "Manages and delivers real-time, in-app notifications to users via WebSockets.",
+            "type": "NestJS Application",
+            "c4_level": "Container"
+        },
+        "hypetrain-scheduler-service": {
+            "name": "hypetrain-scheduler-service",
+            "description": "Handles background jobs and scheduled tasks using BullMQ and Redis.",
+            "type": "NestJS Application",
+            "c4_level": "Container"
+        },
+        "hypetrain-search-service": {
+            "name": "hypetrain-search-service",
+            "description": "Provides platform-wide search functionality by indexing data into Elasticsearch.",
+            "type": "NestJS Application",
+            "c4_level": "Container"
+        },
+        "hypetrain-storage-service": {
+            "name": "hypetrain-storage-service",
+            "description": "Manages file uploads, downloads, and storage, using an S3-compatible object store (Minio).",
+            "type": "NestJS Application",
+            "c4_level": "Container"
+        }
+    },
+    "domain_glossary": {
+        "Orbital Monolith": {
+            "term": "Orbital Monolith",
+            "definition": "An architectural pattern used by HypeTrain, consisting of a large central service (the monolith, `hypetrain-api`) handling core logic, with smaller, specialized satellite microservices orbiting it.",
+            "c4_level": "Context"
+        },
+        "NATS JetStream": {
+            "term": "NATS JetStream",
+            "definition": "The technology used for asynchronous, event-based communication between the microservices in the HypeTrain backend.",
+            "c4_level": "Context"
+        },
+        "Campaign": {
+            "term": "Campaign",
+            "definition": "A top-level entity representing a marketing initiative within a workspace. It contains general information like the brand, product, and default terms, and serves as a container for multiple Campaign Deals.",
+            "c4_level": "Component"
+        },
+        "Campaign Deal": {
+            "term": "Campaign Deal",
+            "definition": "A specific agreement or negotiation with a single influencer (SMA) as part of a larger Campaign. It has its own lifecycle, terms, requirements, and contract.",
+            "c4_level": "Component"
+        }
+    },
+    "deployment_topology": {
+        "gcp": {
+            "name": "Google Cloud Platform",
+            "description": "The primary cloud provider. Application services are deployed on Cloud Run, while infrastructure components like databases, NATS, and Redis are hosted on a GKE (Google Kubernetes Engine) cluster. Cloud SQL is used for managed PostgreSQL.",
+            "c4_level": "Context"
+        },
+        "kubernetes_platform": {
+            "name": "Kubernetes Platform (via Helm)",
+            "description": "Applications are deployed to a Kubernetes cluster using a standardized Helm chart. These templates define a common set of Kubernetes resources, allowing for consistent deployment configurations across different services.",
+            "c4_level": "Container",
+            "resources": {
+                "Workloads": {
+                    "Deployment": "Standard mechanism for deploying stateless applications. The template includes configuration for replicas, update strategy, probes (liveness, readiness, startup), environment variables, and resource limits.",
+                    "StatefulSet": "Available for deploying stateful applications that require stable network identifiers and persistent storage. Includes a template for a corresponding headless service.",
+                    "Job": "Used for running one-off, finite tasks to completion. Multi-job templates are also available.",
+                    "CronJob": "Used for running scheduled, recurring tasks. Multi-cronjob templates are also available."
+                },
+                "Networking": {
+                    "Service": "Exposes applications within the cluster. The default type is `ClusterIP`, with `NodePort` and `ExternalName` also available as options.",
+                    "Ingress": "Manages external access to services, providing HTTP/S routing and TLS termination. Supports single and multi-host configurations.",
+                    "Headless Service": "Used in conjunction with StatefulSets to provide direct network access to each pod."
+                },
+                "Configuration & Storage": {
+                    "ConfigMap": "Manages non-sensitive configuration data for applications. Supports single and multi-resource creation.",
+                    "Secret": "Manages sensitive data like passwords and API keys. Supports single and multi-resource creation.",
+                    "ExternalSecret (AWS)": "Integrates with an external secrets operator (kubernetes-client.io/v1) to sync secrets from AWS Systems Manager into the cluster. This is a Custom Resource.",
+                    "PersistentVolumeClaim": "Allows applications to request persistent storage from the underlying infrastructure."
+                },
+                "Autoscaling": {
+                    "HorizontalPodAutoscaler": "Automatically scales the number of pods in a Deployment based on observed metrics."
+                }
+            }
+        }
+    },
+    "data_schema": {
+        "c4_level": "Code",
+        "description": "The PostgreSQL database schema for the HypeTrain API, derived from sequential analysis of all migration files. It defines the core entities, their relationships, and data structures for users, workspaces, campaigns, payments, subscriptions, and other application domains.",
+        "tables": {
+            "users": {
+                "description": "Stores user account information, including authentication details and preferences.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "email",
+                        "type": "varchar(255)",
+                        "unique": true
+                    },
+                    {
+                        "name": "hashed_password",
+                        "type": "varchar(255)",
+                        "nullable": true
+                    },
+                    {
+                        "name": "is_email_verified",
+                        "type": "bool",
+                        "default": "false"
+                    },
+                    {
+                        "name": "email_verification_token",
+                        "type": "varchar(255)",
+                        "nullable": true
+                    },
+                    {
+                        "name": "password_reset_token",
+                        "type": "varchar(255)",
+                        "nullable": true
+                    },
+                    {
+                        "name": "password_reset_token_expired_at",
+                        "type": "timestamptz(0)",
+                        "nullable": true
+                    },
+                    {
+                        "name": "password_changed_at",
+                        "type": "timestamptz(0)",
+                        "nullable": true
+                    },
+                    {
+                        "name": "last_workspace_uuid",
+                        "type": "uuid",
+                        "nullable": true
+                    },
+                    {
+                        "name": "marketing_consent",
+                        "type": "bool",
+                        "nullable": true
+                    },
+                    {
+                        "name": "marketing_consent_date",
+                        "type": "timestamptz(0)",
+                        "nullable": true
+                    },
+                    {
+                        "name": "auth_strategies",
+                        "type": "auth_strategy[]",
+                        "default": "['local']"
+                    },
+                    {
+                        "name": "fingerprints",
+                        "type": "varchar(255)[]",
+                        "default": "[]"
+                    },
+                    {
+                        "name": "business_type",
+                        "type": "workspace_business_type"
+                    },
+                    {
+                        "name": "pricing_type",
+                        "type": "subscription_plan_type",
+                        "default": "'universal'"
+                    },
+                    {
+                        "name": "referrer_workspace_name",
+                        "type": "varchar",
+                        "nullable": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "one_to_many",
+                        "target_table": "refresh_sessions",
+                        "foreign_key": "user_uuid"
+                    },
+                    {
+                        "type": "one_to_many",
+                        "target_table": "persons",
+                        "foreign_key": "user_uuid"
+                    },
+                    {
+                        "type": "one_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "last_workspace_uuid"
+                    }
+                ]
+            },
+            "exploration_requests": {
+                "description": "Logs requests made to the influencer exploration/search service.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "type",
+                        "type": "text"
+                    },
+                    {
+                        "name": "hash",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "request_data",
+                        "type": "jsonb"
+                    },
+                    {
+                        "name": "person_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "platform",
+                        "type": "sma_platform",
+                        "nullable": true
+                    },
+                    {
+                        "name": "total_results",
+                        "type": "int",
+                        "default": "0"
+                    },
+                    {
+                        "name": "workspace_uuid",
+                        "type": "uuid",
+                        "nullable": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "person_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "workspace_uuid"
+                    }
+                ]
+            },
+            "target_audience": {
+                "description": "Defines target audience criteria for campaigns or searches.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "countries",
+                        "type": "text[]"
+                    },
+                    {
+                        "name": "age",
+                        "type": "text"
+                    },
+                    {
+                        "name": "gender",
+                        "type": "text"
+                    }
+                ]
+            },
+            "performance_parameters": {
+                "description": "Stores performance parameters like projected CTR and AR.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "projected_ctr",
+                        "type": "float"
+                    },
+                    {
+                        "name": "projected_ar",
+                        "type": "float"
+                    }
+                ]
+            },
+            "unknown_youtube_smas_lists": {
+                "description": "Stores lists of social media accounts that could not be found during an upload.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "unknown_sources",
+                        "type": "text[]"
+                    },
+                    {
+                        "name": "not_found_handlers",
+                        "type": "jsonb"
+                    }
+                ]
+            },
+            "refresh_sessions": {
+                "description": "Stores refresh tokens for maintaining user sessions.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "hashed_refresh_token",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "expires_in",
+                        "type": "timestamptz(0)"
+                    },
+                    {
+                        "name": "user_agent",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "fingerprint",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "ip",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "user_uuid",
+                        "type": "uuid"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "users",
+                        "foreign_key": "user_uuid"
+                    }
+                ]
+            },
+            "selected_smas": {
+                "description": "A list of social media accounts selected by a user (person).",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "person_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "sma_uuid",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "platform",
+                        "type": "sma_platform"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "person_uuid"
+                    }
+                ]
+            },
+            "organizations": {
+                "description": "Represents a legal or logical grouping of users, now largely superseded by workspaces but still exists.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "name",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "type",
+                        "type": "organization_type_enum",
+                        "default": "'own'"
+                    },
+                    {
+                        "name": "workspace_uuid",
+                        "type": "uuid"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "workspace_uuid"
+                    }
+                ]
+            },
+            "workspaces": {
+                "description": "Core entity for multi-tenancy. A workspace contains users (via persons), campaigns, billing info, etc.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "name",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "handler",
+                        "type": "varchar(255)",
+                        "unique": true
+                    },
+                    {
+                        "name": "billing_provider",
+                        "type": "billing_provider",
+                        "default": "'stripe'"
+                    },
+                    {
+                        "name": "billing_customer_id",
+                        "type": "varchar(255)",
+                        "nullable": true
+                    },
+                    {
+                        "name": "business_type",
+                        "type": "workspace_business_type"
+                    }
+                ]
+            },
+            "workspace_roles": {
+                "description": "Defines roles within a workspace (e.g., admin, member).",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "workspace_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "name",
+                        "type": "role_name"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "workspace_uuid"
+                    }
+                ]
+            },
+            "workspace_rights": {
+                "description": "Defines specific permissions or actions available in the system.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "key",
+                        "type": "varchar(255)",
+                        "unique": true
+                    },
+                    {
+                        "name": "group",
+                        "type": "right_group",
+                        "nullable": true
+                    }
+                ]
+            },
+            "workspace_roles_rights": {
+                "description": "Join table linking roles to their specific rights/permissions.",
+                "columns": [
+                    {
+                        "name": "right_uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "role_uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspace_rights",
+                        "foreign_key": "right_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspace_roles",
+                        "foreign_key": "role_uuid"
+                    }
+                ]
+            },
+            "persons": {
+                "description": "Represents an individual's profile within a workspace, linking a user account to their workspace-specific data.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "full_name",
+                        "type": "varchar(255)",
+                        "nullable": true
+                    },
+                    {
+                        "name": "job_title",
+                        "type": "varchar(255)",
+                        "nullable": true
+                    },
+                    {
+                        "name": "registration_type",
+                        "type": "persons_registration_type_enum",
+                        "default": "'user'"
+                    },
+                    {
+                        "name": "party_type",
+                        "type": "persons_party_type_enum",
+                        "default": "'own'"
+                    },
+                    {
+                        "name": "domain_type",
+                        "type": "persons_domain_type_enum",
+                        "default": "'influencerMarketing'"
+                    },
+                    {
+                        "name": "status",
+                        "type": "persons_status_enum",
+                        "default": "'pending'"
+                    },
+                    {
+                        "name": "user_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "organization_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "workspace_uuid",
+                        "type": "uuid"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "users",
+                        "foreign_key": "user_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "organizations",
+                        "foreign_key": "organization_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "workspace_uuid"
+                    },
+                    {
+                        "type": "many_to_many",
+                        "target_table": "workspace_roles",
+                        "join_table": "person_workspace_roles"
+                    }
+                ]
+            },
+            "person_contacts": {
+                "description": "Stores contact information (e.g., email) for a person.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "handler",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "type",
+                        "type": "person_contacts_type_enum",
+                        "default": "'email'"
+                    },
+                    {
+                        "name": "status",
+                        "type": "person_contacts_status_enum",
+                        "default": "'active'"
+                    },
+                    {
+                        "name": "priority_type",
+                        "type": "person_contacts_priority_type_enum",
+                        "default": "'regular'"
+                    },
+                    {
+                        "name": "person_uuid",
+                        "type": "uuid"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "person_uuid"
+                    }
+                ]
+            },
+            "workspace_invites": {
+                "description": "Stores pending invitations for users to join a workspace.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "user_email",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "is_active",
+                        "type": "boolean",
+                        "default": "true"
+                    },
+                    {
+                        "name": "workspace_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "person_uuid",
+                        "type": "uuid"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "workspace_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "person_uuid"
+                    }
+                ]
+            },
+            "persons_smas": {
+                "description": "Join table linking persons to their associated social media accounts.",
+                "columns": [
+                    {
+                        "name": "person_uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "sma_uuid",
+                        "type": "varchar(255)",
+                        "primary_key": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "person_uuid"
+                    }
+                ]
+            },
+            "campaigns": {
+                "description": "Represents a marketing campaign within a workspace.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "workspace_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "assignee_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "created_by_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "name",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "dates",
+                        "type": "jsonb"
+                    },
+                    {
+                        "name": "platform",
+                        "type": "sma_platform"
+                    },
+                    {
+                        "name": "brand_info",
+                        "type": "jsonb"
+                    },
+                    {
+                        "name": "product_info",
+                        "type": "jsonb"
+                    },
+                    {
+                        "name": "deal_terms",
+                        "type": "jsonb"
+                    },
+                    {
+                        "name": "deal_requirements",
+                        "type": "jsonb"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "workspace_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "assignee_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "created_by_uuid"
+                    }
+                ]
+            },
+            "campaign_deals": {
+                "description": "Represents a specific deal or agreement with an influencer as part of a campaign.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "campaign_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "created_by_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "sma_id",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "terms",
+                        "type": "jsonb",
+                        "nullable": true
+                    },
+                    {
+                        "name": "requirements",
+                        "type": "jsonb",
+                        "nullable": true
+                    },
+                    {
+                        "name": "stages",
+                        "type": "jsonb"
+                    },
+                    {
+                        "name": "status",
+                        "type": "campaign_deal_status_enum",
+                        "default": "'in progress'"
+                    },
+                    {
+                        "name": "deleted_at",
+                        "type": "timestamptz(0)",
+                        "nullable": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "campaigns",
+                        "foreign_key": "campaign_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "created_by_uuid"
+                    },
+                    {
+                        "type": "many_to_many",
+                        "target_table": "persons",
+                        "join_table": "campaign_deals_persons"
+                    }
+                ]
+            },
+            "person_campaign_config": {
+                "description": "Stores person-specific configurations for a given campaign.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "campaign_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "person_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "config",
+                        "type": "jsonb"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "campaigns",
+                        "foreign_key": "campaign_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "person_uuid"
+                    }
+                ]
+            },
+            "campaign_deals_persons": {
+                "description": "Join table linking campaign deals to the persons (influencers) involved.",
+                "columns": [
+                    {
+                        "name": "campaign_deal_uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "person_uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "campaign_deals",
+                        "foreign_key": "campaign_deal_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "person_uuid"
+                    }
+                ]
+            },
+            "person_workspace_config": {
+                "description": "Stores person-specific configurations for a given workspace.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "workspace_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "person_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "config",
+                        "type": "jsonb"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "workspace_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "person_uuid"
+                    }
+                ]
+            },
+            "deal_chats": {
+                "description": "Represents a chat conversation associated with a campaign deal.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "deal_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "subject",
+                        "type": "varchar(255)",
+                        "nullable": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "one_to_one",
+                        "target_table": "campaign_deals",
+                        "foreign_key": "deal_uuid"
+                    }
+                ]
+            },
+            "deal_chat_messages": {
+                "description": "Stores individual messages within a deal chat.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "chat_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "sender_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "subject",
+                        "type": "varchar(255)",
+                        "nullable": true
+                    },
+                    {
+                        "name": "data",
+                        "type": "text",
+                        "nullable": true
+                    },
+                    {
+                        "name": "type",
+                        "type": "deal_chat_message_type_enum",
+                        "default": "'user'"
+                    },
+                    {
+                        "name": "message_provider",
+                        "type": "deal_chat_message_provider_enum",
+                        "nullable": true
+                    },
+                    {
+                        "name": "system_data",
+                        "type": "jsonb",
+                        "nullable": true
+                    },
+                    {
+                        "name": "system_message_type",
+                        "type": "deal_chat_system_message_type_enum",
+                        "nullable": true
+                    },
+                    {
+                        "name": "mass_mailing_uuid",
+                        "type": "uuid",
+                        "nullable": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "deal_chats",
+                        "foreign_key": "chat_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "sender_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "chat_mass_mailing",
+                        "foreign_key": "mass_mailing_uuid"
+                    }
+                ]
+            },
+            "deal_chat_message_recipients": {
+                "description": "Tracks the delivery status of a message for each recipient.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "message_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "person_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "status",
+                        "type": "deal_chat_message_status_enum",
+                        "default": "'sending'"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "deal_chat_messages",
+                        "foreign_key": "message_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "person_uuid"
+                    }
+                ]
+            },
+            "stored_files": {
+                "description": "Stores metadata about files uploaded to object storage.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "temporary",
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "handler",
+                        "type": "stored_file_handler_enum"
+                    },
+                    {
+                        "name": "path",
+                        "type": "text"
+                    },
+                    {
+                        "name": "file_name",
+                        "type": "text"
+                    },
+                    {
+                        "name": "mimetype",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "size",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "uploaded_by_uuid",
+                        "type": "uuid"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "uploaded_by_uuid"
+                    }
+                ]
+            },
+            "deal_chat_message_attachments": {
+                "description": "Join table linking chat messages to their file attachments.",
+                "columns": [
+                    {
+                        "name": "message_uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "file_uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "deal_chat_messages",
+                        "foreign_key": "message_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "stored_files",
+                        "foreign_key": "file_uuid"
+                    }
+                ]
+            },
+            "deal_chat_unread_messages": {
+                "description": "Tracks unread messages for each person in a chat.",
+                "columns": [
+                    {
+                        "name": "message_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "person_uuid",
+                        "type": "uuid"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "deal_chat_messages",
+                        "foreign_key": "message_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "person_uuid"
+                    }
+                ]
+            },
+            "chat_mass_mailing": {
+                "description": "Manages the state of bulk message sending operations.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "state",
+                        "type": "chat_mass_mailing_state_enum"
+                    }
+                ]
+            },
+            "smas_notes": {
+                "description": "Stores notes made by a person about a specific social media account.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "person_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "workspace_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "sma_id",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "note",
+                        "type": "text"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "person_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "workspace_uuid"
+                    }
+                ]
+            },
+            "subscription_plans": {
+                "description": "Defines the available subscription plans and their properties.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "type",
+                        "type": "subscription_plan_type",
+                        "default": "'universal'"
+                    },
+                    {
+                        "name": "name",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "description",
+                        "type": "text",
+                        "nullable": true
+                    },
+                    {
+                        "name": "price",
+                        "type": "int"
+                    },
+                    {
+                        "name": "currency",
+                        "type": "text",
+                        "default": "'USD'"
+                    },
+                    {
+                        "name": "active",
+                        "type": "boolean",
+                        "default": "true"
+                    },
+                    {
+                        "name": "provider",
+                        "type": "billing_provider",
+                        "default": "'stripe'"
+                    },
+                    {
+                        "name": "external_id",
+                        "type": "varchar(255)",
+                        "nullable": true
+                    },
+                    {
+                        "name": "data",
+                        "type": "jsonb",
+                        "nullable": true
+                    },
+                    {
+                        "name": "order",
+                        "type": "integer",
+                        "default": "0"
+                    }
+                ]
+            },
+            "coupons": {
+                "description": "Stores discount coupons for subscriptions.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "code",
+                        "type": "varchar(255)",
+                        "unique": true
+                    },
+                    {
+                        "name": "active",
+                        "type": "boolean",
+                        "default": "true"
+                    },
+                    {
+                        "name": "duration",
+                        "type": "coupon_duration",
+                        "default": "'once'"
+                    },
+                    {
+                        "name": "provider",
+                        "type": "billing_provider",
+                        "default": "'stripe'"
+                    },
+                    {
+                        "name": "external_id",
+                        "type": "varchar(255)",
+                        "nullable": true
+                    }
+                ]
+            },
+            "subscriptions": {
+                "description": "Represents a workspace's subscription to a plan.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "ended_at",
+                        "type": "timestamptz(0)",
+                        "nullable": true
+                    },
+                    {
+                        "name": "current_period_start",
+                        "type": "timestamptz(0)"
+                    },
+                    {
+                        "name": "current_period_end",
+                        "type": "timestamptz(0)"
+                    },
+                    {
+                        "name": "workspace_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "plan_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "seats",
+                        "type": "int",
+                        "default": "0"
+                    },
+                    {
+                        "name": "used_seats",
+                        "type": "int",
+                        "default": "0"
+                    },
+                    {
+                        "name": "coupon_uuid",
+                        "type": "uuid",
+                        "nullable": true
+                    },
+                    {
+                        "name": "provider",
+                        "type": "billing_provider",
+                        "default": "'stripe'"
+                    },
+                    {
+                        "name": "external_id",
+                        "type": "varchar(255)",
+                        "nullable": true
+                    },
+                    {
+                        "name": "trial_end",
+                        "type": "timestamptz(0)",
+                        "nullable": true
+                    },
+                    {
+                        "name": "current_time",
+                        "type": "timestamptz(0)",
+                        "nullable": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "workspace_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "subscription_plans",
+                        "foreign_key": "plan_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "coupons",
+                        "foreign_key": "coupon_uuid"
+                    }
+                ]
+            },
+            "subscription_statuses": {
+                "description": "Tracks the history of statuses for a subscription.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "subscription_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "status",
+                        "type": "subscription_status_type",
+                        "default": "'incomplete'"
+                    },
+                    {
+                        "name": "reason",
+                        "type": "varchar(255)",
+                        "nullable": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "subscriptions",
+                        "foreign_key": "subscription_uuid"
+                    }
+                ]
+            },
+            "subscription_invoices": {
+                "description": "Stores billing invoices for subscriptions.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "period_start",
+                        "type": "timestamptz(0)"
+                    },
+                    {
+                        "name": "period_end",
+                        "type": "timestamptz(0)"
+                    },
+                    {
+                        "name": "workspace_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "subscription_uuid",
+                        "type": "uuid",
+                        "nullable": true
+                    },
+                    {
+                        "name": "provider",
+                        "type": "billing_provider",
+                        "default": "'stripe'"
+                    },
+                    {
+                        "name": "external_id",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "amount",
+                        "type": "int"
+                    },
+                    {
+                        "name": "currency",
+                        "type": "text",
+                        "default": "'USD'"
+                    },
+                    {
+                        "name": "seats",
+                        "type": "int",
+                        "nullable": true
+                    },
+                    {
+                        "name": "reason",
+                        "type": "invoice_reason",
+                        "default": "'subscription_cycle'"
+                    },
+                    {
+                        "name": "status",
+                        "type": "invoice_status",
+                        "default": "'draft'"
+                    },
+                    {
+                        "name": "pdf_url",
+                        "type": "text",
+                        "nullable": true
+                    },
+                    {
+                        "name": "page_url",
+                        "type": "text",
+                        "nullable": true
+                    },
+                    {
+                        "name": "current_plan_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "previous_plan_uuid",
+                        "type": "uuid",
+                        "nullable": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "workspace_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "subscription_plans",
+                        "foreign_key": "current_plan_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "subscription_plans",
+                        "foreign_key": "previous_plan_uuid"
+                    }
+                ]
+            },
+            "legal_entities": {
+                "description": "Stores legal entity information for billing and contracts.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "created_by_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "workspace_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "name",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "registration_number",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "address",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "region",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "city",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "postal_code",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "country",
+                        "type": "enum_legal_entity_country"
+                    },
+                    {
+                        "name": "email",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "phone_number",
+                        "type": "varchar(255)"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "created_by_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "workspace_uuid"
+                    }
+                ]
+            },
+            "campaign_deal_contracts": {
+                "description": "Stores contract details associated with a campaign deal.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "deal_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "workspace_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "legal_entity_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "advertiser_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "creator_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "preview_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "external_id",
+                        "type": "varchar(255)",
+                        "unique": true,
+                        "nullable": true
+                    },
+                    {
+                        "name": "status",
+                        "type": "deal_contract_status_enum",
+                        "default": "'not created'"
+                    },
+                    {
+                        "name": "expired_at",
+                        "type": "timestamptz(0)",
+                        "nullable": true
+                    },
+                    {
+                        "name": "sign_status",
+                        "type": "jsonb",
+                        "nullable": true
+                    },
+                    {
+                        "name": "deal_data",
+                        "type": "jsonb",
+                        "nullable": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "campaign_deals",
+                        "foreign_key": "deal_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "workspace_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "legal_entities",
+                        "foreign_key": "legal_entity_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "advertiser_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "creator_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "stored_files",
+                        "foreign_key": "preview_uuid"
+                    }
+                ]
+            },
+            "person_workspace_roles": {
+                "description": "Join table linking a person to their roles within a workspace.",
+                "columns": [
+                    {
+                        "name": "person_uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "role_uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "person_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspace_roles",
+                        "foreign_key": "role_uuid"
+                    }
+                ]
+            },
+            "payment_accounts": {
+                "description": "Represents a workspace's payment account for holding funds.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "workspace_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "provider",
+                        "type": "billing_provider",
+                        "default": "'stripe'"
+                    },
+                    {
+                        "name": "external_id",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "balance",
+                        "type": "int"
+                    },
+                    {
+                        "name": "currency",
+                        "type": "text",
+                        "default": "'USD'"
+                    },
+                    {
+                        "name": "funding_instructions",
+                        "type": "jsonb"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "workspace_uuid"
+                    },
+                    {
+                        "type": "one_to_many",
+                        "target_table": "payment_transactions",
+                        "foreign_key": "payment_account_uuid",
+                        "c4_level": "Code"
+                    }
+                ]
+            },
+            "campaign_deal_promo_content": {
+                "description": "Stores information about promotional content (e.g., a YouTube video) for a deal.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "deal_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "external_id",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "creator_external_id",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "title",
+                        "type": "text",
+                        "nullable": true
+                    },
+                    {
+                        "name": "description",
+                        "type": "text",
+                        "nullable": true
+                    },
+                    {
+                        "name": "type",
+                        "type": "deal_promo_content_type_enum"
+                    },
+                    {
+                        "name": "thumbnail_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "link",
+                        "type": "text"
+                    },
+                    {
+                        "name": "upload_date",
+                        "type": "timestamptz(0)"
+                    },
+                    {
+                        "name": "metrics",
+                        "type": "jsonb"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "campaign_deals",
+                        "foreign_key": "deal_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "stored_files",
+                        "foreign_key": "thumbnail_uuid"
+                    }
+                ]
+            },
+            "payment_transactions": {
+                "description": "Records all incoming and outgoing money transactions for a payment account.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "amount",
+                        "type": "int"
+                    },
+                    {
+                        "name": "provider",
+                        "type": "billing_provider",
+                        "default": "'stripe'"
+                    },
+                    {
+                        "name": "currency",
+                        "type": "text"
+                    },
+                    {
+                        "name": "external_id",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "status",
+                        "type": "transaction_status"
+                    },
+                    {
+                        "name": "type",
+                        "type": "transaction_type"
+                    },
+                    {
+                        "name": "payment_account_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "applied_fees",
+                        "type": "jsonb",
+                        "description": "Stores an array of fee objects applied to the transaction. The structure is { amount: number; type: FeeType; currency: Currency; percentage: number; }."
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "payment_accounts",
+                        "foreign_key": "payment_account_uuid"
+                    },
+                    {
+                        "type": "one_to_many",
+                        "target_table": "payment_transaction_transfers",
+                        "foreign_key": "transaction_uuid",
+                        "c4_level": "Code"
+                    }
+                ]
+            },
+            "payment_recipients": {
+                "description": "Represents a recipient of a payment (e.g., an influencer).",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "sma_uuid",
+                        "type": "varchar(255)",
+                        "nullable": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_many",
+                        "target_table": "payout_methods",
+                        "join_table": "recipient_payout_methods",
+                        "c4_level": "Code"
+                    }
+                ]
+            },
+            "payout_methods": {
+                "description": "Stores the methods by which a recipient can be paid.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "status",
+                        "type": "payout_method_status"
+                    },
+                    {
+                        "name": "currency",
+                        "type": "text"
+                    },
+                    {
+                        "name": "external_id",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "business_type",
+                        "type": "business_type"
+                    },
+                    {
+                        "name": "country",
+                        "type": "enum_legal_entity_country"
+                    },
+                    {
+                        "name": "payment_account_currency",
+                        "type": "text"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_many",
+                        "target_table": "payment_recipients",
+                        "join_table": "recipient_payout_methods",
+                        "c4_level": "Code"
+                    }
+                ]
+            },
+            "recipient_payout_methods": {
+                "description": "Join table linking payment recipients to their available payout methods.",
+                "columns": [
+                    {
+                        "name": "recipient_uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "payout_method_uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "payment_recipients",
+                        "foreign_key": "recipient_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "payout_methods",
+                        "foreign_key": "payout_method_uuid"
+                    }
+                ]
+            },
+            "payments": {
+                "description": "Represents a payment to be made for a deal.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "amount",
+                        "type": "int"
+                    },
+                    {
+                        "name": "currency",
+                        "type": "text"
+                    },
+                    {
+                        "name": "status",
+                        "type": "payment_status"
+                    },
+                    {
+                        "name": "due_date",
+                        "type": "timestamptz(0)"
+                    },
+                    {
+                        "name": "deal_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "recipient_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "payout_method_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "contract_id",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "workspace_uuid",
+                        "type": "uuid"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "campaign_deals",
+                        "foreign_key": "deal_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "payment_recipients",
+                        "foreign_key": "recipient_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "payout_methods",
+                        "foreign_key": "payout_method_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "workspace_uuid"
+                    },
+                    {
+                        "type": "one_to_many",
+                        "target_table": "payment_transaction_transfers",
+                        "foreign_key": "payment_uuid",
+                        "c4_level": "Code"
+                    }
+                ]
+            },
+            "payment_transaction_transfers": {
+                "description": "Represents a transfer of funds as part of a payment transaction.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "status",
+                        "type": "transfer_status"
+                    },
+                    {
+                        "name": "reason",
+                        "type": "transfer_failure_reason",
+                        "nullable": true
+                    },
+                    {
+                        "name": "external_id",
+                        "type": "varchar(255)",
+                        "nullable": true
+                    },
+                    {
+                        "name": "amount",
+                        "type": "int"
+                    },
+                    {
+                        "name": "currency",
+                        "type": "text"
+                    },
+                    {
+                        "name": "charge_amount",
+                        "type": "int"
+                    },
+                    {
+                        "name": "charge_currency",
+                        "type": "text"
+                    },
+                    {
+                        "name": "applied_fees",
+                        "type": "jsonb",
+                        "description": "Stores an array of fee objects applied to the transfer. The structure is { amount: number; type: FeeType; currency: Currency; percentage: number; }."
+                    },
+                    {
+                        "name": "charged_applied_fees",
+                        "type": "jsonb",
+                        "description": "Stores an array of fee objects applied to the charge associated with the transfer. The structure is { amount: number; type: FeeType; currency: Currency; percentage: number; }."
+                    },
+                    {
+                        "name": "payment_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "transaction_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "payout_method_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "conversion_rate",
+                        "type": "numeric(20, 10)"
+                    },
+                    {
+                        "name": "recipient_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "paid_at",
+                        "type": "timestamptz(0)",
+                        "nullable": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "payments",
+                        "foreign_key": "payment_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "payment_transactions",
+                        "foreign_key": "transaction_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "payout_methods",
+                        "foreign_key": "payout_method_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "payment_recipients",
+                        "foreign_key": "recipient_uuid"
+                    }
+                ]
+            },
+            "quotas": {
+                "description": "Tracks usage quotas for workspaces based on their subscription.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "workspace_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "subscription_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "key",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "value",
+                        "type": "int",
+                        "default": "0"
+                    },
+                    {
+                        "name": "disabled",
+                        "type": "bool",
+                        "default": "false"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "workspace_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "subscriptions",
+                        "foreign_key": "subscription_uuid"
+                    }
+                ]
+            },
+            "deal_chat_scheduled_messages": {
+                "description": "Stores messages that are scheduled to be sent at a future time.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "scheduled_at",
+                        "type": "timestamptz(0)"
+                    },
+                    {
+                        "name": "message_uuid",
+                        "type": "uuid",
+                        "unique": true
+                    },
+                    {
+                        "name": "sender_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "workspace_uuid",
+                        "type": "uuid"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "one_to_one",
+                        "target_table": "deal_chat_messages",
+                        "foreign_key": "message_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "sender_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "workspace_uuid"
+                    }
+                ]
+            },
+            "briefs": {
+                "description": "Stores briefs for generating influencer search requests.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "platform",
+                        "type": "sma_platform"
+                    },
+                    {
+                        "name": "product_description",
+                        "type": "text",
+                        "nullable": true
+                    },
+                    {
+                        "name": "audience_description",
+                        "type": "text",
+                        "nullable": true
+                    },
+                    {
+                        "name": "additional_notes",
+                        "type": "text",
+                        "nullable": true
+                    },
+                    {
+                        "name": "generated_request_data",
+                        "type": "jsonb",
+                        "nullable": true
+                    },
+                    {
+                        "name": "total_results",
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    {
+                        "name": "campaign_uuid",
+                        "type": "uuid",
+                        "nullable": true
+                    },
+                    {
+                        "name": "person_uuid",
+                        "type": "uuid",
+                        "nullable": true
+                    },
+                    {
+                        "name": "result",
+                        "type": "jsonb",
+                        "nullable": true
+                    },
+                    {
+                        "name": "website_url",
+                        "type": "text",
+                        "nullable": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "campaigns",
+                        "foreign_key": "campaign_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "person_uuid"
+                    }
+                ]
+            },
+            "deal_chat_message_templates": {
+                "description": "Stores user-created templates for deal chat messages.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "subject",
+                        "type": "text"
+                    },
+                    {
+                        "name": "message",
+                        "type": "text"
+                    },
+                    {
+                        "name": "name",
+                        "type": "text"
+                    },
+                    {
+                        "name": "used_variables",
+                        "type": "text[]"
+                    },
+                    {
+                        "name": "workspace_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "person_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "latest_usage",
+                        "type": "timestamptz(0)"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "workspace_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "person_uuid"
+                    }
+                ]
+            },
+            "deal_chat_message_template_attachments": {
+                "description": "Join table for message template attachments.",
+                "columns": [
+                    {
+                        "name": "template_uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "file_uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "deal_chat_message_templates",
+                        "foreign_key": "template_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "stored_files",
+                        "foreign_key": "file_uuid"
+                    }
+                ]
+            },
+            "deal_chat_message_sequence_templates": {
+                "description": "Stores templates for sequences of messages.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "name",
+                        "type": "text"
+                    },
+                    {
+                        "name": "steps",
+                        "type": "jsonb"
+                    },
+                    {
+                        "name": "workspace_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "person_uuid",
+                        "type": "uuid"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "workspace_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "persons",
+                        "foreign_key": "person_uuid"
+                    }
+                ]
+            },
+            "deal_chat_message_sequence_template_attachments": {
+                "description": "Join table for message sequence template attachments.",
+                "columns": [
+                    {
+                        "name": "template_uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "file_uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "deal_chat_message_sequence_templates",
+                        "foreign_key": "template_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "stored_files",
+                        "foreign_key": "file_uuid"
+                    }
+                ]
+            },
+            "deal_chat_message_sequences": {
+                "description": "Represents an active instance of a message sequence in a chat.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "is_active",
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    {
+                        "name": "steps",
+                        "type": "jsonb"
+                    },
+                    {
+                        "name": "chat_uuid",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "template_uuid",
+                        "type": "uuid",
+                        "nullable": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "deal_chats",
+                        "foreign_key": "chat_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "deal_chat_message_sequence_templates",
+                        "foreign_key": "template_uuid"
+                    }
+                ]
+            },
+            "deal_chat_message_sequence_attachments": {
+                "description": "Join table for active message sequence attachments.",
+                "columns": [
+                    {
+                        "name": "sequence_uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "file_uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "deal_chat_message_sequences",
+                        "foreign_key": "sequence_uuid"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "stored_files",
+                        "foreign_key": "file_uuid"
+                    }
+                ]
+            },
+            "smas_agents": {
+                "description": "Stores agent contact information for social media accounts.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "sma_id",
+                        "type": "varchar(255)",
+                        "unique": true
+                    },
+                    {
+                        "name": "platform",
+                        "type": "sma_platform"
+                    },
+                    {
+                        "name": "agent_email",
+                        "type": "varchar(255)",
+                        "nullable": true
+                    }
+                ]
+            },
+            "payment_methods": {
+                "description": "Stores customer payment methods (credit cards).",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "fingerprint",
+                        "type": "varchar(255)",
+                        "unique": true
+                    },
+                    {
+                        "name": "last4",
+                        "type": "varchar(255)"
+                    },
+                    {
+                        "name": "external_id",
+                        "type": "varchar(255)",
+                        "unique": true
+                    },
+                    {
+                        "name": "brand",
+                        "type": "card_brand_type"
+                    },
+                    {
+                        "name": "workspace_uuid",
+                        "type": "uuid"
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "workspace_uuid"
+                    }
+                ]
+            },
+            "referral_bonuses": {
+                "description": "Tracks referral bonuses for workspaces.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "referrer_workspace_id",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "referee_workspace_id",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "subscription_id",
+                        "type": "uuid",
+                        "nullable": true
+                    },
+                    {
+                        "name": "recipient",
+                        "type": "bonus_recipient_enum"
+                    },
+                    {
+                        "name": "bonus_amount",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "bonus_unit",
+                        "type": "text"
+                    },
+                    {
+                        "name": "status",
+                        "type": "bonus_status_enum",
+                        "default": "'pending'"
+                    },
+                    {
+                        "name": "description",
+                        "type": "text"
+                    },
+                    {
+                        "name": "activated_at",
+                        "type": "timestamptz",
+                        "nullable": true
+                    },
+                    {
+                        "name": "invited_user",
+                        "type": "varchar",
+                        "nullable": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "referrer_workspace_id"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "referee_workspace_id"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "subscriptions",
+                        "foreign_key": "subscription_id"
+                    }
+                ]
+            },
+            "ai_selection_batches": {
+                "description": "Stores batches of AI-selected influencers.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "workspace_id",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "created_by",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "name",
+                        "type": "varchar(255)",
+                        "nullable": true
+                    },
+                    {
+                        "name": "access_type",
+                        "type": "access_type",
+                        "default": "'Only those invited can access'"
+                    },
+                    {
+                        "name": "can_duplicate",
+                        "type": "duplicate_type",
+                        "default": "'no_one'"
+                    },
+                    {
+                        "name": "public_link",
+                        "type": "varchar(255)",
+                        "nullable": true
+                    },
+                    {
+                        "name": "private_link",
+                        "type": "varchar(255)",
+                        "nullable": true
+                    },
+                    {
+                        "name": "deleted_at",
+                        "type": "timestamptz",
+                        "nullable": true
+                    },
+                    {
+                        "name": "frozen_tokens",
+                        "type": "integer",
+                        "default": "0"
+                    },
+                    {
+                        "name": "platform",
+                        "type": "ai_selection_platform",
+                        "nullable": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "workspaces",
+                        "foreign_key": "workspace_id"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "users",
+                        "foreign_key": "created_by"
+                    }
+                ]
+            },
+            "ai_selection_batch_access_grants": {
+                "description": "Manages user access permissions for AI selection batches.",
+                "columns": [
+                    {
+                        "name": "uuid",
+                        "type": "uuid",
+                        "primary_key": true
+                    },
+                    {
+                        "name": "batch_id",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "user_id",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "access_level",
+                        "type": "access_level",
+                        "default": "'can_view'"
+                    },
+                    {
+                        "name": "granted_by",
+                        "type": "uuid"
+                    },
+                    {
+                        "name": "granted_at",
+                        "type": "timestamptz"
+                    },
+                    {
+                        "name": "deleted_at",
+                        "type": "timestamptz",
+                        "nullable": true
+                    }
+                ],
+                "relationships": [
+                    {
+                        "type": "many_to_one",
+                        "target_table": "ai_selection_batches",
+                        "foreign_key": "batch_id"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "users",
+                        "foreign_key": "user_id"
+                    },
+                    {
+                        "type": "many_to_one",
+                        "target_table": "users",
+                        "foreign_key": "granted_by"
+                    }
+                ]
+            }
+        },
+        "enums": {
+            "access_level": [
+                "can_view",
+                "can_edit",
+                "is_admin",
+                "owner",
+                "workspace_owner"
+            ],
+            "access_type": [
+                "Only those invited can access",
+                "Anyone with the link can view"
+            ],
+            "ai_selection_platform": [
+                "youtube",
+                "instagram",
+                "tiktok"
+            ],
+            "auth_strategy": [
+                "local",
+                "google"
+            ],
+            "billing_provider": [
+                "stripe"
+            ],
+            "bonus_recipient_enum": [
+                "referrer",
+                "referee"
+            ],
+            "bonus_status_enum": [
+                "pending",
+                "activated",
+                "canceled"
+            ],
+            "business_type": [
+                "Individual",
+                "Company"
+            ],
+            "campaign_deal_status_enum": [
+                "in progress",
+                "completed",
+                "cancelled"
+            ],
+            "card_brand_type": [
+                "visa",
+                "mastercard",
+                "american-express",
+                "discover",
+                "diners",
+                "jcb",
+                "unionpay",
+                "unknown"
+            ],
+            "chat_mass_mailing_state_enum": [
+                "pending",
+                "processed",
+                "failed"
+            ],
+            "coupon_duration": [
+                "once",
+                "repeating",
+                "forever"
+            ],
+            "deal_chat_message_provider_enum": [
+                "email"
+            ],
+            "deal_chat_message_status_enum": [
+                "scheduled",
+                "sending",
+                "sent",
+                "read",
+                "error"
+            ],
+            "deal_chat_message_type_enum": [
+                "user",
+                "system"
+            ],
+            "deal_chat_system_message_type_enum": [
+                "personAdded"
+            ],
+            "deal_contract_status_enum": [
+                "not created",
+                "uploaded",
+                "draft",
+                "sent",
+                "completed",
+                "deleted",
+                "paid"
+            ],
+            "deal_promo_content_type_enum": [
+                "YoutubeVideo",
+                "YoutubeShort",
+                "InstagramPost",
+                "InstagramReel",
+                "TiktokVideo"
+            ],
+            "duplicate_type": [
+                "anyone",
+                "no_one"
+            ],
+            "invoice_reason": [
+                "subscription_cycle",
+                "subscription_create",
+                "subscription_update",
+                "manual"
+            ],
+            "invoice_status": [
+                "draft",
+                "open",
+                "paid",
+                "void",
+                "uncollectible"
+            ],
+            "organization_type_enum": [
+                "own",
+                "counterparty"
+            ],
+            "payment_status": [
+                "created",
+                "ready",
+                "paid",
+                "failed"
+            ],
+            "payout_method_status": [
+                "onboarding",
+                "active",
+                "inactive"
+            ],
+            "person_contacts_priority_type_enum": [
+                "primary",
+                "regular"
+            ],
+            "person_contacts_status_enum": [
+                "active",
+                "inactive"
+            ],
+            "person_contacts_type_enum": [
+                "email"
+            ],
+            "persons_domain_type_enum": [
+                "influencerMarketing",
+                "brand",
+                "creating"
+            ],
+            "persons_party_type_enum": [
+                "own",
+                "counterparty"
+            ],
+            "persons_registration_type_enum": [
+                "user",
+                "representative"
+            ],
+            "persons_status_enum": [
+                "pending",
+                "active",
+                "inactive"
+            ],
+            "right_group": [
+                "workspace",
+                "address-book",
+                "campaign",
+                "subscription",
+                "payment"
+            ],
+            "role_name": [
+                "owner",
+                "admin",
+                "im-manager",
+                "im-payment-specialist"
+            ],
+            "sma_platform": [
+                "youtube",
+                "instagram",
+                "twitter",
+                "twitch",
+                "facebook",
+                "tiktok"
+            ],
+            "stored_file_handler_enum": [
+                "object-storage"
+            ],
+            "subscription_plan_type": [
+                "freemium",
+                "good-better-best",
+                "brief",
+                "universal"
+            ],
+            "subscription_status_type": [
+                "incomplete",
+                "incomplete_expired",
+                "freemiuming",
+                "active",
+                "past_due",
+                "canceled",
+                "unpaid"
+            ],
+            "transaction_status": [
+                "succeeded",
+                "pending",
+                "failed"
+            ],
+            "transaction_type": [
+                "in",
+                "out"
+            ],
+            "transfer_failure_reason": [
+                "insufficient_capabilities",
+                "internal_error"
+            ],
+            "transfer_status": [
+                "pending",
+                "failed",
+                "succeeded"
+            ],
+            "workspace_business_type": [
+                "agency",
+                "local-brand"
+            ]
+        },
+        "maintenance_procedures": {
+            "c4_level": "Code",
+            "migrations": {
+                "tooling": "The project uses the 'umzug' library to manage SQL-based schema migrations located in `apps/hypetrain-api/src/infrastructure/database/migrations/`. Scripts are provided to create, apply (`up`), and rollback (`down`) migrations.",
+                "rollback_strategy": "Rollbacks are performed by executing the corresponding `down` migration script for the last applied migration. The `rollback-migration.ts` script handles this, reverting one migration at a time."
+            },
+            "seeding": {
+                "tooling": "The 'umzug' library is also used to manage data seeding from SQL files located in `apps/hypetrain-api/src/infrastructure/database/seeds/`.",
+                "seeded_data": "The database is seeded with foundational data, including: default `performance_parameters` (e.g., projected CTR), a default `target_audience` profile, and a large directory of influencer agent contacts in the `smas_agents` table."
+            },
+            "special_scripts": {
+                "description": "The repository contains several one-off NodeJS scripts in `apps/hypetrain-api/src/infrastructure/database/scripts/` used for significant data migrations and backfills. These scripts often interact with multiple systems beyond the primary PostgreSQL database.",
+                "examples": [
+                    {
+                        "script": "create-quotas.ts",
+                        "purpose": "A backfill script to create records in the `quotas` table for existing subscriptions. It contains the business logic for default quota values for different subscription types (e.g., trial vs. paid)."
+                    },
+                    {
+                        "script": "merge-workspaces-to-personal.ts",
+                        "purpose": "A complex data migration script that merges 'collaborative' workspace data into 'personal' workspaces. It highlights a past architectural refactoring of the multi-tenancy model and demonstrates interaction with PostgreSQL, Redis, and Elasticsearch."
+                    },
+                    {
+                        "script": "update-instagram-ids.ts",
+                        "purpose": "A data migration script to update the format of Instagram SMA (Social Media Account) IDs across multiple tables. It relies on an external data service to map old IDs to new ones, indicating external data dependencies."
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "authn_authz": {
+            "name": "Authentication & Authorization",
+            "description": "A core component within the `hypetrain-api` container responsible for verifying user identity and controlling access to resources. It implements multiple authentication strategies, a JWT-based session management system with refresh tokens, and a Role-Based Access Control (RBAC) mechanism for authorization.",
+            "type": "NestJS Module",
+            "c4_level": "Component",
+            "details": {
+                "authentication_strategies": [
+                    {
+                        "strategy": "Local (Email/Password)",
+                        "description": "Standard authentication flow where users sign up and sign in with their email and a password. Passwords are hashed before being stored. Includes flows for email verification and password reset."
+                    },
+                    {
+                        "strategy": "Google OAuth",
+                        "description": "Allows users to sign up or sign in using their Google account. The system receives a token from Google, verifies it, and then creates a user and session within the platform."
+                    },
+                    {
+                        "strategy": "API Key",
+                        "description": "The `AuthMiddleware` indicates that API keys can be used for authentication, likely for programmatic access or internal service-to-service communication."
+                    }
+                ],
+                "token_handling": {
+                    "type": "JWT (JSON Web Tokens)",
+                    "access_token": "A short-lived JWT containing user's email and UUID. It is used to authenticate requests to protected endpoints.",
+                    "refresh_token": "A long-lived JWT used to obtain a new access token without requiring the user to log in again. Each refresh token is associated with a `RefreshSession`.",
+                    "session_management": "Refresh tokens are managed via `RefreshSession`s, which are stored in the `refresh_sessions` database table. A session is tied to a user, their IP address, user agent, and a browser fingerprint. When a user logs out or changes their password, all their active refresh sessions are invalidated."
+                },
+                "authorization_mechanism": {
+                    "type": "Role-Based Access Control (RBAC)",
+                    "implementation": "Authorization is enforced by the `PermissionMiddleware`. When a user performs an action within a workspace, this middleware checks if the user's associated `Person` entity has the required permissions (rights).",
+                    "decorators": "Command handlers are protected using decorators. `@AuthProtected()` ensures a user is authenticated (via JWT or API key). `@PermissionProtected()` builds on this by also checking for specific rights required for the operation."
+                }
+            },
+            "relationships": [
+                {
+                    "target": "User Management",
+                    "description": "Depends on the User component to retrieve and update user data during authentication and session creation."
+                },
+                {
+                    "target": "Workspace Management",
+                    "description": "Relies on the Workspace component to determine user roles and permissions for authorization."
+                }
+            ]
+        },
+        "user_workspace_management": {
+            "name": "User & Workspace Management",
+            "description": "A core component within the `hypetrain-api` container responsible for multi-tenancy, user identity, and access control. It manages the lifecycle of users, their organization into workspaces, and the permissions they have within those workspaces.",
+            "type": "NestJS Module",
+            "c4_level": "Component",
+            "details": {
+                "entities": [
+                    {
+                        "name": "User",
+                        "description": "A global entity representing an individual's account and authentication credentials (`user.model.ts`)."
+                    },
+                    {
+                        "name": "Workspace",
+                        "description": "The primary multi-tenancy entity. All data like campaigns and billing is scoped to a workspace (`workspace.model.ts`)."
+                    },
+                    {
+                        "name": "Person",
+                        "description": "The pivot entity linking a `User` to a `Workspace`. It represents a user's membership and profile *within* a specific workspace. A user can be part of multiple workspaces, having a distinct `Person` entity for each (`person.model.ts`)."
+                    },
+                    {
+                        "name": "WorkspaceRole",
+                        "description": "Defines a named set of permissions (e.g., 'Owner', 'Admin'). Roles are created per-workspace (`workspace-role.model.ts`)."
+                    },
+                    {
+                        "name": "WorkspaceInvite",
+                        "description": "A transient entity used to invite a user (by email) to join a workspace (`workspace-invite.model.ts`)."
+                    }
+                ],
+                "workflows": [
+                    {
+                        "name": "Workspace Creation",
+                        "description": "When a new `User` signs up, a corresponding `Workspace` is created. A `Person` entity is also created to link the new `User` to the new `Workspace`, and this `Person` is granted the 'Owner' role. A default set of `WorkspaceRole`s is provisioned for the new workspace, as seen in `create-collaborative-workspace.handler.ts`."
+                    },
+                    {
+                        "name": "User Invitation",
+                        "description": "An existing member of a workspace can invite a new user via email. This creates a `WorkspaceInvite` and a new `Person` with a 'pending' status. This flow is managed by `create-workspace-invite.handler.ts`."
+                    },
+                    {
+                        "name": "Invite Acceptance",
+                        "description": "When the invited user accepts (either by signing up or logging in), their `User` account is associated with the pending `Person`, the `Person`'s status is set to 'active', and the invite is consumed. This is handled by `accept-workspace-invite.handler.ts`."
+                    },
+                    {
+                        "name": "Person Profile Update",
+                        "description": "Users can update person profiles (name, job title, roles, contacts) via the `UpdatePersonHandler`. The handler enforces permissions based on the person's type (e.g., 'UpdateOwnUserPerson') before applying changes to the `Person` domain model and persisting them."
+                    },
+                    {
+                        "name": "Workspace Settings Update",
+                        "description": "Users with appropriate permissions can update workspace settings like name and handler via the `UpdateWorkspaceHandler`. The handler delegates validation and state changes to the `Workspace` domain model."
+                    }
+                ],
+                "authorization_model": {
+                    "type": "Role-Based Access Control (RBAC)",
+                    "description": "Authorization is based on an RBAC model scoped to each workspace. A `Person` is assigned one or more `WorkspaceRole`s. Each `WorkspaceRole` contains a collection of specific permissions (rights). A `Person`'s effective permissions are the union of all rights from their assigned roles, checked via the `person.hasPermission()` method."
+                }
+            },
+            "relationships": [
+                {
+                    "target": "Authentication & Authorization",
+                    "description": "Provides the `User` entity that is the subject of authorization within a workspace."
+                }
+            ]
+        },
+        "campaign_management": {
+            "name": "Campaign Management",
+            "description": "A core component within the `hypetrain-api` container responsible for the entire lifecycle of influencer marketing campaigns. It manages the creation and configuration of campaigns, the associated deals with influencers, contract generation, and the tracking of promotional content.",
+            "type": "NestJS Module",
+            "c4_level": "Component",
+            "details": {
+                "entities": [
+                    {
+                        "name": "Campaign",
+                        "description": "The top-level entity representing a marketing initiative. It defines the overall parameters like platform, brand information, and default terms and requirements for deals. (campaign.model.ts)"
+                    },
+                    {
+                        "name": "CampaignDeal",
+                        "description": "Represents a specific agreement with an influencer (SMA) within a campaign. It tracks its own status and moves through a multi-stage lifecycle (e.g., Recruitment, Contracting, Publishing). (campaign-deal.model.ts)"
+                    },
+                    {
+                        "name": "CampaignDealContract",
+                        "description": "Manages the legal contract associated with a CampaignDeal, including its status and signatories. (campaign-deal-contract.model.ts)"
+                    },
+                    {
+                        "name": "DealPromoContent",
+                        "description": "Represents the promotional content created by an influencer for a deal, and tracks its performance metrics (likes, views, etc.). (deal-promo-content.model.ts)"
+                    }
+                ],
+                "workflows": [
+                    {
+                        "name": "Campaign & Deal Creation",
+                        "description": "Users create a Campaign and add influencers (SMAs) to it. The system does not create deal records synchronously. Instead, it publishes a `DealsScheduledEvent` to an external queue. This indicates that an asynchronous process is responsible for creating the individual `CampaignDeal` entities, likely for performance and scalability. (create-campaign.handler.ts)"
+                    },
+                    {
+                        "name": "Deal Lifecycle Management",
+                        "description": "Each `CampaignDeal` progresses through a defined set of stages (e.g., Recruitment, Drafting, Contracting, Publishing, Payment). The component manages the state transitions for each stage."
+                    },
+                    {
+                        "name": "Notifications",
+                        "description": "The component uses internal domain events, such as `CampaignCreatedEvent`, to trigger side effects like sending email notifications to users when they are assigned to a new campaign. (campaign-created.handler.ts)"
+                    }
+                ]
+            },
+            "relationships": [
+                {
+                    "target": "User & Workspace Management",
+                    "description": "Depends on the Person entity to assign campaign managers and track influencers."
+                },
+                {
+                    "target": "Communication",
+                    "description": "Each CampaignDeal is associated with a DealChat for communication with influencers."
+                },
+                {
+                    "target": "hypetrain-contracting-service",
+                    "description": "Likely interacts with the contracting service to manage the lifecycle of CampaignDealContracts."
+                },
+                {
+                    "target": "hypetrain-scheduler-service",
+                    "description": "Uses an asynchronous pattern (`DealsScheduledEvent`) to offload the creation of campaign deals, which is likely handled by the scheduler service."
+                }
+            ]
+        },
+        "Communication": {
+            "name": "Communication",
+            "description": "A component within the `hypetrain-api` container responsible for managing all communication with influencers related to campaign deals. It handles direct messaging, bulk messaging, user-defined templates, and automated multi-step message sequences. The component is heavily event-driven, offloading the actual sending and receiving of messages to other services via integration events.",
+            "type": "NestJS Module",
+            "c4_level": "Component",
+            "details": {
+                "entities": [
+                    {
+                        "name": "DealChat",
+                        "description": "The container for a conversation associated with a specific CampaignDeal. (deal-chat.model.ts)"
+                    },
+                    {
+                        "name": "DealChatMessage",
+                        "description": "Represents a single message within a DealChat. Can be a user-generated or system message. Manages recipients, status (sending, sent, read), and attachments. (deal-chat-message.model.ts)"
+                    },
+                    {
+                        "name": "MessageTemplate",
+                        "description": "User-creatable templates for reusable messages, supporting variables like {{CampaignName}}. (message-template.model.ts)"
+                    },
+                    {
+                        "name": "MessageSequenceTemplate",
+                        "description": "User-creatable templates for a series of messages to be sent over time, with defined delays and content for each step."
+                    },
+                    {
+                        "name": "MessageSequence",
+                        "description": "An active instance of a message sequence applied to a specific DealChat, tracking the state of each step. (message-sequence.model.ts)"
+                    },
+                    {
+                        "name": "DealChatScheduledMessage",
+                        "description": "A domain model representing a message that is scheduled to be sent at a future time, managed by the MailingSchedulerService."
+                    },
+                    {
+                        "name": "DealChatMessage",
+                        "description": "Represents a single user-generated or system message within a DealChat. The domain model contains logic to differentiate between incoming and outgoing messages, manage recipients and their delivery status, and handle attachments. (deal-chat-message.model.ts)"
+                    }
+                ]
+            },
+            "relationships": [
+                {
+                    "target": "Campaign Management",
+                    "description": "Is fundamentally linked to CampaignDeals, as every conversation (DealChat) is scoped to a deal."
+                },
+                {
+                    "target": "hypetrain-message-processing-service",
+                    "description": "Communicates asynchronously via NATS events (`MessageCreatedEvent`, `MessageReceivedEvent`) to handle the external sending and receiving of messages (e.g., emails)."
+                },
+                {
+                    "target": "hypetrain-scheduler-service",
+                    "description": "Relies on a scheduling service to trigger the sending of delayed messages in bulk mailings and sequences via the `ScheduledMessageSendingRequestedEvent`."
+                },
+                {
+                    "target": "OpenAI",
+                    "description": "Integrates with OpenAI's API to provide AI-powered generation of initial outreach messages."
+                }
+            ]
+        },
+        "Subscription & Billing": {
+            "name": "Subscription & Billing",
+            "description": "A component within the `hypetrain-api` container that manages the entire subscription lifecycle for workspaces. It handles different subscription plans, trials, payments, cancellations, and upgrades/downgrades. It is also responsible for setting and updating usage quotas based on a workspace's active subscription plan.",
+            "type": "NestJS Module",
+            "c4_level": "Component",
+            "details": {
+                "entities": [
+                    {
+                        "name": "Subscription",
+                        "description": "The core domain model representing a workspace's subscription to a plan. It tracks the current plan, status (e.g., active, freemiuming, canceled), billing period, seats, and trial status. (subscription.model.ts)"
+                    },
+                    {
+                        "name": "SubscriptionPlan",
+                        "description": "Defines the available subscription plans, including price, currency, and billing provider. Critically, it contains a `data` field that specifies the usage quotas (e.g., SmaProfile, SmaExploration, Tokens) associated with the plan. (subscription-plan.model.ts)"
+                    },
+                    {
+                        "name": "Invoice",
+                        "description": "Represents a billing invoice, containing details like amount, status, billing period, and links to the hosted invoice page and PDF. (invoice.model.ts)"
+                    },
+                    {
+                        "name": "Coupon",
+                        "description": "Represents a discount coupon that can be applied to a subscription. (coupon.model.ts)"
+                    }
+                ],
+                "workflows": [
+                    {
+                        "name": "Subscription Creation & Checkout",
+                        "description": "When a user subscribes, the system creates an 'incomplete' Subscription record locally and then generates a Stripe Checkout session. The user is redirected to Stripe to complete payment. Upon success, a webhook or redirect triggers the `ConfirmCheckoutHandler`, which activates the subscription in the local database."
+                    },
+                    {
+                        "name": "Lifecycle Management",
+                        "description": "The component handles cancellations, plan changes, and providing access to a customer portal for self-service management. These operations are performed by command handlers that call a `SubscriptionProvider`, which abstracts the Stripe API."
+                    },
+                    {
+                        "name": "Quota Management",
+                        "description": "The component is tightly integrated with a Quota system. When a subscription is activated or its plan changes (`SubscriptionActivatedDomainEvent`, `SubscriptionPlanChangedDomainEvent`), the `UpdateQuotasHandler` is triggered. It reads the quota limits from the `SubscriptionPlan.data` field and applies them to the workspace. Logic exists to preserve or reset token quotas based on the type of plan change (e.g., freemium to paid)."
+                    },
+                    {
+                        "name": "Trial Management",
+                        "description": "The system supports trial periods, which are initiated via the `CreateTrialSubscriptionHandler`. The trial's lifecycle and eventual cancellation or conversion are managed through the external billing provider (Stripe)."
+                    }
+                ]
+            },
+            "relationships": [
+                {
+                    "target": "User & Workspace Management",
+                    "description": "Subscriptions are scoped to a Workspace."
+                },
+                {
+                    "target": "Stripe",
+                    "description": "Delegates all payment processing, subscription management, and invoicing to Stripe."
+                }
+            ]
+        },
+        "Payment Processing": {
+            "name": "Payment Processing",
+            "description": "A component within the `hypetrain-api` container that manages outgoing payments to influencers (recipients) for completed campaign deals. It functions as a wallet system for each workspace, which must be explicitly activated before use. This component is distinct from the `Subscription & Billing` component, which handles incoming subscription revenue from customers.",
+            "type": "NestJS Module",
+            "c4_level": "Component",
+            "details": {
+                "entities": [
+                    {
+                        "name": "PaymentAccount",
+                        "description": "Represents a workspace's wallet, holding funds in either USD or EUR. Funds are added via `IncomingTransaction`s and debited via `OutgoingTransaction`s. (payment-account.model.ts)"
+                    },
+                    {
+                        "name": "Payment",
+                        "description": "Represents a single, specific payment owed to a `PaymentRecipient` for a `CampaignDeal`. It has a status lifecycle (e.g., `Created`, `Ready`, `Paid`, `Failed`). (payment.model.ts)"
+                    },
+                    {
+                        "name": "PaymentRecipient",
+                        "description": "The influencer or entity being paid, linked to a Social Media Account (SMA). (payment-recipient.model.ts)"
+                    },
+                    {
+                        "name": "PayoutMethod",
+                        "description": "The specific destination for funds (e.g., bank account) for a `PaymentRecipient`, managed by an external provider. (payout-method.model.ts)"
+                    },
+                    {
+                        "name": "Transaction",
+                        "description": "Records the movement of funds into (`IncomingTransaction`) or out of (`OutgoingTransaction`) a `PaymentAccount`. An `OutgoingTransaction` is a batch operation that can bundle multiple individual `Payment`s."
+                    },
+                    {
+                        "name": "Transfer",
+                        "description": "Represents the transfer of funds for a single `Payment` as part of a larger `OutgoingTransaction`. (transfer.model.ts)"
+                    }
+                ],
+                "workflows": [
+                    {
+                        "name": "Workspace Onboarding",
+                        "description": "A workspace activates the payment module via `ActivatePaymentModuleHandler`. The system calls an external `PaymentProvider` to create corresponding payment accounts (wallets) for different currencies (USD, EUR) and stores them locally as `PaymentAccount` entities."
+                    },
+                    {
+                        "name": "Funding",
+                        "description": "A user initiates a batch payment for one or more payments in 'Ready' status via the `ExecutePaymentsHandler`. The handler creates a `PaymentBatch` domain object to calculate totals and fees. It then generates an `OutgoingTransaction` and calls the external `PaymentProvider` to execute the transaction. The handler then finalizes the status of all involved entities (`Transaction`, `Transfer`, `Payment`) based on the provider's response and publishes a `PaymentUpdatedEvent` to notify other systems."
+                    },
+                    {
+                        "name": "Payment Execution",
+                        "description": "A user initiates a batch payment via `ExecutePaymentsHandler`, providing a list of `paymentIds` in `Ready` status. The handler creates a `PaymentBatch` to calculate totals and fees, then generates an `OutgoingTransaction`. It calls the external `PaymentProvider` to execute the transaction and then finalizes the status of all involved entities (`Transaction`, `Transfer`, `Payment`) based on the provider's response. A `PaymentUpdatedEvent` is published to notify other systems."
+                    }
+                ]
+            },
+            "relationships": [
+                {
+                    "target": "Campaign Management",
+                    "description": "Payments are created and linked to a CampaignDeal."
+                },
+                {
+                    "target": "External Payment Provider",
+                    "description": "Relies on an external service (abstracted by `PaymentProvider`) for creating accounts, processing transactions, and managing payout methods."
+                }
+            ]
+        },
+        "AI Bridge": {
+            "name": "AI Bridge",
+            "description": "A component within the `hypetrain-api` container that serves as a bridge to an external, Python-based AI service responsible for influencer selection. It manages the entire lifecycle of an 'AI Selection', including proxying requests, handling real-time updates via WebSockets, and managing the consumption of 'tokens' from user subscription quotas.",
+            "type": "NestJS Module",
+            "c4_level": "Component",
+            "details": {
+                "entities": [
+                    {
+                        "name": "AISelectionBatch",
+                        "description": "The core domain model representing a single AI-powered influencer selection task. It stores metadata such as the creator, workspace, platform, and sharing/access control settings (e.g., private/public links)."
+                    },
+                    {
+                        "name": "AccessGrant",
+                        "description": "Manages user access permissions for a specific AISelectionBatch, defining roles like 'owner' or 'can_view'."
+                    }
+                ],
+                "workflows": [
+                    {
+                        "name": "AI Selection Creation",
+                        "description": "A user initiates a selection via a CQRS command. The `CreateAISelectionHandler` calls the `AIProxyService`, which forwards the request to the external AI service over NATS. A local `AISelectionBatch` record is created, and an `AISelectionCreatedEvent` is published to establish a WebSocket room for real-time updates."
+                    },
+                    {
+                        "name": "Token Management",
+                        "description": "The component integrates tightly with the subscription quota system. When a selection starts, the `TokenFreezeService` listens for a NATS event and 'freezes' the required number of tokens by consuming them from the user's quota. The `TokenBalanceCheckService` provides synchronous, on-demand balance checks for the AI service. Finally, `AISelectionConsumeTokensHandler` and `AISelectionTokensReturnedHandler` reconcile the final token count based on the actual number of influencers found, adjusting the user's quota accordingly."
+                    },
+                    {
+                        "name": "Real-time Interaction & Updates",
+                        "description": "The component handles real-time communication. The `AiProxyRequestHandler` listens for events originating from the client (likely via WebSockets), forwards them to the AI service using the `AIProxyService`, and publishes the AI's responses back as `AiWebSocketForwardEvent`s to be sent to the client. This supports interactive features like viewing results as they are found."
+                    },
+                    {
+                        "name": "Selection Completion & Export",
+                        "description": "Upon completion, the `AISelectionFinishedHandler` sends an email notification to the user. Users can then export the results via the `ExportAISelectionHandler`, which fetches the final list of influencers from the AI service, consumes additional tokens for the export, enriches the data via the IQDataProvider, and generates a CSV file."
+                    }
+                ]
+            },
+            "relationships": [
+                {
+                    "target": "External AI Service (python-ai-selector)",
+                    "description": "Communicates asynchronously via NATS to create and manage influencer selections, retrieve results, and handle token balance checks."
+                },
+                {
+                    "target": "Subscription & Billing",
+                    "description": "Integrates with the QuotaProvider to check, freeze, and consume `Tokens` (QuotaKey.Tokens) from a workspace's subscription."
+                },
+                {
+                    "target": "hypetrain-notification-service",
+                    "description": "Implicitly interacts via `AiWebSocketForwardEvent` to send real-time updates and results to the connected client."
+                },
+                {
+                    "target": "IQDataProvider",
+                    "description": "Uses this external service to enrich influencer data with contact information during the export process."
+                },
+                {
+                    "target": "UserMailingProvider",
+                    "description": "Sends email notifications to users when their AI selection process is complete."
+                }
+            ]
+        },
+        "Brief Management": {
+            "name": "Brief Management",
+            "description": "Manages briefs for generating influencer search requests. The exact functionality is not yet analyzed.",
+            "type": "NestJS Module",
+            "c4_level": "Component"
+        },
+        "Influencer Exploration": {
+            "name": "Influencer Exploration",
+            "description": "Handles influencer discovery and data fetching. The exact functionality is not yet analyzed.",
+            "type": "NestJS Module",
+            "c4_level": "Component"
+        },
+        "Referral Management": {
+            "name": "Referral Management",
+            "description": "Manages the user referral program. The exact functionality is not yet analyzed.",
+            "type": "NestJS Module",
+            "c4_level": "Component"
+        },
+        "Influencer Selection": {
+            "name": "Influencer Selection",
+            "description": "Manages manual selection lists of influencers. The exact functionality is not yet analyzed.",
+            "type": "NestJS Module",
+            "c4_level": "Component"
+        },
+        "SMA Management": {
+            "name": "SMA Management",
+            "description": "Manages Social Media Account (SMA) data, such as notes. The exact functionality is not yet analyzed.",
+            "type": "NestJS Module",
+            "c4_level": "Component"
+        },
+        "Target Audience Management": {
+            "name": "Target Audience Management",
+            "description": "Manages target audience definitions for campaigns. The exact functionality is not yet analyzed.",
+            "type": "NestJS Module",
+            "c4_level": "Component"
+        }
+    },
+    "external_integrations": {
+        "OpenAI": {
+            "description": "Used for AI-powered message generation. The `GenerateFirstMessageHandler` creates a detailed prompt based on campaign and influencer data and calls the OpenAI API via the `OpenaiProvider` to get a suggested outreach message.",
+            "c4_level": "Component"
+        },
+        "Email Service": {
+            "description": "Handles the actual delivery and reception of emails. While the specific provider is not detailed in this component's code, the architecture strongly implies its existence. The `Communication` component in `hypetrain-api` delegates the sending/receiving logic to the `hypetrain-message-processing-service` via NATS events, which in turn integrates with an external email provider.",
+            "c4_level": "Container"
+        },
+        "Stripe": {
+            "description": "The exclusive payment and billing provider. The `Subscription & Billing` component uses Stripe for creating checkout sessions, managing the subscription lifecycle (cancellations, plan changes), handling trials, and providing a customer portal for self-service. Communication is managed via a `SubscriptionProvider` which acts as an adapter to the Stripe API.",
+            "c4_level": "Container"
+        },
+        "External Payment Provider": {
+            "description": "An external payment service (e.g., Stripe Connect, Wise) used by the `Payment Processing` component. It is abstracted by the `PaymentProvider` interface and is responsible for creating workspace wallets, processing batch payouts, and managing payout methods for recipients.",
+            "c4_level": "Container"
+        }
+    },
+    "testing_strategy": {},
+    "workflows_jobs": {
+        "Incoming Message Processing": {
+            "description": "Handles messages received from external sources. The `hypetrain-message-processing-service` publishes a `MessageReceivedEvent` to the NATS bus. The `ResolveIncomingMessageHandler` within the `hypetrain-api` subscribes to this event, identifies the correct `DealChat`, creates and stores the `DealChatMessage`, deactivates any active message sequences for that chat, and sends real-time notifications to the relevant users.",
+            "c4_level": "Component",
+            "trigger": "NATS Event (`MessageReceivedEvent`)"
+        },
+        "Outgoing Message Sending": {
+            "description": "Handles the sending of individual, bulk, or sequence-based messages. A command handler (e.g., `SendMessageHandler`) creates a `DealChatMessage` and publishes an integration event (`MessageCreatedEvent` or `MessageSendingRequestedEvent`) to the NATS bus. The `hypetrain-message-processing-service` subscribes to this event and uses an external provider (e.g., an email service) to deliver the message.",
+            "c4_level": "Component",
+            "trigger": "API Request"
+        },
+        "Scheduled & Bulk Messaging": {
+            "description": "Manages messages that are sent in the future. The `MailingSchedulerService` calculates send times based on daily limits and random delays, creating `DealChatScheduledMessage` records in the database. A separate scheduler (likely `hypetrain-scheduler-service`) monitors these records and publishes a `ScheduledMessageSendingRequestedEvent` at the appropriate time. This event is handled by `ScheduledMessageSendingRequestedHandler`, which in turn fires the `MessageSendingRequestedEvent` to initiate the sending process.",
+            "c4_level": "Component",
+            "trigger": "API Request (for scheduling) / Internal Cron (for sending)"
+        }
+    },
+    "configuration": {
+        "c4_level": "Code",
+        "description": "Details about the project's build, runtime, and development configuration.",
+        "runtime": "The application is configured via environment variables, as specified in `.env.example`. This includes database credentials (Postgres), service-to-service API keys, JWT secrets, and keys for external services like NATS, Redis, Mailgun, and OpenAI.",
+        "containerization": "The `hypetrain-api` application is containerized using a multi-stage Dockerfile (`Dockerfile.dev`). The final image is based on `node:18.15-bullseye-slim`, and the application exposes port 8080.",
+        "dependency_management": "The project uses Yarn for dependency management. A `.yarnrc` file configures a private GitHub Packages registry for packages within the `@infludb-inc` scope, indicating the use of private, shared libraries. The Dockerfile uses `yarn install --frozen-lockfile` to ensure deterministic builds.",
+        "development_tooling": {
+            "linting_and_formatting": "Code quality is enforced using ESLint (`.eslintrc`) and code formatting is standardized with Prettier (`.prettierrc`).",
+            "git_hooks": "A Lefthook configuration (`.lefthook/commit-msg/commitlint`) is used to run `commitlint` on commit messages, enforcing a consistent commit message format."
+        }
+    },
+    "security_posture": {
+        "c4_level": "Code",
+        "description": "An overview of the project's security practices and configurations.",
+        "secrets_management": "Secrets such as database credentials, API keys, and JWT secrets are managed via environment variables. The `.gitignore` and `.dockerignore` files are configured to explicitly exclude `.env` files, preventing secrets from being committed to version control or included in container images. This implies a runtime injection mechanism is used in deployment environments.",
+        "authentication_methods": "The configuration in `.env.example` indicates multiple authentication methods: JWT for user sessions (`JWT_ACCESS_TOKEN_SECRET`), static API keys for service-to-service or administrative access (`SHARED_API_KEY`, `ADMIN_API_KEY`), and Google OAuth (`GOOGLE_AUTH_CLIENT_ID`).",
+        "build_security": "The `.dockerignore` file minimizes the container's attack surface by preventing sensitive files (e.g., `.env`), logs, local dependencies (`node_modules`), and IDE configurations from being included in the build context. Using `yarn install --frozen-lockfile` in the Docker build process mitigates supply chain risks by ensuring dependency versions are locked."
+    }
+}
+```
+
+`reposcan/20251111-1325-gpt5p-ois-cfa.shtgn.reposcan.json`:
+
+```json
+{
+  "meta": {
+    "project": "OIS-CFA",
+    "generated_at": "2025-11-11T10:25:34Z",
+    "source": [
+      "repositories/customer-gitlab/ois-cfa",
+      "packages/contracts/*.yaml",
+      "ops/infra/*",
+      "docs/architecture/*"
+    ],
+    "version": "shtgn-1.0"
+  },
+  "contexts": {
+    "OIS Platform": {
+      "description": "Digital Financial Assets (CFA) platform: issuance, trading/transfer, redemption, payouts, audit & reporting; portals for Issuer/Investor, Backoffice for Operator.",
+      "c4_level": "Context"
+    },
+    "External Systems": {
+      "description": "Bank Nominal Account (payments & reserve), ESIA (OIDC identity), EDO (document signing), HLF network for ledger.",
+      "c4_level": "Context"
+    },
+    "Regulatory": {
+      "description": "KYC/AML, Investor Qualification, Audit logging; compliance with 259-ФЗ, 746‑П, 5635‑У.",
+      "c4_level": "Context"
+    }
+  },
+  "containers": {
+    "portal": {
+      "name": "Portal (Issuer/Investor)",
+      "description": "Public web app for issuers/investors flows (create/publish issuance, buy orders, portfolio).",
+      "technology": "Next.js 15 / TypeScript",
+      "c4_level": "Container"
+    },
+    "backoffice": {
+      "name": "Backoffice (Operator)",
+      "description": "Admin UI for compliance, payouts, audit; OIDC via Keycloak.",
+      "technology": "Next.js 15 / TypeScript",
+      "c4_level": "Container"
+    },
+    "api-gateway": {
+      "name": "API Gateway",
+      "description": "Edge API + routing to internal services; rate limiting and auth integration.",
+      "technology": ".NET 9 (ASP.NET Core + YARP)",
+      "c4_level": "Container"
+    },
+    "issuance-service": {
+      "name": "Issuance Service",
+      "description": "Manage CFA issuances lifecycle; ledger integration (issue/close/get).",
+      "technology": ".NET 9 (ASP.NET Core)",
+      "c4_level": "Container"
+    },
+    "registry-service": {
+      "name": "Registry Service",
+      "description": "Orders, wallets, holdings, transactions; calls Bank and Ledger; outbox pattern.",
+      "technology": ".NET 9 (ASP.NET Core)",
+      "c4_level": "Container"
+    },
+    "settlement-service": {
+      "name": "Settlement Service",
+      "description": "Batch payouts & reconciliation; deterministic IDs; reports.",
+      "technology": ".NET 9 (ASP.NET Core)",
+      "c4_level": "Container"
+    },
+    "compliance-service": {
+      "name": "Compliance Service",
+      "description": "KYC/Qualification checks, complaints; stores investor compliance status.",
+      "technology": ".NET 9 (ASP.NET Core)",
+      "c4_level": "Container"
+    },
+    "identity": {
+      "name": "Identity Provider",
+      "description": "Realm/clients, RBAC and OIDC tokens.",
+      "technology": "Keycloak",
+      "c4_level": "Container"
+    },
+    "esia-adapter": {
+      "name": "ESIA Adapter",
+      "description": "OIDC endpoints and profile (dev mock).",
+      "technology": "HTTP service (OpenAPI 3.1)",
+      "c4_level": "Container"
+    },
+    "bank-adapter": {
+      "name": "Bank Nominal Adapter",
+      "description": "Nominal account open, transfer, batch payouts; idempotent operations.",
+      "technology": "HTTP service (OpenAPI 3.1)",
+      "c4_level": "Container"
+    },
+    "edo-connector": {
+      "name": "EDO Connector",
+      "description": "Send documents for signing (UKEP), track status.",
+      "technology": "HTTP service (OpenAPI 3.0)",
+      "c4_level": "Container"
+    },
+    "ledger": {
+      "name": "HLF Network",
+      "description": "Hyperledger Fabric (orderer, peers, CA, CouchDB); chaincode: issuance, registry.",
+      "technology": "Kubernetes + Helm (fabric-tools)",
+      "c4_level": "Container"
+    },
+    "postgres": {
+      "name": "PostgreSQL",
+      "description": "Primary relational database for services (registry/compliance/settlement).",
+      "technology": "PostgreSQL 14+",
+      "c4_level": "Container"
+    },
+    "observability": {
+      "name": "Observability Stack",
+      "description": "OpenTelemetry collector; Prometheus metrics; Grafana dashboards.",
+      "technology": "OTel + Prometheus + Grafana",
+      "c4_level": "Container"
+    },
+    "kafka": {
+      "name": "Event Bus (planned)",
+      "description": "Kafka topics for issuance/settlement/outbox.",
+      "technology": "Kafka (AsyncAPI defined)",
+      "c4_level": "Container"
+    }
+  },
+  "components": {
+    "gateway.yarp": {
+      "name": "Reverse Proxy Routes",
+      "description": "YARP routes/clusters to identity, issuance, registry, settlement, compliance.",
+      "technology": ".NET YARP",
+      "dependencies": [
+        "identity",
+        "issuance-service",
+        "registry-service",
+        "settlement-service",
+        "compliance-service"
+      ],
+      "c4_level": "Component"
+    },
+    "issuance.ledger-adapter": {
+      "name": "LedgerIssuance Adapter",
+      "description": "Issue/Close/Get against chaincode 'issuance' (mock/real).",
+      "technology": "HttpClient + retry policy",
+      "dependencies": [
+        "ledger"
+      ],
+      "c4_level": "Component"
+    },
+    "registry.core": {
+      "name": "Registry Service Core",
+      "description": "Orders workflow, wallets/holdings updates, idempotency, outbox.",
+      "technology": "C#",
+      "dependencies": [
+        "registry.db",
+        "bank.client",
+        "compliance.client",
+        "registry.ledger-adapter",
+        "kafka"
+      ],
+      "c4_level": "Component"
+    },
+    "registry.db": {
+      "name": "RegistryDbContext",
+      "description": "EF Core models & migrations for wallets, holdings, orders, tx, outbox.",
+      "technology": "EF Core + Npgsql",
+      "dependencies": [
+        "postgres"
+      ],
+      "c4_level": "Component"
+    },
+    "registry.ledger-adapter": {
+      "name": "LedgerRegistry Adapter",
+      "description": "Transfer/Redeem against chaincode 'registry' (mock/real).",
+      "technology": "HttpClient + retry policy",
+      "dependencies": [
+        "ledger"
+      ],
+      "c4_level": "Component"
+    },
+    "bank.client": {
+      "name": "Bank Nominal Client",
+      "description": "Reserve funds / execute payouts; idempotent calls via Idempotency-Key.",
+      "technology": "HttpClient",
+      "dependencies": [
+        "bank-adapter"
+      ],
+      "c4_level": "Component"
+    },
+    "compliance.client": {
+      "name": "Compliance Client",
+      "description": "KYC & Qualification checks; complaints API.",
+      "technology": "HttpClient",
+      "dependencies": [
+        "compliance-service"
+      ],
+      "c4_level": "Component"
+    },
+    "compliance.db": {
+      "name": "ComplianceDbContext",
+      "description": "Investor compliance status, complaints, outbox.",
+      "technology": "EF Core + Npgsql",
+      "dependencies": [
+        "postgres"
+      ],
+      "c4_level": "Component"
+    },
+    "settlement.engine": {
+      "name": "Settlement Engine",
+      "description": "Calculate due payouts, create batch, call bank & mark on ledger, emit event.",
+      "technology": "C#",
+      "dependencies": [
+        "registry-service",
+        "issuance-service",
+        "bank-adapter",
+        "ledger",
+        "postgres"
+      ],
+      "c4_level": "Component"
+    },
+    "sdks.ts": {
+      "name": "TypeScript SDK",
+      "description": "Generated API client for frontends.",
+      "technology": "TypeScript / Axios",
+      "dependencies": [
+        "api-gateway"
+      ],
+      "c4_level": "Component"
+    },
+    "chaincode.issuance": {
+      "name": "Chaincode Issuance",
+      "description": "Issue, Close, Get methods.",
+      "technology": "Go (HLF)",
+      "dependencies": [],
+      "c4_level": "Component"
+    },
+    "chaincode.registry": {
+      "name": "Chaincode Registry",
+      "description": "Transfer, Redeem, GetHistory methods.",
+      "technology": "Go (HLF)",
+      "dependencies": [],
+      "c4_level": "Component"
+    }
+  },
+  "domain_glossary": {
+    "CFA": {
+      "description": "Digital Financial Asset unit.",
+      "c4_level": "Context"
+    },
+    "Issuance": {
+      "description": "CFA issuance (total amount, nominal, schedule, lifecycle: draft→published→closed).",
+      "c4_level": "Context"
+    },
+    "Investor": {
+      "description": "Holder/buyer of CFA; has wallet and holdings.",
+      "c4_level": "Context"
+    },
+    "Issuer": {
+      "description": "Creates and publishes CFA issuances.",
+      "c4_level": "Context"
+    },
+    "NominalAccount": {
+      "description": "Bank account used for custody/settlement operations.",
+      "c4_level": "Context"
+    },
+    "UKEP": {
+      "description": "Qualified electronic signature used for documents (EDO).",
+      "c4_level": "Context"
+    },
+    "Payout": {
+      "description": "Periodic payments to holders per schedule (coupon/dividend).",
+      "c4_level": "Context"
+    },
+    "Settlement": {
+      "description": "Batch execution of payouts & reconciliation.",
+      "c4_level": "Context"
+    }
+  },
+  "deployment_topology": {
+    "k8s-dev": {
+      "name": "Kubernetes · ois-dev",
+      "description": "Services run in K8s; HLF network with NLB; OTel→Prometheus→Grafana; Postgres stateful.",
+      "relationships": [
+        {
+          "source": "portal",
+          "destination": "api-gateway",
+          "description": "HTTPS"
+        },
+        {
+          "source": "backoffice",
+          "destination": "api-gateway",
+          "description": "HTTPS"
+        },
+        {
+          "source": "api-gateway",
+          "destination": "identity",
+          "description": "OIDC"
+        },
+        {
+          "source": "api-gateway",
+          "destination": "issuance-service",
+          "description": "HTTP"
+        },
+        {
+          "source": "api-gateway",
+          "destination": "registry-service",
+          "description": "HTTP"
+        },
+        {
+          "source": "api-gateway",
+          "destination": "settlement-service",
+          "description": "HTTP"
+        },
+        {
+          "source": "api-gateway",
+          "destination": "compliance-service",
+          "description": "HTTP"
+        },
+        {
+          "source": "registry-service",
+          "destination": "postgres",
+          "description": "Npgsql"
+        },
+        {
+          "source": "compliance-service",
+          "destination": "postgres",
+          "description": "Npgsql"
+        },
+        {
+          "source": "settlement-service",
+          "destination": "postgres",
+          "description": "Npgsql"
+        },
+        {
+          "source": "issuance-service",
+          "destination": "ledger",
+          "description": "Chaincode: issuance"
+        },
+        {
+          "source": "registry-service",
+          "destination": "ledger",
+          "description": "Chaincode: registry"
+        },
+        {
+          "source": "registry-service",
+          "destination": "bank-adapter",
+          "description": "Reserve/transfer"
+        },
+        {
+          "source": "settlement-service",
+          "destination": "bank-adapter",
+          "description": "Batch payouts"
+        },
+        {
+          "source": "api-gateway",
+          "destination": "observability",
+          "description": "OTel metrics"
+        },
+        {
+          "source": "issuance-service",
+          "destination": "observability",
+          "description": "OTel metrics"
+        },
+        {
+          "source": "registry-service",
+          "destination": "observability",
+          "description": "OTel metrics"
+        },
+        {
+          "source": "settlement-service",
+          "destination": "observability",
+          "description": "OTel metrics"
+        },
+        {
+          "source": "compliance-service",
+          "destination": "observability",
+          "description": "OTel metrics"
+        },
+        {
+          "source": "api-gateway",
+          "destination": "esia-adapter",
+          "description": "OIDC flows (dev mock)"
+        },
+        {
+          "source": "api-gateway",
+          "destination": "edo-connector",
+          "description": "Document signing (UKEP)"
+        },
+        {
+          "source": "kafka",
+          "destination": "observability",
+          "description": "Future: metrics"
+        },
+        {
+          "source": "registry-service",
+          "destination": "kafka",
+          "description": "Outbox events (planned)"
+        },
+        {
+          "source": "settlement-service",
+          "destination": "kafka",
+          "description": "Events (payout executed)"
+        }
+      ],
+      "c4_level": "Container"
+    }
+  },
+  "data_schema": {
+    "description": "PostgreSQL schemas for registry/compliance/settlement (numeric(20,8) for monetary fields).",
+    "tables": {
+      "wallets": {
+        "description": "Balances per owner (investor or issuer).",
+        "columns": [
+          "id uuid PK",
+          "owner_type varchar(50) NOT NULL",
+          "owner_id uuid NOT NULL UNIQUE WITH owner_type",
+          "balance numeric(20,8) NOT NULL",
+          "blocked numeric(20,8) NOT NULL",
+          "updated_at timestamptz NOT NULL"
+        ]
+      },
+      "holdings": {
+        "description": "Investor positions per issuance.",
+        "columns": [
+          "id uuid PK",
+          "investor_id uuid NOT NULL",
+          "issuance_id uuid NOT NULL",
+          "quantity numeric(20,8) NOT NULL",
+          "updated_at timestamptz NOT NULL",
+          "UNIQUE(investor_id, issuance_id)"
+        ]
+      },
+      "orders": {
+        "description": "Buy orders with idempotency and ledger tx hash.",
+        "columns": [
+          "id uuid PK",
+          "investor_id uuid NOT NULL",
+          "issuance_id uuid NOT NULL",
+          "amount numeric(20,8) NOT NULL",
+          "status varchar(50) NOT NULL",
+          "wallet_id uuid NULL",
+          "dlt_tx_hash text NULL",
+          "idem_key varchar(255) UNIQUE",
+          "created_at timestamptz NOT NULL",
+          "updated_at timestamptz NOT NULL",
+          "confirmed_at timestamptz NULL"
+        ]
+      },
+      "tx": {
+        "description": "Ledger-related transfers/redemptions with status and references.",
+        "columns": [
+          "id uuid PK",
+          "issuance_id uuid NOT NULL",
+          "from_wallet_id uuid NULL",
+          "to_wallet_id uuid NULL",
+          "amount numeric(20,8) NOT NULL",
+          "status varchar(50) NOT NULL",
+          "completed_at timestamptz NULL"
+        ]
+      },
+      "outbox_messages": {
+        "description": "Outbox pattern for reliable events.",
+        "columns": [
+          "id uuid PK",
+          "topic varchar(255) NOT NULL",
+          "payload jsonb NOT NULL",
+          "created_at timestamptz NOT NULL",
+          "processed_at timestamptz NULL",
+          "INDEX(processed_at, created_at)"
+        ]
+      },
+      "investors_compliance": {
+        "description": "KYC & qualification state for investor.",
+        "columns": [
+          "investor_id uuid PK",
+          "kyc varchar(50) NOT NULL",
+          "qualification_tier varchar(50) NOT NULL",
+          "qual_limit numeric(20,8)",
+          "qual_used numeric(20,8)",
+          "updated_at timestamptz NOT NULL"
+        ]
+      },
+      "reconciliation_log": {
+        "description": "Settlement reconciliation log per batch.",
+        "columns": [
+          "id uuid PK",
+          "batch_id uuid NOT NULL",
+          "payload_json jsonb NOT NULL",
+          "created_at timestamptz NOT NULL"
+        ]
+      }
+    },
+    "relationships": [
+      {
+        "from": "wallets",
+        "to": "holdings",
+        "type": "One-to-Many",
+        "description": "Investor wallet → many holdings by issuance"
+      },
+      {
+        "from": "orders",
+        "to": "tx",
+        "type": "One-to-Many",
+        "description": "Order may create multiple tx records (transfers/redemptions)"
+      },
+      {
+        "from": "investors_compliance",
+        "to": "orders",
+        "type": "One-to-Many",
+        "description": "Compliance gate before confirming orders"
+      }
+    ]
+  },
+  "api_endpoints": {
+    "gateway": {
+      "routes": [
+        "GET /health",
+        "/* → clusters: identity, issuance, registry, settlement, compliance"
+      ]
+    },
+    "issuance-service": {
+      "endpoints": [
+        "POST /v1/issuances",
+        "GET /v1/issuances/{id}",
+        "POST /v1/issuances/{id}/publish",
+        "POST /v1/issuances/{id}/close",
+        "GET /v1/issuances/{id}/status"
+      ]
+    },
+    "registry-service": {
+      "endpoints": [
+        "POST /v1/orders  (Idempotency-Key)",
+        "GET /wallets/{investorId}",
+        "POST /issuances/{id}/redeem",
+        "GET /v1/market/issuances  (via gateway)"
+      ]
+    },
+    "settlement-service": {
+      "endpoints": [
+        "POST /v1/settlement/run?date=YYYY-MM-DD",
+        "GET /v1/reports/payouts?from&to"
+      ]
+    },
+    "compliance-service": {
+      "endpoints": [
+        "POST /v1/compliance/kyc/check",
+        "POST /v1/compliance/qualification/evaluate",
+        "GET /v1/complaints",
+        "GET /v1/complaints/{id}"
+      ]
+    },
+    "esia-adapter": {
+      "endpoints": [
+        "GET /oidc/authorize",
+        "POST /oidc/callback",
+        "GET /userinfo",
+        "GET /profile"
+      ]
+    },
+    "bank-adapter": {
+      "endpoints": [
+        "POST /nominal/accounts",
+        "GET /nominal/accounts/{accountId}",
+        "POST /nominal/transfer",
+        "POST /nominal/payouts/batch",
+        "GET /nominal/payouts/{batchId}/status"
+      ]
+    },
+    "edo-connector": {
+      "endpoints": [
+        "POST /documents",
+        "GET /documents/{id}/status"
+      ]
+    }
+  },
+  "external_services": [
+    {
+      "name": "Hyperledger Fabric",
+      "type": "ledger",
+      "notes": "chaincode: issuance, registry"
+    },
+    {
+      "name": "PostgreSQL",
+      "type": "db",
+      "notes": "registry/compliance/settlement schemas"
+    },
+    {
+      "name": "Keycloak",
+      "type": "idp",
+      "notes": "OIDC, RBAC"
+    },
+    {
+      "name": "ESIA",
+      "type": "oidc",
+      "notes": "public identity provider (mock for dev)"
+    },
+    {
+      "name": "Bank Nominal API",
+      "type": "payments",
+      "notes": "reserve, transfers, payouts"
+    },
+    {
+      "name": "EDO",
+      "type": "signing",
+      "notes": "UKEP document workflow"
+    },
+    {
+      "name": "Prometheus",
+      "type": "monitoring",
+      "notes": "metrics scraping"
+    },
+    {
+      "name": "Grafana",
+      "type": "dashboards",
+      "notes": "visualization"
+    },
+    {
+      "name": "OpenTelemetry Collector",
+      "type": "tracing",
+      "notes": "ingest traces/metrics/logs"
+    },
+    {
+      "name": "Kafka",
+      "type": "events",
+      "notes": "AsyncAPI defined; planned"
+    }
+  ],
+  "sources": {
+    "services/registry/Program.cs": [
+      "DbContext: RegistryDbContext; HttpClient for Bank/Compliance; OTel setup"
+    ],
+    "services/registry/DTOs/*.cs": [
+      "OrderResponse, RedeemRequest/Response, WalletResponse"
+    ],
+    "services/registry/Migrations/*InitialCreate*.cs": [
+      "wallets, holdings tables; indexes and precision numeric(20,8)"
+    ],
+    "services/compliance/ComplianceDbContext.cs": [
+      "investors_compliance table; complaints; outbox"
+    ],
+    "packages/contracts/openapi-*.yaml": [
+      "OpenAPI endpoints for issuance, registry, settlement, compliance, ESIA, Bank, EDO"
+    ],
+    "ops/infra/helm/chaincode-build/*": [
+      "Helm jobs for install/approve/commit/rollback chaincode"
+    ],
+    "ops/fabric/scripts/*.sh": [
+      "approve/commit chaincode; peer CLI usage"
+    ],
+    "ops/infra/*prometheus*.yml + grafana-dashboards.json": [
+      "Metrics scraping & dashboards"
+    ],
+    "docs/architecture/c4/*": [
+      "C1-Context, C2-Containers, C4-Code drawio sources"
+    ],
+    "packages/sdks/ts/src/*.ts": [
+      "Typed API client for frontends"
+    ]
+  }
+}
+```
