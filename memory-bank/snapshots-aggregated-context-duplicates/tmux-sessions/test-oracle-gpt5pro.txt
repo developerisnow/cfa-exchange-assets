@@ -1,0 +1,167 @@
+
+• Сейчас добавлю шаг в план и выполню oracle_gpt5.oracle_query с подготовленным промптом и нужными файлами.                    
+
+• Updated Plan                                                 
+  └ ✔ Review NX-01 session and related Scrum memory-bank files 
+    ✔ Review OIS-CFA context docs and NX-01 task spec          
+    ✔ Select best context files for GPT-5 Pro delegation       
+    ✔ Draft high-quality GPT-5 Pro prompt and oracle_query payload                                                             
+    □ Execute oracle_gpt5.oracle_query with prompt and files   
+
+• Called                                                       
+  └ oracle_gpt5.oracle_query({"model":"gpt-5-pro","prompt":"You are Oracle, a focused one-shot problem solver. Emphasize direct answers, cite any files referenced, and clearly note when the search tool was used.\n\nТы — GPT‑5 Pro в роли                   
+        **Oracle‑архитектора NX‑01** для репозитория `ois-cfa`. Отвечай по-русски, с B2‑English terms и короткими, структурными формулировками (Why→What→How→Result, таблицы, чек-листы). Нулевая галлюцинация: любые факты только из приложенных файлов.      
+        \n\n---\n\n## 0. Контекст и входные файлы\n\n**Рабочая среда:**\n\n- Личная mono‑repo: `prj_Cifra-rwa-exachange-assets` (контрольная плоскость, manifests, memory-bank, AGENTS).\n- Командный repo: `ois-cfa` (основной код, спецификации, тесты).     
+        Мы работаем в worktree\n  `repositories/customer-gitlab/wt__ois-cfa__NX01` на ветке `tasks/NX-01-spec-validate-and-matrix`.\n- Trunk/Branch/Leaf, RepoScan, CodeMachine уже описаны в твоих предыдущих отчётах — сейчас фокус **узко на NX‑01**.       
+        \n\n**Подключённые файлы (важно использовать):**\n\n1. `tasks/NX-01-spec-validate-and-matrix.md` — постановка задачи NX‑01.\n2. `docs/context/PROJECT-CONTEXT.md` — текущий проектный контекст, в т.ч. раздел `API/Event Matrix` и ссылки на           
+        NX‑01..NX‑03.\n3. `docs/context/WBS-OIS.md` — WBS по `ois-cfa`, связь Milestones ↔ NX‑таски (M1 = NX‑01).\n4. `docs/context/RULES-SUMMARY.md` — выжимка из .cursor/rules: spec‑first, test‑first, нулевая галлюцинация, требования к артефактам.       
+        \n5. `memory-bank/snapshots-aggregated-context-duplicates/20251117-c2p_ois-cfa.txt` — свежий code2prompt‑снимок `ois-cfa@infra.defis.deploy` (структура, ключевые файлы).\n6. `memory-bank/snapshots-aggregated-context-duplicates/20251117-           
+        c2p_aggregated-gpt5pro-talks.txt` — агрегированные твои прошлые отчёты + контекст по NX‑серии и T/B/L.\n7. `packages/contracts/openapi-gateway.yaml` — REST API gateway спецификация (entrypoint для API Matrix).\n8. `packages/contracts/openapi-     
+        issuance.yaml` — спецификация Issuance‑сервиса.\n9. `packages/contracts/openapi-registry.yaml` — спецификация Registry‑сервиса.\n10. `packages/contracts/asyncapi.yaml` — события Kafka (API/Event часть NX‑01).\n\n**Суть задачи NX‑01 (см.           
+        `tasks/NX-01-spec-validate-and-matrix.md` и WBS):**\n\n> Линтинг и базовая валидация OpenAPI/AsyncAPI/JSON Schemas, сверка с кодом и формирование проверенной **API/Event Matrix** + Gap List.\n> Результат должен лечь в `docs/context/PROJECT-       
+        CONTEXT.md` (разделы API/Event Matrix и Gap List) + в артефакты в `artifacts/spec-*`.\n\nВажно: ты **не можешь выполнять реальные команды** (Spectral/AsyncAPI/AJV), но можешь:\n\n- прочитать YAML/JSON и кодовые сниппеты из `c2p_ois-cfa.txt`;      
+        \n- спроектировать набор команд и ожиданий;\n- построить матрицу и Gap List по фактическому содержанию файлов.\n\n---\n\n## 1. Что сделать (ориентир на NX‑01 acceptance criteria)\n\nИспользуя все указанные файлы:\n\n1. **Спроектировать план       
+        lint/validate для NX‑01:**\n   - какие команды должны быть выполнены (Spectral, AsyncAPI CLI, AJV) и по каким путям;\n   - какие типы проблем они потенциально поймают, учитывая содержимое YAML/JSON (без выдумывания конкретных ошибок, только       
+        реальные, увиденные тобой).\n\n2. **Построить актуальную API/Event Matrix:**\n   - REST‑часть: на основе `openapi-gateway.yaml` + `openapi-issuance.yaml` + `openapi-registry.yaml` + `PROJECT-CONTEXT` + `c2p_ois-cfa.txt`;\n   - Event‑часть: на     
+        основе `asyncapi.yaml` + кода событий из `c2p_ois-cfa.txt` (issuance, registry, settlement, compliance).\n\n3. **Выявить SPEC DIFF / Gap List:**\n   - несоответствия между OpenAPI и фактическими endpoint’ами/DTO (как в отчёте NX‑03 по Issuance,   
+        но теперь сквозняком по gateway+services);\n   - несоответствия между AsyncAPI и событиями в коде (topic’и без продьюсеров/консьюмеров, поля как `dltTxHash`, которых нет в спеках и наоборот);\n   - пробелы по JSON Schema (типы/форматы, ссылки     
+        `$ref`, которые потенциально будут проблемой для AJV).\n\n4. **Сформировать артефакты для человека:**\n   - готовый блок для обновления `docs/context/PROJECT-CONTEXT.md` (API/Event Matrix + Gap List), совместимый со стилем текущего файла;         
+        \n   - шаблоны/структуру для `artifacts/spec-lint-openapi.txt`, `artifacts/spec-validate-asyncapi.txt`, `artifacts/spec-validate-jsonschema.txt` (не сами лог‑аутпуты, а заголовки + пояснения, что туда класть после запуска команд).\n\n---\n\n##    
+        2. Ограничения и правила\n\n- Не придумывай \"результаты\" Spectral/AsyncAPI/AJV, которые ты не видишь глазами в YAML/JSON.\n  - Можно писать: «Ajv, скорее всего, пожалуется на custom `format: uuid`/`decimal`, нужно либо `pattern`, либо           
+        регистрировать формат» — **если ты это реально видишь** в JSON Schema.\n- Уважай Trunk/Branch/Leaf:\n  - `packages/contracts/**` и `docs/context/**` — Trunk уровень (спеки и контекст);\n  - `services/**`, `apps/**` — Branch;\n  - `tests/**`,      
+        `tools/**` — Leaf.\n  В выводе явно отмечай, что мы делаем trunk‑level выравнивание спецификаций.\n- Стиль ответа:\n  - Русский, но термины как есть (`spec-first`, `API Matrix`, `AsyncAPI`, `YARP`, `SPEC DIFF`);\n  - структуры → таблицы, чек-     
+        листы, короткие абзацы;\n  - не переписывай полностью `PROJECT-CONTEXT.md`, дай только те блоки, которые нужно заменить/добавить.\n\n---\n\n## 3. Формат ответа (очень важно)\n\nСоблюдай **ровно такую структуру**:\n\n### 3.1. `# TL;DR`\n\n3–       
+        5 bullets формата:\n\n- Why (зачем нужен NX‑01 в текущем состоянии репо);\n- What (что именно ты предлагаешь сделать и куда положить результаты);\n- Result (как это помогает NX‑02/NX‑03/NX‑04 и общему T/B/L).\n\n---\n\n### 3.2. `# 1. Lint &       
+        Validation Plan (NX-01)`\n\nОбязательно:\n\n1.1. Кратко — **Why / What / How**.\n\n1.2. Таблица:\n\n| Tool        | Target files/patterns                           | Command (пример)                                                           |     
+        Notes |\n|------------|--------------------------------------------------|----------------------------------------------------------------------------|-------|\n| Spectral   | `packages/contracts/openapi-*.yaml`              | `npx -y @stoplight/ 
+        spectral-cli@6 lint packages/contracts/openapi-*.yaml` | ...   |\n| AsyncAPI   | `packages/contracts/asyncapi.yaml`               | `docker run --rm -v \"$PWD:/work\" asyncapi/cli:2.10.0 validate ...`        | ...   |\n| AJV        | `packages/   
+        contracts/schemas/*.json`              | `npx -y ajv-cli@5 compile -s packages/contracts/schemas/*.json`           | ...   |\n\n1.3. Подсекция **\"Что смотреть в результатах\"** — чек-лист, что человек должен отфильтровать и перенести в Gap List, 
+        а что можно оставить как noise.\n\n---\n\n### 3.3. `# 2. API/Event Matrix — блок для PROJECT-CONTEXT.md`\n\nДай **готовый markdown‑блок**, который можно вставить в `docs/context/PROJECT-CONTEXT.md` вместо существующей матрицы.\nОбязательно оберни 
+        его маркерами, чтобы Codex/я мог сделать патч:\n\n```markdown\n<!-- BEGIN: PROJECT-CONTEXT:API-EVENT-MATRIX -->\n\n## API/Event Matrix\n\n### REST API Matrix (Gateway → Services)\n\n| Gateway Endpoint | Method | YARP Route | Target Service |      
+        Service Endpoint | Status | Notes |\n|-----------------|--------|------------|----------------|------------------|--------|-------|\n| ...             | ...    | ...        | ...            | ...              | ...    | ...   |\n\n### Event Matrix
+        (AsyncAPI ↔ Code)\n\n| Topic                | Producer Service | Consumer Services        | Payload Schema         | Status | Notes |\n|----------------------|------------------|--------------------------|------------------------|--------|-------|
+        \n| `ois.issuance.*`     | Issuance         | Settlement (и/или ...)   | `Issuance*Payload`     | ...    | ...   |\n| ...                  | ...              | ...                      | ...                    | ...    | ...   |\n\n<!-- END:      
+        PROJECT-CONTEXT:API-EVENT-MATRIX -->\n```\n\n- Наполни таблицы реальными данными на основе `openapi-*`, `asyncapi.yaml` и `c2p_ois-cfa.txt`.\n- Если что-то уже описано в текущем `PROJECT-CONTEXT.md`, используй это как baseline, но поправь/        
+        дополни при расхождениях.\n\n---\n\n### 3.4. `# 3. SPEC DIFF / Gap List`\n\nОтдельный блок, тоже в виде готового фрагмента для `PROJECT-CONTEXT.md`:\n\n```markdown\n<!-- BEGIN: PROJECT-CONTEXT:API-EVENT-GAPS -->\n\n### Gap List (NX-01 Spec        
+        Validation)\n\n#### OpenAPI (REST)\n\n- [Blocking] ...\n- [Non-blocking] ...\n\n#### AsyncAPI (Events)\n\n- [Blocking] ...\n- [Non-blocking] ...\n\n#### JSON Schemas\n\n- [Blocking] ...\n- [Non-blocking] ...\n\n<!-- END: PROJECT-CONTEXT:API-      
+        EVENT-GAPS -->\n```\n\n- Заполни списки **только реальными проблемами**, которые ты видишь в спеках/коде.\n- Можешь ссылаться на строки/пути (из `c2p_ois-cfa.txt` или YAML), чтобы мне было проще проверить.\n\n---\n\n### 3.5. `# 4. Artifacts & Next
+        Steps`\n\nОпиши:\n\n- какую структуру должны иметь файлы:\n  - `artifacts/spec-lint-openapi.txt`\n  - `artifacts/spec-validate-asyncapi.txt`\n  - `artifacts/spec-validate-jsonschema.txt`\n\nПример:\n\n```text\nartifacts/spec-lint-openapi.txt\n-   
+        Header: Generated: <date>, Task: NX-01\n- Then: raw output of Spectral (no manual edits)\n- At the end: short summary block (3-5 bullet points) with main warnings/errors to care about\n```\n\n- как результаты NX‑01 будут использованы в NX‑02/     
+        NX‑03/NX‑04 (1–2 абзаца, Why→Result).\n\n---\n\nЕсли чего-то принципиально не хватает в подключённых файлах (например, нет текущих JSON Schemas), явно скажи об этом в TL;DR и в Gap List как отдельный пункт.\n","files":"repositories/customer-      
+        gitlab/wt__ois-cfa__NX01/tasks/NX-01-spec-validate-and-matrix.md repositories/customer-gitlab/wt__ois-cfa__NX01/docs/context/PROJECT-CONTEXT.md repositories/customer-gitlab/wt__ois-cfa__NX01/docs/context/WBS-OIS.md repositories/customer-gitlab/   
+        wt__ois-cfa__NX01/docs/context/RULES-SUMMARY.md memory-bank/snapshots-aggregated-context-duplicates/20251117-c2p_ois-cfa.txt memory-bank/snapshots-aggregated-context-duplicates/20251117-c2p_aggregated-gpt5pro-talks.txt repositories/customer-      
+        gitlab/wt__ois-cfa__NX01/packages/contracts/openapi-gateway.yaml repositories/customer-gitlab/wt__ois-cfa__NX01/packages/contracts/openapi-issuance.yaml repositories/customer-gitlab/wt__ois-cfa__NX01/packages/contracts/openapi-registry.yaml       
+        repositories/customer-gitlab/wt__ois-cfa__NX01/packages/contracts/asyncapi.yaml","use_browser":true})                  
+    1 validation error for call[oracle_query]                  
+    files                                                      
+      Input should be a valid list [type=list_type, input_value='repositories/customer-gi...contracts/asyncapi.yaml', input_type=str]                                                                                                                          
+        For further information visit https://errors.pydantic.dev/2.12/v/list_type                                             
+
+─ Worked for 50s ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• Файлы туда ожидаются списком, а не строкой — сейчас поправлю вызов и перезапущу oracle_query с массивом путей.               
+
+• Called                                                       
+  └ oracle_gpt5.oracle_query({"model":"gpt-5-pro","prompt":"You are Oracle, a focused one-shot problem solver. Emphasize direct answers, cite any files referenced, and clearly note when the search tool was used.\n\nТы — GPT‑5 Pro в роли                   
+        **Oracle‑архитектора NX‑01** для репозитория `ois-cfa`. Отвечай по-русски, с B2‑English terms и короткими, структурными формулировками (Why→What→How→Result, таблицы, чек-листы). Нулевая галлюцинация: любые факты только из приложенных файлов.      
+        \n\n---\n\n## 0. Контекст и входные файлы\n\n**Рабочая среда:**\n\n- Личная mono‑repo: `prj_Cifra-rwa-exachange-assets` (контрольная плоскость, manifests, memory-bank, AGENTS).\n- Командный repo: `ois-cfa` (основной код, спецификации, тесты).     
+        Мы работаем в worktree\n  `repositories/customer-gitlab/wt__ois-cfa__NX01` на ветке `tasks/NX-01-spec-validate-and-matrix`.\n- Trunk/Branch/Leaf, RepoScan, CodeMachine уже описаны в твоих предыдущих отчётах — сейчас фокус **узко на NX‑01**.       
+        \n\n**Подключённые файлы (важно использовать):**\n\n1. `tasks/NX-01-spec-validate-and-matrix.md` — постановка задачи NX‑01.\n2. `docs/context/PROJECT-CONTEXT.md` — текущий проектный контекст, в т.ч. раздел `API/Event Matrix` и ссылки на           
+        NX‑01..NX‑03.\n3. `docs/context/WBS-OIS.md` — WBS по `ois-cfa`, связь Milestones ↔ NX‑таски (M1 = NX‑01).\n4. `docs/context/RULES-SUMMARY.md` — выжимка из .cursor/rules: spec‑first, test‑first, нулевая галлюцинация, требования к артефактам.       
+        \n5. `memory-bank/snapshots-aggregated-context-duplicates/20251117-c2p_ois-cfa.txt` — свежий code2prompt‑снимок `ois-cfa@infra.defis.deploy` (структура, ключевые файлы).\n6. `memory-bank/snapshots-aggregated-context-duplicates/20251117-           
+        c2p_aggregated-gpt5pro-talks.txt` — агрегированные твои прошлые отчёты + контекст по NX‑серии и T/B/L.\n7. `packages/contracts/openapi-gateway.yaml` — REST API gateway спецификация (entrypoint для API Matrix).\n8. `packages/contracts/openapi-     
+        issuance.yaml` — спецификация Issuance‑сервиса.\n9. `packages/contracts/openapi-registry.yaml` — спецификация Registry‑сервиса.\n10. `packages/contracts/asyncapi.yaml` — события Kafka (API/Event часть NX‑01).\n\n**Суть задачи NX‑01 (см.           
+        `tasks/NX-01-spec-validate-and-matrix.md` и WBS):**\n\n> Линтинг и базовая валидация OpenAPI/AsyncAPI/JSON Schemas, сверка с кодом и формирование проверенной **API/Event Matrix** + Gap List.\n> Результат должен лечь в `docs/context/PROJECT-       
+        CONTEXT.md` (разделы API/Event Matrix и Gap List) + в артефакты в `artifacts/spec-*`.\n\nВажно: ты **не можешь выполнять реальные команды** (Spectral/AsyncAPI/AJV), но можешь:\n\n- прочитать YAML/JSON и кодовые сниппеты из `c2p_ois-cfa.txt`;      
+        \n- спроектировать набор команд и ожиданий;\n- построить матрицу и Gap List по фактическому содержанию файлов.\n\n---\n\n## 1. Что сделать (ориентир на NX‑01 acceptance criteria)\n\nИспользуя все указанные файлы:\n\n1. **Спроектировать план       
+        lint/validate для NX‑01:**\n   - какие команды должны быть выполнены (Spectral, AsyncAPI CLI, AJV) и по каким путям;\n   - какие типы проблем они потенциально поймают, учитывая содержимое YAML/JSON (без выдумывания конкретных ошибок, только       
+        реальные, увиденные тобой).\n\n2. **Построить актуальную API/Event Matrix:**\n   - REST‑часть: на основе `openapi-gateway.yaml` + `openapi-issuance.yaml` + `openapi-registry.yaml` + `PROJECT-CONTEXT` + `c2p_ois-cfa.txt`;\n   - Event‑часть: на     
+        основе `asyncapi.yaml` + кода событий из `c2p_ois-cfa.txt` (issuance, registry, settlement, compliance).\n\n3. **Выявить SPEC DIFF / Gap List:**\n   - несоответствия между OpenAPI и фактическими endpoint’ами/DTO (как в отчёте NX‑03 по Issuance,   
+        но теперь сквозняком по gateway+services);\n   - несоответствия между AsyncAPI и событиями в коде (topic’и без продьюсеров/консьюмеров, поля как `dltTxHash`, которых нет в спеках и наоборот);\n   - пробелы по JSON Schema (типы/форматы, ссылки     
+        `$ref`, которые потенциально будут проблемой для AJV).\n\n4. **Сформировать артефакты для человека:**\n   - готовый блок для обновления `docs/context/PROJECT-CONTEXT.md` (API/Event Matrix + Gap List), совместимый со стилем текущего файла;         
+        \n   - шаблоны/структуру для `artifacts/spec-lint-openapi.txt`, `artifacts/spec-validate-asyncapi.txt`, `artifacts/spec-validate-jsonschema.txt` (не сами лог‑аутпуты, а заголовки + пояснения, что туда класть после запуска команд).\n\n---\n\n##    
+        2. Ограничения и правила\n\n- Не придумывай \"результаты\" Spectral/AsyncAPI/AJV, которые ты не видишь глазами в YAML/JSON.\n  - Можно писать: «Ajv, скорее всего, пожалуется на custom `format: uuid`/`decimal`, нужно либо `pattern`, либо           
+        регистрировать формат» — **если ты это реально видишь** в JSON Schema.\n- Уважай Trunk/Branch/Leaf:\n  - `packages/contracts/**` и `docs/context/**` — Trunk уровень (спеки и контекст);\n  - `services/**`, `apps/**` — Branch;\n  - `tests/**`,      
+        `tools/**` — Leaf.\n  В выводе явно отмечай, что мы делаем trunk‑level выравнивание спецификаций.\n- Стиль ответа:\n  - Русский, но термины как есть (`spec-first`, `API Matrix`, `AsyncAPI`, `YARP`, `SPEC DIFF`);\n  - структуры → таблицы, чек-     
+        листы, короткие абзацы;\n  - не переписывай полностью `PROJECT-CONTEXT.md`, дай только те блоки, которые нужно заменить/добавить.\n\n---\n\n## 3. Формат ответа (очень важно)\n\nСоблюдай **ровно такую структуру**:\n\n### 3.1. `# TL;DR`\n\n3–       
+        5 bullets формата:\n\n- Why (зачем нужен NX‑01 в текущем состоянии репо);\n- What (что именно ты предлагаешь сделать и куда положить результаты);\n- Result (как это помогает NX‑02/NX‑03/NX‑04 и общему T/B/L).\n\n---\n\n### 3.2. `# 1. Lint &       
+        Validation Plan (NX-01)`\n\nОбязательно:\n\n1.1. Кратко — **Why / What / How**.\n\n1.2. Таблица:\n\n| Tool        | Target files/patterns                           | Command (пример)                                                           |     
+        Notes |\n|------------|--------------------------------------------------|----------------------------------------------------------------------------|-------|\n| Spectral   | `packages/contracts/openapi-*.yaml`              | `npx -y @stoplight/ 
+        spectral-cli@6 lint packages/contracts/openapi-*.yaml` | ...   |\n| AsyncAPI   | `packages/contracts/asyncapi.yaml`               | `docker run --rm -v \"$PWD:/work\" asyncapi/cli:2.10.0 validate ...`        | ...   |\n| AJV        | `packages/   
+        contracts/schemas/*.json`              | `npx -y ajv-cli@5 compile -s packages/contracts/schemas/*.json`           | ...   |\n\n1.3. Подсекция **\"Что смотреть в результатах\"** — чек-лист, что человек должен отфильтровать и перенести в Gap List, 
+        а что можно оставить как noise.\n\n---\n\n### 3.3. `# 2. API/Event Matrix — блок для PROJECT-CONTEXT.md`\n\nДай **готовый markdown‑блок**, который можно вставить в `docs/context/PROJECT-CONTEXT.md` вместо существующей матрицы.\nОбязательно оберни 
+        его маркерами, чтобы Codex/я мог сделать патч:\n\n```markdown\n<!-- BEGIN: PROJECT-CONTEXT:API-EVENT-MATRIX -->\n\n## API/Event Matrix\n\n### REST API Matrix (Gateway → Services)\n\n| Gateway Endpoint | Method | YARP Route | Target Service |      
+        Service Endpoint | Status | Notes |\n|-----------------|--------|------------|----------------|------------------|--------|-------|\n| ...             | ...    | ...        | ...            | ...              | ...    | ...   |\n\n### Event Matrix
+        (AsyncAPI ↔ Code)\n\n| Topic                | Producer Service | Consumer Services        | Payload Schema         | Status | Notes |\n|----------------------|------------------|--------------------------|------------------------|--------|-------|
+        \n| `ois.issuance.*`     | Issuance         | Settlement (и/или ...)   | `Issuance*Payload`     | ...    | ...   |\n| ...                  | ...              | ...                      | ...                    | ...    | ...   |\n\n<!-- END:      
+        PROJECT-CONTEXT:API-EVENT-MATRIX -->\n```\n\n- Наполни таблицы реальными данными на основе `openapi-*`, `asyncapi.yaml` и `c2p_ois-cfa.txt`.\n- Если что-то уже описано в текущем `PROJECT-CONTEXT.md`, используй это как baseline, но поправь/        
+        дополни при расхождениях.\n\n---\n\n### 3.4. `# 3. SPEC DIFF / Gap List`\n\nОтдельный блок, тоже в виде готового фрагмента для `PROJECT-CONTEXT.md`:\n\n```markdown\n<!-- BEGIN: PROJECT-CONTEXT:API-EVENT-GAPS -->\n\n### Gap List (NX-01 Spec        
+        Validation)\n\n#### OpenAPI (REST)\n\n- [Blocking] ...\n- [Non-blocking] ...\n\n#### AsyncAPI (Events)\n\n- [Blocking] ...\n- [Non-blocking] ...\n\n#### JSON Schemas\n\n- [Blocking] ...\n- [Non-blocking] ...\n\n<!-- END: PROJECT-CONTEXT:API-      
+        EVENT-GAPS -->\n```\n\n- Заполни списки **только реальными проблемами**, которые ты видишь в спеках/коде.\n- Можешь ссылаться на строки/пути (из `c2p_ois-cfa.txt` или YAML), чтобы мне было проще проверить.\n\n---\n\n### 3.5. `# 4. Artifacts & Next
+        Steps`\n\nОпиши:\n\n- какую структуру должны иметь файлы:\n  - `artifacts/spec-lint-openapi.txt`\n  - `artifacts/spec-validate-asyncapi.txt`\n  - `artifacts/spec-validate-jsonschema.txt`\n\nПример:\n\n```text\nartifacts/spec-lint-openapi.txt\n-   
+        Header: Generated: <date>, Task: NX-01\n- Then: raw output of Spectral (no manual edits)\n- At the end: short summary block (3-5 bullet points) with main warnings/errors to care about\n```\n\n- как результаты NX‑01 будут использованы в NX‑02/     
+        NX‑03/NX‑04 (1–2 абзаца, Why→Result).\n\n---\n\nЕсли чего-то принципиально не хватает в подключённых файлах (например, нет текущих JSON Schemas), явно скажи об этом в TL;DR и в Gap List как отдельный пункт.\n","files":["repositories/customer-     
+        gitlab/wt__ois-cfa__NX01/tasks/NX-01-spec-validate-and-matrix.md","repositories/customer-gitlab/wt__ois-cfa__NX01/docs/context/PROJECT-CONTEXT.md","repositories/customer-gitlab/wt__ois-cfa__NX01/docs/context/WBS-OIS.md","repositories/customer-    
+        gitlab/wt__ois-cfa__NX01/docs/context/RULES-SUMMARY.md","memory-bank/snapshots-aggregated-context-duplicates/20251117-c2p_ois-cfa.txt","memory-bank/snapshots-aggregated-context-duplicates/20251117-c2p_aggregated-gpt5pro-talks.txt","repositories/  
+        customer-gitlab/wt__ois-cfa__NX01/packages/contracts/openapi-gateway.yaml","repositories/customer-gitlab/wt__ois-cfa__NX01/packages/contracts/openapi-issuance.yaml","repositories/customer-gitlab/wt__ois-cfa__NX01/packages/contracts/openapi-       
+        registry.yaml","repositories/customer-gitlab/wt__ois-cfa__NX01/packages/contracts/asyncapi.yaml"],"use_browser":true}) 
+    {"success": true, "response": "Reattach later with: pnpm oracle session you-are-oracle-a-focused\n\nReattach via: oracle session you-are-oracle-a-focused\nOracle (1.0.8) launching browser mode (gpt-5-pro) with ~2,683 tokens\nChrome automation does    
+        not stream output; this may take a minute...\nConnecting to remote Chrome at 127.0.0.1:9222\nConnected to remote Chrome DevTools protocol at 127.0.0.1:9222\nSkipping cookie sync for remote Chrome (using existing session)\nNavigating to https://   
+        chatgpt.com/\nPrompt textarea ready\nPrompt textarea ready (initial focus, 9,288 chars queued)\nModel picker: ProResearch-grade intelligence\nPrompt textarea ready\nPrompt textarea ready (after model switch, 9,288 chars queued)\nUploading         
+        attachment: repositories/customer-gitlab/wt__ois-cfa__NX01/tasks/NX-01-spec-validate-and-matrix.md\nAttachment queued: repositories/customer-gitlab/wt__ois-cfa__NX01/tasks/NX-01-spec-validate-and-matrix.md\nUploading attachment: repositories/     
+        customer-gitlab/wt__ois-cfa__NX01/docs/context/PROJECT-CONTEXT.md\nAttachment queued: repositories/customer-gitlab/wt__ois-cfa__NX01/docs/context/PROJECT-CONTEXT.md\nUploading attachment: repositories/customer-gitlab/wt__ois-cfa__NX01/docs/       
+        context/WBS-OIS.md\nAttachment que...                  
+
+• Updated Plan                                                 
+  └ ✔ Review NX-01 session and related Scrum memory-bank files 
+    ✔ Review OIS-CFA context docs and NX-01 task spec          
+    ✔ Select best context files for GPT-5 Pro delegation       
+    ✔ Draft high-quality GPT-5 Pro prompt and oracle_query payload                                                             
+    ✔ Execute oracle_gpt5.oracle_query with prompt and files   
+
+─ Worked for 2m 28s ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• TL;DR                                                        
+
+  - Вызов oracle_gpt5.oracle_query с подготовленным промптом и 10 файлами я уже сделал — Oracle CLI всё загрузил, но сам чатгпт‑ран упал по timeout (prompt не успел появиться в UI).                                                                          
+  - Сессия зафиксирована как you-are-oracle-a-focused, и Oracle CLI предлагает переattach’иться командой oracle session you-are-oracle-a-focused / pnpm oracle session you-are-oracle-a-focused.                                                               
+  - Дальше логично либо повторить запуск (короче prompt / дождаться руками ответа и вставить сюда), либо ты дашь мне текст ответа из ChatGPT, и я уже по нему подготовлю патч к PROJECT-CONTEXT.md и артефактам NX‑01.                                         
+
+  Что уже сделано                                              
+
+  - Собран и передан в Oracle CLI полный промпт под NX‑01 (spec‑lint + API/Event Matrix + Gap List, структура TL;DR → Plan → Matrix → Gaps → Artifacts).                                                                                                       
+  - Прикреплены файлы (все repo‑relative пути):                
+      - repositories/customer-gitlab/wt__ois-cfa__NX01/tasks/NX-01-spec-validate-and-matrix.md                                 
+      - repositories/customer-gitlab/wt__ois-cfa__NX01/docs/context/PROJECT-CONTEXT.md                                         
+      - repositories/customer-gitlab/wt__ois-cfa__NX01/docs/context/WBS-OIS.md                                                 
+      - repositories/customer-gitlab/wt__ois-cfa__NX01/docs/context/RULES-SUMMARY.md                                           
+      - memory-bank/snapshots-aggregated-context-duplicates/20251117-c2p_ois-cfa.txt                                           
+      - memory-bank/snapshots-aggregated-context-duplicates/20251117-c2p_aggregated-gpt5pro-talks.txt                          
+      - repositories/customer-gitlab/wt__ois-cfa__NX01/packages/contracts/openapi-gateway.yaml                                 
+      - repositories/customer-gitlab/wt__ois-cfa__NX01/packages/contracts/openapi-issuance.yaml                                
+      - repositories/customer-gitlab/wt__ois-cfa__NX01/packages/contracts/openapi-registry.yaml                                
+      - repositories/customer-gitlab/wt__ois-cfa__NX01/packages/contracts/asyncapi.yaml                                        
+
+  Что говорит Oracle CLI                                       
+
+  - Сессия успешно стартовала в browser‑режиме (gpt-5-pro, remote Chrome 127.0.0.1:9222), все 10 файлов загружены, prompt в ~9.2k символов поставлен в очередь, нажата кнопка send.                                                                            
+  - Ошибка: Prompt did not appear in conversation before timeout (send may have failed) — т.е. браузерная автоматизация не дождалась появления промпта в UI.                                                                                                   
+
+  Next actions                                                 
+
+  Варианты, как продолжить:                                    
+
+  1. Ты сам на eywa1 запустишь:                                
+      - oracle session you-are-oracle-a-focused                
+        Либо повторишь запрос (если нужно, я могу сократить/подправить prompt под лимиты браузерной автоматизации).            
+  2. Если ответ от ChatGPT по этой сессии уже есть в UI — просто скопируй его в новый файл (например, memory-bank/Scrum/20251117-coding-based-infra-branch/20251118-xxxx-gpt5pro-NX01-spec-matrix.gpt5p.md) и пришли мне сюда.                                 
+  3. После этого я:                                            
+      - выдерну из ответа блок API/Event Matrix + Gap List и подготовлю конкретный patch к repositories/customer-gitlab/wt__ois-cfa__NX01/docs/context/PROJECT-CONTEXT.md;                                                                                     
+      - при необходимости предложу формат artifacts/spec-lint-openapi.txt, spec-validate-asyncapi.txt, spec-validate-jsonschema.txt под твой стиль.                                                                                                            
+
+  Скажи, как двигаемся: повторить вызов с более коротким prompt или работать дальше уже от готового ответа, который ты вставишь.                                                                                                                               
+
+
+› Improve documentation in @filename                           
+
+  81% context left · ? for shortcuts                           

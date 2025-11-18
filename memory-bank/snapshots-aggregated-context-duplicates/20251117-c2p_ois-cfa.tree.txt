@@ -1,0 +1,1141 @@
+Project Path: ois-cfa
+
+Source Tree:
+
+```txt
+ois-cfa
+├── Makefile
+├── README.md
+├── apps
+│   ├── _theme
+│   │   ├── README.md
+│   │   ├── package.json
+│   │   ├── tailwind-preset.js
+│   │   └── tokens.css
+│   ├── api-gateway
+│   │   ├── Dockerfile
+│   │   ├── Program.cs
+│   │   ├── Properties
+│   │   │   └── launchSettings.json
+│   │   ├── api-gateway.csproj
+│   │   └── appsettings.json
+│   ├── backoffice
+│   │   ├── Dockerfile
+│   │   ├── README.md
+│   │   ├── next-env.d.ts
+│   │   ├── next.config.js
+│   │   ├── package.json
+│   │   ├── postcss.config.js
+│   │   ├── src
+│   │   │   ├── app
+│   │   │   ├── lib
+│   │   │   │   ├── api-client.ts
+│   │   │   │   └── auth.ts
+│   │   │   ├── middleware.ts
+│   │   │   └── types
+│   │   │       └── next-auth.d.ts
+│   │   ├── tailwind.config.ts
+│   │   └── tsconfig.json
+│   ├── broker-portal
+│   │   ├── next-env.d.ts
+│   │   ├── next.config.js
+│   │   ├── package.json
+│   │   ├── postcss.config.js
+│   │   ├── src
+│   │   │   ├── app
+│   │   │   ├── lib
+│   │   │   │   ├── api-client.ts
+│   │   │   │   └── auth.ts
+│   │   │   ├── middleware.ts
+│   │   │   └── types
+│   │   │       └── next-auth.d.ts
+│   │   ├── tailwind.config.ts
+│   │   └── tsconfig.json
+│   ├── portal-investor
+│   │   ├── Dockerfile
+│   │   ├── README.md
+│   │   ├── next-env.d.ts
+│   │   ├── next.config.js
+│   │   ├── package.json
+│   │   ├── postcss.config.js
+│   │   ├── src
+│   │   │   ├── app
+│   │   │   ├── lib
+│   │   │   │   ├── api-client.ts
+│   │   │   │   └── auth.ts
+│   │   │   ├── middleware.ts
+│   │   │   └── types
+│   │   │       └── next-auth.d.ts
+│   │   ├── tailwind.config.ts
+│   │   └── tsconfig.json
+│   ├── portal-issuer
+│   │   ├── Dockerfile
+│   │   ├── README.md
+│   │   ├── next-env.d.ts
+│   │   ├── next.config.js
+│   │   ├── package.json
+│   │   ├── postcss.config.js
+│   │   ├── src
+│   │   │   ├── app
+│   │   │   ├── lib
+│   │   │   │   ├── api-client.ts
+│   │   │   │   └── auth.ts
+│   │   │   ├── middleware.ts
+│   │   │   └── types
+│   │   │       └── next-auth.d.ts
+│   │   ├── tailwind.config.ts
+│   │   └── tsconfig.json
+│   └── shared-ui
+│       ├── README.md
+│       ├── package.json
+│       ├── src
+│       │   ├── components
+│       │   │   ├── charts
+│       │   │   │   ├── BarChart.tsx
+│       │   │   │   ├── ChartContainer.tsx
+│       │   │   │   ├── LineChart.tsx
+│       │   │   │   └── PieChart.tsx
+│       │   │   ├── data
+│       │   │   │   ├── DataTable.tsx
+│       │   │   │   ├── KPIGrid.tsx
+│       │   │   │   └── StatCard.tsx
+│       │   │   ├── feedback
+│       │   │   │   ├── EmptyState.tsx
+│       │   │   │   ├── ErrorBoundary.tsx
+│       │   │   │   └── Skeleton.tsx
+│       │   │   ├── forms
+│       │   │   │   └── OrderForm.tsx
+│       │   │   ├── layout
+│       │   │   │   ├── AppShell.tsx
+│       │   │   │   └── PageHeader.tsx
+│       │   │   ├── theme
+│       │   │   │   └── ThemeProvider.tsx
+│       │   │   ├── timeline
+│       │   │   │   ├── AuditLog.tsx
+│       │   │   │   └── Timeline.tsx
+│       │   │   └── widgets
+│       │   │       └── MiniTicker.tsx
+│       │   ├── index.ts
+│       │   └── utils
+│       │       ├── cn.ts
+│       │       └── webVitals.ts
+│       ├── tailwind.config.ts
+│       └── tsconfig.json
+├── audit
+│   ├── 00_Executive_Summary.md
+│   ├── 01_Findings.md
+│   ├── 02_Recommendations.md
+│   ├── 03_Roadmap_Prioritized.md
+│   ├── 04_Risk_Register.md
+│   ├── 05_Cost_Capacity_Calc.md
+│   ├── 06_Observability_Checklist.md
+│   ├── 07_Security_Checklist.md
+│   ├── 08_Runbooks.md
+│   ├── 09_Artifacts
+│   │   ├── ci
+│   │   │   ├── improved.gitlab-ci.yml
+│   │   │   └── templates
+│   │   │       ├── helm-diff.yml
+│   │   │       ├── kaniko-build.yml
+│   │   │       ├── review-app.yml
+│   │   │       └── trivy-scan.yml
+│   │   ├── helm
+│   │   │   ├── values.dev.yaml
+│   │   │   ├── values.prod.yaml
+│   │   │   └── values.stage.yaml
+│   │   ├── k8s
+│   │   │   ├── efcore-migrations-hook.sample.yaml
+│   │   │   ├── hpa.sample.yaml
+│   │   │   ├── networkpolicy.sample.yaml
+│   │   │   ├── pdb.sample.yaml
+│   │   │   └── podsecurity.sample.yaml
+│   │   └── observability
+│   │       ├── grafana-dashboards
+│   │       │   └── service-overview.json
+│   │       ├── grafana-dashboards-notes.md
+│   │       ├── otel-collector.sample.yaml
+│   │       ├── prometheus-rules.sample.yaml
+│   │       └── prometheus-rules.yaml
+│   └── INVENTORY.md
+├── chaincode
+│   ├── issuance
+│   │   ├── README.md
+│   │   ├── go.mod
+│   │   ├── issuance.go
+│   │   └── issuance_test.go
+│   └── registry
+│       ├── README.md
+│       ├── go.mod
+│       ├── registry.go
+│       └── registry_test.go
+├── docker-compose.apps.yml
+├── docker-compose.kafka.override.yml
+├── docker-compose.services.yml
+├── docker-compose.yml
+├── docs
+│   ├── 00-Дорожная-карта-проекта.md
+│   ├── 00-Проверка-готовности-ЦБ.md
+│   ├── 00-Структура-проекта-создана.md
+│   ├── README-ARCH.md
+│   ├── apps
+│   │   ├── backoffice.md
+│   │   ├── portal-investor.md
+│   │   └── portal-issuer.md
+│   ├── architecture
+│   │   ├── 10-HighLevel-Architecture.md
+│   │   ├── 11-Sequence-ESIA-OIDC.md
+│   │   ├── 12-DataModel.md
+│   │   ├── 13-HLF-Network-Design.md
+│   │   ├── 14-NonFunctional-Targets.md
+│   │   ├── api
+│   │   │   ├── openapi-bank-nominal.yaml
+│   │   │   ├── openapi-edo.yaml
+│   │   │   └── openapi-esia.yaml
+│   │   ├── c4
+│   │   │   ├── C1-Context.drawio
+│   │   │   ├── C2-Containers.drawio
+│   │   │   ├── C3-Components.drawio
+│   │   │   └── C4-Code.drawio
+│   │   ├── contracts
+│   │   │   ├── RulesIS-skeleton.md
+│   │   │   └── SystemDescription-skeleton.md
+│   │   ├── dfd
+│   │   │   ├── DFD-L0.drawio
+│   │   │   ├── DFD-L1-Emission.drawio
+│   │   │   └── DFD-L2-Settlement-EDO.drawio
+│   │   ├── infra
+│   │   │   ├── Backup-Topology.drawio
+│   │   │   ├── DRP-Topology.drawio
+│   │   │   └── Network-Zones.drawio
+│   │   ├── ontology
+│   │   │   ├── ois-ontology.jsonld
+│   │   │   └── ois-ontology.ttl
+│   │   ├── security
+│   │   │   ├── GOST-57580-Mapping.md
+│   │   │   └── STO-BR-Checklist.md
+│   │   ├── threat
+│   │   │   ├── Mitigations-Map.md
+│   │   │   ├── STRIDE-Context.md
+│   │   │   └── STRIDE-Dataflow.drawio
+│   │   └── uml
+│   │       ├── UML-Activity-Complaints.puml
+│   │       ├── UML-Activity-KYC-AML.puml
+│   │       ├── UML-Activity-KYCAML.puml
+│   │       ├── UML-Class-Domain.puml
+│   │       ├── UML-Component.puml
+│   │       ├── UML-Deployment.puml
+│   │       ├── UML-Package.puml
+│   │       ├── UML-Sequence-EDO.puml
+│   │       ├── UML-Sequence-ESIA.puml
+│   │       ├── UML-Sequence-Emission.puml
+│   │       ├── UML-Sequence-Payout.puml
+│   │       ├── UML-Sequence-Purchase.puml
+│   │       ├── UML-State-CFA-Lifecycle.puml
+│   │       └── UML-UseCases.puml
+│   ├── assumptions.md
+│   ├── backend
+│   │   └── context-map.md
+│   ├── context
+│   │   ├── FRONTEND-CONTEXT.md
+│   │   ├── PROJECT-CONTEXT.md
+│   │   ├── PROMPTS-MAP.md
+│   │   ├── RULES-SUMMARY.md
+│   │   └── WBS-OIS.md
+│   ├── deploy
+│   │   ├── 20251113-cloudflare-ingress.md
+│   │   ├── docker-compose-at-vps
+│   │   │   ├── 00-overview.md
+│   │   │   ├── 01-prereqs-and-host-prep.md
+│   │   │   ├── 02-env-and-compose.md
+│   │   │   ├── 03-infra.md
+│   │   │   ├── 04-services.md
+│   │   │   ├── 05-gateway.md
+│   │   │   ├── 06-keycloak.md
+│   │   │   ├── 07-frontends-dev-on-vps.md
+│   │   │   ├── 07-frontends.md
+│   │   │   ├── 08-smoke-tests.md
+│   │   │   └── 09-troubleshooting.md
+│   │   └── localhost
+│   │       ├── FRONTEND-STARTUP.md
+│   │       └── KEYCLOAK-SETUP.md
+│   ├── dlt
+│   │   ├── dev-network.md
+│   │   ├── fabric-k8s-ha.md
+│   │   └── k8s-deploy.md
+│   ├── frontend
+│   │   ├── MVP-impl.md
+│   │   └── context-map.md
+│   ├── glossary.md
+│   ├── legal
+│   │   ├── 01-Заявление-в-ЦБ.md
+│   │   ├── 01-ПравилаИС-template.md
+│   │   ├── 02-ОписаниеИС-template.md
+│   │   ├── 03-Матрица-соответствия_259ФЗ-746П.md
+│   │   ├── 04-Структура-владения.md
+│   │   ├── 05-Руководители.md
+│   │   ├── 06-Учредительные-документы.md
+│   │   ├── 07-Реестр-пользователей.md
+│   │   └── 08-Артефакты-для-ЦБ-746П.md
+│   ├── ops
+│   │   ├── debug-deploy-quickstart.md
+│   │   ├── gitlab-ci-docker-frontend-fix.md
+│   │   ├── gitlab-ci.md
+│   │   ├── gitlab-runner-403-fix-complete.md
+│   │   ├── gitlab-runner-403-solution.md
+│   │   ├── gitlab-runner-compliance-report.md
+│   │   ├── gitlab-runner-fix-summary.md
+│   │   ├── gitlab-runner-force-reregister.md
+│   │   ├── gitlab-runner-image-pull-fix.md
+│   │   ├── gitlab-runner-install-troubleshooting.md
+│   │   ├── gitlab-runner-job-hanging-fix.md
+│   │   ├── gitlab-runner-lens-install.md
+│   │   ├── gitlab-runner-memory-issue.md
+│   │   ├── gitlab-runner-registration-explained.md
+│   │   ├── gitlab-runner-resources-optimization.md
+│   │   ├── gitlab-runner-state-file-fix.md
+│   │   ├── gitlab-runner-status-report.md
+│   │   ├── gitlab-runner-troubleshooting.md
+│   │   ├── gitlab-runner.md
+│   │   ├── gitops-sync-acceptance.md
+│   │   ├── gitops-sync-guide.md
+│   │   ├── gitops-sync-task-complete.md
+│   │   ├── gitops.md
+│   │   ├── helm.md
+│   │   ├── production-deployment-master-plan.md
+│   │   ├── production-deployment-master-prompt.md
+│   │   ├── production-deployment-status.md
+│   │   ├── quick-start-production.md
+│   │   └── timeweb
+│   │       ├── kubeconfig.md
+│   │       ├── terraform.md
+│   │       └── twc-setup.md
+│   ├── security
+│   │   ├── 04-ПолитикаИБ.md
+│   │   ├── 05-ПолитикаНепрерывности-DRP.md
+│   │   ├── 20-ГОСТ57580-Чеклист.md
+│   │   └── 21-СТОБР-Чеклист.md
+│   ├── services
+│   │   ├── compliance.md
+│   │   ├── issuance.md
+│   │   ├── registry.md
+│   │   └── settlement.md
+│   ├── source
+│   │   └── Описание ИС vs Правила ИС.md
+│   ├── sources
+│   │   ├── FRONTEND-FUNCTIONALITY-ANALYSIS.md
+│   │   └── sources.md
+│   ├── testing
+│   │   ├── 30-Perf-Test-Plan.md
+│   │   ├── 31-DR-Drill-Runbook.md
+│   │   └── perf-baseline.md
+│   └── ui
+│       └── design-system.md
+├── get_helm.sh
+├── memory-bank
+├── ois-backend.sln
+├── openapitools.json
+├── ops
+│   ├── CODEOWNERS
+│   ├── CONTRIBUTING.md
+│   ├── SECURITY.md
+│   ├── ci
+│   │   ├── diagnose_runner.sh
+│   │   └── patch_runner_fix_403.sh
+│   ├── debug
+│   │   ├── Dockerfile
+│   │   ├── README.md
+│   │   ├── configmap-scripts.yaml
+│   │   ├── debug-pod.yaml
+│   │   ├── namespace.yaml
+│   │   ├── scripts
+│   │   │   ├── agent-status.sh
+│   │   │   ├── argo-status.sh
+│   │   │   ├── events-dump.sh
+│   │   │   ├── install-tools.sh
+│   │   │   └── logs-collect.sh
+│   │   ├── secret-gitlab-token.yaml.example
+│   │   └── serviceaccount.yaml
+│   ├── fabric
+│   │   ├── README.md
+│   │   ├── configtx.yaml
+│   │   ├── crypto-config.yaml
+│   │   ├── dev-down.sh
+│   │   ├── dev-reset.sh
+│   │   ├── dev-up.sh
+│   │   ├── docker-compose.yml
+│   │   └── scripts
+│   │       ├── approve-chaincode.sh
+│   │       ├── chaincode-api.sh
+│   │       ├── create-channel.sh
+│   │       ├── health-check.sh
+│   │       ├── install-chaincode.sh
+│   │       └── invoke-example.sh
+│   ├── gitops
+│   │   ├── README-HELM.md
+│   │   ├── README.md
+│   │   ├── argocd
+│   │   │   ├── apps
+│   │   │   │   ├── business
+│   │   │   │   │   ├── api-gateway.yaml
+│   │   │   │   │   ├── frontend.yaml
+│   │   │   │   │   └── services.yaml
+│   │   │   │   ├── platform
+│   │   │   │   │   ├── fabric.yaml
+│   │   │   │   │   └── keycloak.yaml
+│   │   │   │   └── system
+│   │   │   │       ├── argocd.yaml
+│   │   │   │       └── monitoring.yaml
+│   │   │   ├── bootstrap
+│   │   │   │   ├── app-of-apps.yaml
+│   │   │   │   └── namespace.yaml
+│   │   │   ├── config
+│   │   │   │   ├── projects.yaml
+│   │   │   │   ├── rbac.yaml
+│   │   │   │   └── sso-keycloak.yaml
+│   │   │   └── helm
+│   │   │       └── values.yaml
+│   │   └── gitlab-agent
+│   │       ├── README.md
+│   │       ├── agent-config.yaml
+│   │       └── manifests
+│   │           ├── business
+│   │           │   ├── api-gateway.yaml
+│   │           │   └── namespace.yaml
+│   │           ├── platform
+│   │           │   └── namespace.yaml
+│   │           └── system
+│   │               └── namespace.yaml
+│   ├── infra
+│   │   ├── grafana-dashboards-fabric.json
+│   │   ├── grafana-dashboards.json
+│   │   ├── helm
+│   │   │   ├── api-gateway
+│   │   │   │   ├── Chart.yaml
+│   │   │   │   ├── templates
+│   │   │   │   │   ├── _helpers.tpl
+│   │   │   │   │   ├── deployment.yaml
+│   │   │   │   │   ├── hpa.yaml
+│   │   │   │   │   ├── ingress.yaml
+│   │   │   │   │   ├── service.yaml
+│   │   │   │   │   ├── serviceaccount.yaml
+│   │   │   │   │   └── servicemonitor.yaml
+│   │   │   │   ├── values-dev.yaml
+│   │   │   │   ├── values-prod.yaml
+│   │   │   │   ├── values-staging.yaml
+│   │   │   │   └── values.yaml
+│   │   │   ├── chaincode-build
+│   │   │   │   ├── Chart.yaml
+│   │   │   │   ├── templates
+│   │   │   │   │   ├── _helpers.tpl
+│   │   │   │   │   ├── ingress.yaml
+│   │   │   │   │   ├── job-approve.yaml
+│   │   │   │   │   ├── job-build.yaml
+│   │   │   │   │   ├── job-commit.yaml
+│   │   │   │   │   ├── job-install.yaml
+│   │   │   │   │   └── job-rollback.yaml
+│   │   │   │   └── values.yaml
+│   │   │   ├── chaincode-lifecycle
+│   │   │   │   ├── Chart.yaml
+│   │   │   │   ├── README.md
+│   │   │   │   ├── templates
+│   │   │   │   │   ├── _helpers.tpl
+│   │   │   │   │   ├── job-approve.yaml
+│   │   │   │   │   ├── job-commit.yaml
+│   │   │   │   │   ├── job-install.yaml
+│   │   │   │   │   └── serviceaccount.yaml
+│   │   │   │   └── values.yaml
+│   │   │   ├── fabric-ca
+│   │   │   │   ├── Chart.yaml
+│   │   │   │   ├── templates
+│   │   │   │   │   ├── _helpers.tpl
+│   │   │   │   │   ├── deployment.yaml
+│   │   │   │   │   ├── ingress.yaml
+│   │   │   │   │   ├── networkpolicy.yaml
+│   │   │   │   │   ├── pvc.yaml
+│   │   │   │   │   ├── service.yaml
+│   │   │   │   │   ├── serviceaccount.yaml
+│   │   │   │   │   └── servicemonitor.yaml
+│   │   │   │   ├── values.prod.yaml
+│   │   │   │   └── values.yaml
+│   │   │   ├── fabric-orderer
+│   │   │   │   ├── Chart.yaml
+│   │   │   │   ├── templates
+│   │   │   │   │   ├── _helpers.tpl
+│   │   │   │   │   ├── deployment.yaml
+│   │   │   │   │   ├── ingress.yaml
+│   │   │   │   │   ├── networkpolicy.yaml
+│   │   │   │   │   ├── pvc.yaml
+│   │   │   │   │   ├── service-headless.yaml
+│   │   │   │   │   ├── service.yaml
+│   │   │   │   │   ├── serviceaccount.yaml
+│   │   │   │   │   └── servicemonitor.yaml
+│   │   │   │   ├── values-dev.yaml
+│   │   │   │   ├── values-prod.yaml
+│   │   │   │   ├── values.prod.yaml
+│   │   │   │   └── values.yaml
+│   │   │   └── fabric-peer
+│   │   │       ├── Chart.yaml
+│   │   │       ├── templates
+│   │   │       │   ├── _helpers.tpl
+│   │   │       │   ├── deployment.yaml
+│   │   │       │   ├── ingress.yaml
+│   │   │       │   ├── networkpolicy.yaml
+│   │   │       │   ├── pvc-couchdb.yaml
+│   │   │       │   ├── pvc.yaml
+│   │   │       │   ├── secrets-rotation.yaml
+│   │   │       │   ├── service.yaml
+│   │   │       │   ├── serviceaccount.yaml
+│   │   │       │   └── servicemonitor.yaml
+│   │   │       ├── values-dev.yaml
+│   │   │       ├── values-prod.yaml
+│   │   │       ├── values.prod.yaml
+│   │   │       └── values.yaml
+│   │   ├── k8s
+│   │   │   ├── gitlab-runner
+│   │   │   │   ├── README.md
+│   │   │   │   ├── configmap.yaml
+│   │   │   │   ├── deployment.yaml
+│   │   │   │   ├── namespace.yaml
+│   │   │   │   ├── rbac.yaml
+│   │   │   │   └── service.yaml
+│   │   │   ├── ingress.yaml
+│   │   │   ├── namespace.yaml
+│   │   │   ├── nlb-service.yaml
+│   │   │   ├── storageclass.yaml
+│   │   │   └── test-pod.yaml
+│   │   ├── otel-collector-config.yaml
+│   │   ├── prometheus.yml
+│   │   ├── timeweb
+│   │   │   ├── README.md
+│   │   │   ├── backend.tf
+│   │   │   ├── main.tf
+│   │   │   ├── outputs.tf
+│   │   │   ├── providers.tf
+│   │   │   ├── terraform.tfvars.example
+│   │   │   ├── twc-ois-cfa-k8s-config.yaml
+│   │   │   └── variables.tf
+│   │   └── uk1
+│   │       ├── docker-compose.keycloak-proxy.yml
+│   │       └── nginx-cfa-portals.conf
+│   ├── keycloak
+│   │   └── bootstrap-realm.sh
+│   └── scripts
+│       ├── README.md
+│       ├── backup.sh
+│       ├── check-gitlab-jobs-status.sh
+│       ├── check-gitlab-jobs.sh
+│       ├── check-gitlab-runners.sh
+│       ├── check-kubeconfig.sh
+│       ├── check-runner-status.sh
+│       ├── create-helm-chart.sh
+│       ├── fix-runner-and-deploy.sh
+│       ├── force-runner-reregister.sh
+│       ├── get-runner-token.sh
+│       ├── gitlab-runner-install.sh
+│       ├── gitops-sync.sh
+│       ├── install-helm.sh
+│       ├── k8s-healthcheck.sh
+│       ├── restore.md
+│       ├── setup-kubeconfig.sh
+│       ├── setup-twc-cluster.sh
+│       ├── test-restore.sh
+│       └── validate-specs.sh
+├── packages
+│   ├── contracts
+│   │   ├── README.md
+│   │   ├── asyncapi.yaml
+│   │   ├── openapi-compliance.yaml
+│   │   ├── openapi-gateway.yaml
+│   │   ├── openapi-identity.yaml
+│   │   ├── openapi-integrations-bank.yaml
+│   │   ├── openapi-integrations-edo.yaml
+│   │   ├── openapi-integrations-esia.yaml
+│   │   ├── openapi-issuance.yaml
+│   │   ├── openapi-registry.yaml
+│   │   ├── openapi-settlement.yaml
+│   │   └── schemas
+│   │       ├── AuditEvent.json
+│   │       ├── BrokerClient.json
+│   │       ├── BrokerOrder.json
+│   │       ├── CFA.json
+│   │       ├── CommissionRow.json
+│   │       ├── Complaint.json
+│   │       ├── FeedItem.json
+│   │       ├── Holding.json
+│   │       ├── Issuance.json
+│   │       ├── IssuerReportRow.json
+│   │       ├── KycDecision.json
+│   │       ├── KycDocument.json
+│   │       ├── KycResult.json
+│   │       ├── MarketIssuanceCard.json
+│   │       ├── Order.json
+│   │       ├── Payout.json
+│   │       ├── PayoutBatch.json
+│   │       ├── PayoutItem.json
+│   │       ├── QualificationResult.json
+│   │       ├── ReconciliationReport.json
+│   │       ├── RegistryTx.json
+│   │       ├── TxHistoryItem.json
+│   │       └── Wallet.json
+│   ├── domain
+│   │   ├── IntegrationEvents.cs
+│   │   ├── IssuanceId.cs
+│   │   ├── IssuanceStatus.cs
+│   │   ├── Money.cs
+│   │   ├── ScheduleItem.cs
+│   │   ├── Security.cs
+│   │   ├── domain.Tests
+│   │   │   ├── IssuanceIdTests.cs
+│   │   │   ├── IssuanceStatusTests.cs
+│   │   │   ├── MoneyTests.cs
+│   │   │   └── ScheduleItemTests.cs
+│   │   ├── domain.Tests.csproj
+│   │   └── domain.csproj
+│   ├── dotnet-clients
+│   │   ├── gateway
+│   │   │   ├── Org.OpenAPITools.sln
+│   │   │   ├── README.md
+│   │   │   ├── api
+│   │   │   │   └── openapi.yaml
+│   │   │   ├── appveyor.yml
+│   │   │   ├── docs
+│   │   │   │   ├── apis
+│   │   │   │   │   ├── AuditApi.md
+│   │   │   │   │   ├── ComplaintsApi.md
+│   │   │   │   │   ├── ComplianceApi.md
+│   │   │   │   │   ├── HealthApi.md
+│   │   │   │   │   ├── InvestorsApi.md
+│   │   │   │   │   ├── IssuancesApi.md
+│   │   │   │   │   ├── MarketApi.md
+│   │   │   │   │   ├── OrdersApi.md
+│   │   │   │   │   ├── ReportsApi.md
+│   │   │   │   │   ├── SettlementApi.md
+│   │   │   │   │   └── WalletsApi.md
+│   │   │   │   ├── models
+│   │   │   │   │   ├── AuditEvent.md
+│   │   │   │   │   ├── AuditEventsResponse.md
+│   │   │   │   │   ├── BrokerClient.md
+│   │   │   │   │   ├── BrokerClientsResponse.md
+│   │   │   │   │   ├── BrokerOrderResponse.md
+│   │   │   │   │   ├── CommissionRow.md
+│   │   │   │   │   ├── CommissionsResponse.md
+│   │   │   │   │   ├── ComplaintResponse.md
+│   │   │   │   │   ├── CreateBrokerOrderRequest.md
+│   │   │   │   │   ├── CreateComplaintRequest.md
+│   │   │   │   │   ├── CreateIssuanceRequest.md
+│   │   │   │   │   ├── CreateOrderRequest.md
+│   │   │   │   │   ├── FeedItem.md
+│   │   │   │   │   ├── FeedResponse.md
+│   │   │   │   │   ├── HealthStatus.md
+│   │   │   │   │   ├── Holding.md
+│   │   │   │   │   ├── InvestorStatusResponse.md
+│   │   │   │   │   ├── IssuanceResponse.md
+│   │   │   │   │   ├── IssuerIssuancesReportResponse.md
+│   │   │   │   │   ├── IssuerIssuancesReportResponseSummary.md
+│   │   │   │   │   ├── IssuerPayoutsReportResponse.md
+│   │   │   │   │   ├── IssuerPayoutsReportResponseItemsInner.md
+│   │   │   │   │   ├── IssuerPayoutsReportResponseSummary.md
+│   │   │   │   │   ├── IssuerReportRow.md
+│   │   │   │   │   ├── KycCheckRequest.md
+│   │   │   │   │   ├── KycDecisionRequest.md
+│   │   │   │   │   ├── KycDecisionResponse.md
+│   │   │   │   │   ├── KycDocument.md
+│   │   │   │   │   ├── KycDocumentsResponse.md
+│   │   │   │   │   ├── KycResult.md
+│   │   │   │   │   ├── MarketIssuanceCard.md
+│   │   │   │   │   ├── MarketIssuancesResponse.md
+│   │   │   │   │   ├── OrderResponse.md
+│   │   │   │   │   ├── PayoutHistoryResponse.md
+│   │   │   │   │   ├── PayoutItem.md
+│   │   │   │   │   ├── PayoutsReportResponse.md
+│   │   │   │   │   ├── PayoutsReportResponsePeriod.md
+│   │   │   │   │   ├── ProblemDetails.md
+│   │   │   │   │   ├── QualificationEvaluateRequest.md
+│   │   │   │   │   ├── QualificationResult.md
+│   │   │   │   │   ├── RedeemRequest.md
+│   │   │   │   │   ├── RedeemResponse.md
+│   │   │   │   │   ├── SettlementResponse.md
+│   │   │   │   │   ├── TransactionHistoryResponse.md
+│   │   │   │   │   ├── TxHistoryItem.md
+│   │   │   │   │   └── WalletResponse.md
+│   │   │   │   └── scripts
+│   │   │   │       ├── git_push.ps1
+│   │   │   │       └── git_push.sh
+│   │   │   └── src
+│   │   │       └── Org.OpenAPITools
+│   │   │           ├── Api
+│   │   │           │   ├── AuditApi.cs
+│   │   │           │   ├── ComplaintsApi.cs
+│   │   │           │   ├── ComplianceApi.cs
+│   │   │           │   ├── HealthApi.cs
+│   │   │           │   ├── IApi.cs
+│   │   │           │   ├── InvestorsApi.cs
+│   │   │           │   ├── IssuancesApi.cs
+│   │   │           │   ├── MarketApi.cs
+│   │   │           │   ├── OrdersApi.cs
+│   │   │           │   ├── ReportsApi.cs
+│   │   │           │   ├── SettlementApi.cs
+│   │   │           │   └── WalletsApi.cs
+│   │   │           ├── Client
+│   │   │           │   ├── ApiException.cs
+│   │   │           │   ├── ApiFactory.cs
+│   │   │           │   ├── ApiResponseEventArgs.cs
+│   │   │           │   ├── ApiResponse`1.cs
+│   │   │           │   ├── BearerToken.cs
+│   │   │           │   ├── ClientUtils.cs
+│   │   │           │   ├── CookieContainer.cs
+│   │   │           │   ├── DateOnlyJsonConverter.cs
+│   │   │           │   ├── DateOnlyNullableJsonConverter.cs
+│   │   │           │   ├── DateTimeJsonConverter.cs
+│   │   │           │   ├── DateTimeNullableJsonConverter.cs
+│   │   │           │   ├── ExceptionEventArgs.cs
+│   │   │           │   ├── HostConfiguration.cs
+│   │   │           │   ├── JsonSerializerOptionsProvider.cs
+│   │   │           │   ├── Option.cs
+│   │   │           │   ├── RateLimitProvider`1.cs
+│   │   │           │   ├── TokenBase.cs
+│   │   │           │   ├── TokenContainer`1.cs
+│   │   │           │   └── TokenProvider`1.cs
+│   │   │           ├── Extensions
+│   │   │           │   ├── IHostBuilderExtensions.cs
+│   │   │           │   ├── IHttpClientBuilderExtensions.cs
+│   │   │           │   └── IServiceCollectionExtensions.cs
+│   │   │           ├── Model
+│   │   │           │   ├── AuditEvent.cs
+│   │   │           │   ├── AuditEventsResponse.cs
+│   │   │           │   ├── BrokerClient.cs
+│   │   │           │   ├── BrokerClientsResponse.cs
+│   │   │           │   ├── BrokerOrderResponse.cs
+│   │   │           │   ├── CommissionRow.cs
+│   │   │           │   ├── CommissionsResponse.cs
+│   │   │           │   ├── ComplaintResponse.cs
+│   │   │           │   ├── CreateBrokerOrderRequest.cs
+│   │   │           │   ├── CreateComplaintRequest.cs
+│   │   │           │   ├── CreateIssuanceRequest.cs
+│   │   │           │   ├── CreateOrderRequest.cs
+│   │   │           │   ├── FeedItem.cs
+│   │   │           │   ├── FeedResponse.cs
+│   │   │           │   ├── HealthStatus.cs
+│   │   │           │   ├── Holding.cs
+│   │   │           │   ├── InvestorStatusResponse.cs
+│   │   │           │   ├── IssuanceResponse.cs
+│   │   │           │   ├── IssuerIssuancesReportResponse.cs
+│   │   │           │   ├── IssuerIssuancesReportResponseSummary.cs
+│   │   │           │   ├── IssuerPayoutsReportResponse.cs
+│   │   │           │   ├── IssuerPayoutsReportResponseItemsInner.cs
+│   │   │           │   ├── IssuerPayoutsReportResponseSummary.cs
+│   │   │           │   ├── IssuerReportRow.cs
+│   │   │           │   ├── KycCheckRequest.cs
+│   │   │           │   ├── KycDecisionRequest.cs
+│   │   │           │   ├── KycDecisionResponse.cs
+│   │   │           │   ├── KycDocument.cs
+│   │   │           │   ├── KycDocumentsResponse.cs
+│   │   │           │   ├── KycResult.cs
+│   │   │           │   ├── MarketIssuanceCard.cs
+│   │   │           │   ├── MarketIssuancesResponse.cs
+│   │   │           │   ├── OrderResponse.cs
+│   │   │           │   ├── PayoutHistoryResponse.cs
+│   │   │           │   ├── PayoutItem.cs
+│   │   │           │   ├── PayoutsReportResponse.cs
+│   │   │           │   ├── PayoutsReportResponsePeriod.cs
+│   │   │           │   ├── ProblemDetails.cs
+│   │   │           │   ├── QualificationEvaluateRequest.cs
+│   │   │           │   ├── QualificationResult.cs
+│   │   │           │   ├── RedeemRequest.cs
+│   │   │           │   ├── RedeemResponse.cs
+│   │   │           │   ├── SettlementResponse.cs
+│   │   │           │   ├── TransactionHistoryResponse.cs
+│   │   │           │   ├── TxHistoryItem.cs
+│   │   │           │   └── WalletResponse.cs
+│   │   │           ├── Org.OpenAPITools.csproj
+│   │   │           └── README.md
+│   │   └── identity
+│   │       ├── Org.OpenAPITools.sln
+│   │       ├── README.md
+│   │       ├── api
+│   │       │   └── openapi.yaml
+│   │       ├── appveyor.yml
+│   │       ├── docs
+│   │       │   ├── apis
+│   │       │   │   ├── HealthApi.md
+│   │       │   │   ├── OIDCApi.md
+│   │       │   │   └── UsersApi.md
+│   │       │   ├── models
+│   │       │   │   ├── HealthCheck200Response.md
+│   │       │   │   ├── OidcConfiguration.md
+│   │       │   │   ├── TokenResponse.md
+│   │       │   │   ├── User.md
+│   │       │   │   └── UserInfo.md
+│   │       │   └── scripts
+│   │       │       ├── git_push.ps1
+│   │       │       └── git_push.sh
+│   │       └── src
+│   │           └── Org.OpenAPITools
+│   │               ├── Api
+│   │               │   ├── HealthApi.cs
+│   │               │   ├── IApi.cs
+│   │               │   ├── OIDCApi.cs
+│   │               │   └── UsersApi.cs
+│   │               ├── Client
+│   │               │   ├── ApiException.cs
+│   │               │   ├── ApiFactory.cs
+│   │               │   ├── ApiResponseEventArgs.cs
+│   │               │   ├── ApiResponse`1.cs
+│   │               │   ├── BearerToken.cs
+│   │               │   ├── ClientUtils.cs
+│   │               │   ├── CookieContainer.cs
+│   │               │   ├── DateOnlyJsonConverter.cs
+│   │               │   ├── DateOnlyNullableJsonConverter.cs
+│   │               │   ├── DateTimeJsonConverter.cs
+│   │               │   ├── DateTimeNullableJsonConverter.cs
+│   │               │   ├── ExceptionEventArgs.cs
+│   │               │   ├── HostConfiguration.cs
+│   │               │   ├── JsonSerializerOptionsProvider.cs
+│   │               │   ├── Option.cs
+│   │               │   ├── RateLimitProvider`1.cs
+│   │               │   ├── TokenBase.cs
+│   │               │   ├── TokenContainer`1.cs
+│   │               │   └── TokenProvider`1.cs
+│   │               ├── Extensions
+│   │               │   ├── IHostBuilderExtensions.cs
+│   │               │   ├── IHttpClientBuilderExtensions.cs
+│   │               │   └── IServiceCollectionExtensions.cs
+│   │               ├── Model
+│   │               │   ├── HealthCheck200Response.cs
+│   │               │   ├── OidcConfiguration.cs
+│   │               │   ├── TokenResponse.cs
+│   │               │   ├── User.cs
+│   │               │   └── UserInfo.cs
+│   │               ├── Org.OpenAPITools.csproj
+│   │               └── README.md
+│   ├── sdks
+│   │   ├── ts
+│   │   │   ├── README.md
+│   │   │   ├── openapi-generator-config.json
+│   │   │   ├── openapitools.json
+│   │   │   ├── package.json
+│   │   │   ├── src
+│   │   │   │   ├── api-client.ts
+│   │   │   │   └── index.ts
+│   │   │   └── tsconfig.json
+│   │   └── typescript-gateway
+│   │       ├── apis
+│   │       │   ├── AuditApi.ts
+│   │       │   ├── ComplaintsApi.ts
+│   │       │   ├── ComplianceApi.ts
+│   │       │   ├── HealthApi.ts
+│   │       │   ├── InvestorsApi.ts
+│   │       │   ├── IssuancesApi.ts
+│   │       │   ├── MarketApi.ts
+│   │       │   ├── OrdersApi.ts
+│   │       │   ├── ReportsApi.ts
+│   │       │   ├── SettlementApi.ts
+│   │       │   ├── WalletsApi.ts
+│   │       │   └── index.ts
+│   │       ├── docs
+│   │       │   ├── AuditApi.md
+│   │       │   ├── AuditEvent.md
+│   │       │   ├── AuditEventsResponse.md
+│   │       │   ├── BrokerClient.md
+│   │       │   ├── BrokerClientsResponse.md
+│   │       │   ├── BrokerOrderResponse.md
+│   │       │   ├── CommissionRow.md
+│   │       │   ├── CommissionsResponse.md
+│   │       │   ├── ComplaintResponse.md
+│   │       │   ├── ComplaintsApi.md
+│   │       │   ├── ComplianceApi.md
+│   │       │   ├── CreateBrokerOrderRequest.md
+│   │       │   ├── CreateComplaintRequest.md
+│   │       │   ├── CreateIssuanceRequest.md
+│   │       │   ├── CreateOrderRequest.md
+│   │       │   ├── FeedItem.md
+│   │       │   ├── FeedResponse.md
+│   │       │   ├── HealthApi.md
+│   │       │   ├── HealthStatus.md
+│   │       │   ├── Holding.md
+│   │       │   ├── InvestorStatusResponse.md
+│   │       │   ├── InvestorsApi.md
+│   │       │   ├── IssuanceResponse.md
+│   │       │   ├── IssuancesApi.md
+│   │       │   ├── IssuerIssuancesReportResponse.md
+│   │       │   ├── IssuerIssuancesReportResponseSummary.md
+│   │       │   ├── IssuerPayoutsReportResponse.md
+│   │       │   ├── IssuerPayoutsReportResponseItemsInner.md
+│   │       │   ├── IssuerPayoutsReportResponseSummary.md
+│   │       │   ├── IssuerReportRow.md
+│   │       │   ├── KycCheckRequest.md
+│   │       │   ├── KycDecisionRequest.md
+│   │       │   ├── KycDecisionResponse.md
+│   │       │   ├── KycDocument.md
+│   │       │   ├── KycDocumentsResponse.md
+│   │       │   ├── KycResult.md
+│   │       │   ├── MarketApi.md
+│   │       │   ├── MarketIssuanceCard.md
+│   │       │   ├── MarketIssuancesResponse.md
+│   │       │   ├── OrderResponse.md
+│   │       │   ├── OrdersApi.md
+│   │       │   ├── PayoutHistoryResponse.md
+│   │       │   ├── PayoutItem.md
+│   │       │   ├── PayoutsReportResponse.md
+│   │       │   ├── PayoutsReportResponsePeriod.md
+│   │       │   ├── ProblemDetails.md
+│   │       │   ├── QualificationEvaluateRequest.md
+│   │       │   ├── QualificationResult.md
+│   │       │   ├── RedeemRequest.md
+│   │       │   ├── RedeemResponse.md
+│   │       │   ├── ReportsApi.md
+│   │       │   ├── SettlementApi.md
+│   │       │   ├── SettlementResponse.md
+│   │       │   ├── TransactionHistoryResponse.md
+│   │       │   ├── TxHistoryItem.md
+│   │       │   ├── WalletResponse.md
+│   │       │   └── WalletsApi.md
+│   │       ├── index.ts
+│   │       ├── models
+│   │       │   ├── AuditEvent.ts
+│   │       │   ├── AuditEventsResponse.ts
+│   │       │   ├── BrokerClient.ts
+│   │       │   ├── BrokerClientsResponse.ts
+│   │       │   ├── BrokerOrderResponse.ts
+│   │       │   ├── CommissionRow.ts
+│   │       │   ├── CommissionsResponse.ts
+│   │       │   ├── ComplaintResponse.ts
+│   │       │   ├── CreateBrokerOrderRequest.ts
+│   │       │   ├── CreateComplaintRequest.ts
+│   │       │   ├── CreateIssuanceRequest.ts
+│   │       │   ├── CreateOrderRequest.ts
+│   │       │   ├── FeedItem.ts
+│   │       │   ├── FeedResponse.ts
+│   │       │   ├── HealthStatus.ts
+│   │       │   ├── Holding.ts
+│   │       │   ├── InvestorStatusResponse.ts
+│   │       │   ├── IssuanceResponse.ts
+│   │       │   ├── IssuerIssuancesReportResponse.ts
+│   │       │   ├── IssuerIssuancesReportResponseSummary.ts
+│   │       │   ├── IssuerPayoutsReportResponse.ts
+│   │       │   ├── IssuerPayoutsReportResponseItemsInner.ts
+│   │       │   ├── IssuerPayoutsReportResponseSummary.ts
+│   │       │   ├── IssuerReportRow.ts
+│   │       │   ├── KycCheckRequest.ts
+│   │       │   ├── KycDecisionRequest.ts
+│   │       │   ├── KycDecisionResponse.ts
+│   │       │   ├── KycDocument.ts
+│   │       │   ├── KycDocumentsResponse.ts
+│   │       │   ├── KycResult.ts
+│   │       │   ├── MarketIssuanceCard.ts
+│   │       │   ├── MarketIssuancesResponse.ts
+│   │       │   ├── OrderResponse.ts
+│   │       │   ├── PayoutHistoryResponse.ts
+│   │       │   ├── PayoutItem.ts
+│   │       │   ├── PayoutsReportResponse.ts
+│   │       │   ├── PayoutsReportResponsePeriod.ts
+│   │       │   ├── ProblemDetails.ts
+│   │       │   ├── QualificationEvaluateRequest.ts
+│   │       │   ├── QualificationResult.ts
+│   │       │   ├── RedeemRequest.ts
+│   │       │   ├── RedeemResponse.ts
+│   │       │   ├── SettlementResponse.ts
+│   │       │   ├── TransactionHistoryResponse.ts
+│   │       │   ├── TxHistoryItem.ts
+│   │       │   ├── WalletResponse.ts
+│   │       │   └── index.ts
+│   │       └── runtime.ts
+│   └── types
+│       └── ts
+│           ├── package.json
+│           ├── scripts
+│           │   └── generate-types.mjs
+│           ├── src
+│           │   └── index.ts
+│           └── tsconfig.json
+├── services
+│   ├── compliance
+│   │   ├── Background
+│   │   │   └── OutboxPublisher.cs
+│   │   ├── ComplianceDbContext.cs
+│   │   ├── DTOs
+│   │   │   ├── ComplaintResponse.cs
+│   │   │   ├── InvestorStatusResponse.cs
+│   │   │   ├── KycResult.cs
+│   │   │   └── QualificationResult.cs
+│   │   ├── Dockerfile
+│   │   ├── Infrastructure
+│   │   │   └── Metrics.cs
+│   │   ├── Migrations
+│   │   │   ├── 20250104000000_InitialCreate.cs
+│   │   │   └── 20250104110000_AddKycTasks.cs
+│   │   ├── Program.cs
+│   │   ├── Properties
+│   │   │   └── launchSettings.json
+│   │   ├── Services
+│   │   │   ├── ComplianceService.cs
+│   │   │   ├── IWatchlistsService.cs
+│   │   │   └── QualificationPolicyService.cs
+│   │   ├── appsettings.json
+│   │   ├── compliance.Tests
+│   │   │   ├── AuditApiTests.cs
+│   │   │   ├── KycWorkflowTests.cs
+│   │   │   ├── QualificationPolicyTests.cs
+│   │   │   └── compliance.Tests.csproj
+│   │   └── compliance.csproj
+│   ├── fabric-gateway
+│   │   ├── FabricGatewayService.cs
+│   │   └── Program.cs
+│   ├── identity
+│   │   ├── Dockerfile
+│   │   ├── Program.cs
+│   │   ├── Properties
+│   │   │   └── launchSettings.json
+│   │   ├── appsettings.json
+│   │   ├── identity.csproj
+│   │   └── packages-microsoft-prod.deb
+│   ├── integrations
+│   │   ├── bank-nominal
+│   │   │   ├── Dockerfile
+│   │   │   ├── Program.cs
+│   │   │   ├── Properties
+│   │   │   │   └── launchSettings.json
+│   │   │   ├── README.md
+│   │   │   ├── appsettings.json
+│   │   │   └── bank-nominal.csproj
+│   │   ├── edo-connector
+│   │   │   └── README.md
+│   │   └── esia-adapter
+│   │       └── README.md
+│   ├── issuance
+│   │   ├── Background
+│   │   │   └── OutboxPublisher.cs
+│   │   ├── DTOs
+│   │   │   ├── CreateIssuanceRequest.cs
+│   │   │   └── IssuanceResponse.cs
+│   │   ├── Dockerfile
+│   │   ├── Infrastructure
+│   │   │   └── Metrics.cs
+│   │   ├── IssuanceDbContext.cs
+│   │   ├── Migrations
+│   │   │   └── 20250101000000_InitialCreate.cs
+│   │   ├── Program.cs
+│   │   ├── Properties
+│   │   │   └── launchSettings.json
+│   │   ├── Services
+│   │   │   ├── ILedgerIssuance.cs
+│   │   │   ├── IssuanceService.cs
+│   │   │   ├── LedgerIssuanceAdapter.cs
+│   │   │   └── OutboxService.cs
+│   │   ├── Validators
+│   │   │   └── CreateIssuanceRequestValidator.cs
+│   │   ├── appsettings.json
+│   │   ├── issuance.Tests
+│   │   │   └── TestResults
+│   │   │       └── issuance.trx
+│   │   ├── issuance.Tests.csproj
+│   │   └── issuance.csproj
+│   ├── registry
+│   │   ├── Background
+│   │   │   └── OutboxPublisher.cs
+│   │   ├── DTOs
+│   │   │   ├── CreateOrderRequest.cs
+│   │   │   ├── OrderResponse.cs
+│   │   │   ├── RedeemRequest.cs
+│   │   │   ├── RedeemResponse.cs
+│   │   │   └── WalletResponse.cs
+│   │   ├── Dockerfile
+│   │   ├── Infrastructure
+│   │   │   └── Metrics.cs
+│   │   ├── Migrations
+│   │   │   └── 20250102000000_InitialCreate.cs
+│   │   ├── Program.cs
+│   │   ├── Properties
+│   │   │   └── launchSettings.json
+│   │   ├── RegistryDbContext.cs
+│   │   ├── Services
+│   │   │   ├── IBankNominalService.cs
+│   │   │   ├── IComplianceService.cs
+│   │   │   ├── ILedgerRegistry.cs
+│   │   │   └── RegistryService.cs
+│   │   ├── Validators
+│   │   │   └── CreateOrderRequestValidator.cs
+│   │   ├── appsettings.json
+│   │   ├── registry.Tests
+│   │   │   ├── ErrorMappingTests.cs
+│   │   │   ├── IdempotencyTests.cs
+│   │   │   ├── OrderFlowTests.cs
+│   │   │   ├── OutboxPublishTests.cs
+│   │   │   └── registry.Tests.csproj
+│   │   └── registry.csproj
+│   └── settlement
+│       ├── Background
+│       │   ├── OrderPaidConsumer.cs
+│       │   └── OutboxPublisher.cs
+│       ├── Consumers
+│       │   └── OrderPaidEventConsumer.cs
+│       ├── DTOs
+│       │   ├── PayoutsReportResponse.cs
+│       │   └── SettlementResponse.cs
+│       ├── Dockerfile
+│       ├── Infrastructure
+│       │   └── Metrics.cs
+│       ├── Migrations
+│       │   └── 20250103000000_InitialCreate.cs
+│       ├── Program.cs
+│       ├── Properties
+│       │   └── launchSettings.json
+│       ├── Services
+│       │   ├── IBankNominalClient.cs
+│       │   ├── IIssuanceClient.cs
+│       │   ├── IRegistryClient.cs
+│       │   └── SettlementService.cs
+│       ├── SettlementDbContext.cs
+│       ├── appsettings.json
+│       ├── settlement.Tests
+│       │   ├── IdempotencyTests.cs
+│       │   └── settlement.Tests.csproj
+│       └── settlement.csproj
+├── tests
+│   ├── contracts
+│   │   ├── pact-consumer
+│   │   │   ├── gateway-to-issuance.test.ts
+│   │   │   ├── gateway-to-registry.test.ts
+│   │   │   └── package.json
+│   │   └── pact-provider
+│   │       └── registry-provider-verification.cs
+│   ├── e2e
+│   │   ├── README.md
+│   │   ├── helpers
+│   │   │   └── test-data.ts
+│   │   ├── package.json
+│   │   ├── playwright.config.ts
+│   │   └── tests
+│   │       ├── backoffice-journey.spec.ts
+│   │       ├── investor-journey.spec.ts
+│   │       ├── investor.catalog_buy_history.spec.ts
+│   │       ├── issuer-journey.spec.ts
+│   │       ├── ledger-integration.spec.ts
+│   │       └── lifecycle.spec.ts
+│   ├── e2e-playwright
+│   │   ├── README.md
+│   │   ├── package.json
+│   │   ├── playwright.config.ts
+│   │   └── tests
+│   │       ├── backoffice-auth.spec.ts
+│   │       ├── public-auth.spec.ts
+│   │       └── self-registration.spec.ts
+│   ├── issuance.Tests
+│   │   ├── IssuanceApiTests.cs
+│   │   ├── IssuanceServiceTests.cs
+│   │   ├── TestResults
+│   │   │   └── issuance.trx
+│   │   └── issuance.Tests.csproj
+│   ├── k6
+│   │   ├── gateway-critical-paths.js
+│   │   └── payouts-report.js
+│   └── load
+│       └── README.md
+└── tools
+    ├── migrate_all.sh
+    └── timeweb
+        ├── README.md
+        ├── install.sh
+        └── kubeconfig-export.sh
+
+```
