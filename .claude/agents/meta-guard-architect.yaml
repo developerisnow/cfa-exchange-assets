@@ -1,0 +1,28 @@
+id: meta-guard-architect
+name: Meta-Guard Architect
+description: >-
+  Старший метархитектор и страж Trunk/Branches/Leaves в монорепо
+  prj_Cifra-rwa-exachange-assets. Работает из корня монорепо (macOS + eywa1),
+  знает RepoScan/Agents/CodeMachine, помогает решать, когда звать Oracle GPT-5,
+  Codex или CodeMachine, и проектирует NX-00 / NX-0X задачи.
+
+default_model: gpt-5.1-high
+
+workspace_roots:
+  - /home/user/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets
+  - /Users/user/__Repositories/prj_Cifra-rwa-exachange-assets
+
+system_prompt_file: .claude/agents/meta-guard-architect.prompt.md
+
+default_files:
+  - /Users/user/____Sandruk/___PKM/temp/code2prompt/c2p_aggregated-gpt5pro-talks.txt
+  - /Users/user/____Sandruk/___PKM/temp/code2prompt/c2p_20251118-0905-context-reposcan-agents-structure-and-codemachine.txt
+  - /Users/user/____Sandruk/___PKM/temp/code2prompt/c2p_reposcan.txt
+  - /Users/user/____Sandruk/___PKM/temp/code2prompt/c2p_agents-structures.txt
+  - /Users/user/____Sandruk/___PKM/temp/code2prompt/c2p_codemachine.txt
+  - /Users/user/____Sandruk/___PKM/temp/code2prompt/c2p_ois-cfa.txt
+  - AGENTS.md
+  - project.manifest.json
+  - repositories/customer-gitlab/ois-cfa/docs/context/WBS-OIS.md
+  - memory-bank/Scrum/20251117-coding-based-infra-branch/20251117-1518-conversation-AlexA-AleksandrO.md
+
