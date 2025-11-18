@@ -2,8 +2,8 @@
     "id": "docs",
     "description": "Catalog of critical project documents.",
   "meta": {
-      "version": "1.2.1",
-      "updated": "2025-11-17T15:12:00+03:00",
+      "version": "1.2.2",
+      "updated": "2025-11-18T13:55:00+03:00",
       "edited_by": ["co-76ca", "co-3c63"]
     },
     "documents": [
@@ -86,6 +86,22 @@
         "owner": "alex-a",
         "tags": ["context-snapshot", "week47", "onboarding"],
         "summary": "Week47 context snapshot for new agents: people/domains, repositories/branches, environments, infra and billing state, and manifest gaps."
+      },
+      {
+        "id": "oracle-step5-os-design-20251118",
+        "path": "./memory-bank/Scrum/20251117-coding-based-infra-branch/20251118-1321-gpt5pro-step5-cohere-json-markdown.gpt5p.md",
+        "type": "ai-report",
+        "owner": "alex-a",
+        "tags": ["os", "agents", "reposcan", "codemachine", "gpt5pro"],
+        "summary": "GPT-5 Pro step5 report that outlines a JSON+Markdown operating system for the project: RepoScan, agents.manifest, workflows, YAML frontmatter."
+      },
+      {
+        "id": "oracle-step6-nx00-glue-20251118",
+        "path": "./memory-bank/Scrum/20251117-coding-based-infra-branch/20251118-1400-gpt5pro-step6-all-together.gpt5p.md",
+        "type": "ai-report",
+        "owner": "alex-a",
+        "tags": ["nx-00", "planning", "os", "gpt5pro"],
+        "summary": "GPT-5 Pro step6 master glue report that validates step5, designs the NX-00 series, Mermaid plan, and tool selection (Oracle vs Codex vs CodeMachine)."
       }
     ]
   }

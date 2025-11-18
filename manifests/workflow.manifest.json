@@ -2,8 +2,8 @@
   "id": "workflow",
   "description": "Workplace, orchestration, tools, and operational workflow for AI-assisted development and research.",
   "meta": {
-    "version": "1.1.1",
-    "updated": "2025-11-17T15:12:00+03:00",
+    "version": "1.2.0",
+    "updated": "2025-11-18T13:55:00+03:00",
     "edited_by": ["co-76ca", "co-3c63"]
   },
   "workplaces": {
@@ -70,7 +70,8 @@
       { "name": "Gemini CLI", "use": "coding + analysis" }
     ],
     "assistants": [
-      { "name": "AI Studio", "role": "evaluator/teacher/buddy", "context_window": "~1M tokens", "use": "large-context analysis" }
+      { "name": "AI Studio", "role": "evaluator/teacher/buddy", "context_window": "~1M tokens", "use": "large-context analysis" },
+      { "name": "CodeMachine", "role": "agent-orchestrator", "use": "map/reduce workflows over RepoScan + manifests + tasks" }
     ]
   },
   "dev_practices": {
@@ -95,6 +96,10 @@
     "manifests": {
       "role": "SSOT for agents; indices drive navigation",
       "update_cadence": "incremental, checksum-updated"
+    },
+    "reposcan": {
+      "role": "Provide compact JSON maps of each repo/branch for agents and CodeMachine.",
+      "artifacts": "stored under snapshots/reposcan/<repo>/<branch>.reposcan.json in the mono-repo control plane"
     }
   },
   "git_flow": {

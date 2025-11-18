@@ -4,8 +4,8 @@
     "id": "prj_Cifra-rwa-exachange-assets",
     "name": "Cifra RWA Exchange Assets",
     "description": "Root project manifest (SSOT) for agents and operators.",
-    "version": "1.2.1",
-    "updated": "2025-11-17T13:40:00+03:00",
+    "version": "1.2.2",
+    "updated": "2025-11-18T13:55:00+03:00",
     "status": "active"
   },
   "goals": [
@@ -88,25 +88,25 @@
     {
       "id": "communication",
       "path": "./manifests/communication.manifest.json",
-      "checksum": "f59d78caff66ff854be58e6390526d987ab3509e47908acb94e7daedf59f863e",
+      "checksum": "23c31d0f151ac34113addcde7041817df9b2e4ea794489fb7c7c90c5e47ba360",
       "description": "Key communication logs and transcripts."
     },
     {
       "id": "docs",
       "path": "./manifests/docs.manifest.json",
-      "checksum": "50be4104beced40e75ae90400121fb372a62b98bd74eba6c93c9afe5f68a0737",
+      "checksum": "1718364d018e4b1c35edce4fdc9c2a8c6d5b006c6ad0bd2f14a371d38ffc017c",
       "description": "Critical documents and research."
     },
     {
       "id": "repo-structure",
       "path": "./manifests/repo-structure.manifest.json",
-      "checksum": "32cb6d5473a1daaeb57a172aaaabf7f60e4f051c956d9f9906aa973511e7b834",
+      "checksum": "5ee0b9dc97ecc7d061fcfa037ffeea7ff80a4d4fde1eee169c3571580812df15",
       "description": "Folder map for agent navigation."
     },
     {
       "id": "workflow",
       "path": "./manifests/workflow.manifest.json",
-      "checksum": "9373d23b0a09aafd4a23de7cba372b257f8ccf0a4c02b775ab987b21d94e5368",
+      "checksum": "ce4081e194059a6a4ea9bdd240e02881fd94d9da2a669bb8ca5d64f7346502d1",
       "description": "Operational workflow, tools, servers, and policies."
     }
   ]

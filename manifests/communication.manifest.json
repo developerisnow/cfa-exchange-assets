@@ -2,10 +2,11 @@
   "id": "communication",
   "description": "Index of key project communication logs.",
   "meta": {
-    "version": "1.1.0",
-    "updated": "2025-11-10T19:04:00+03:00",
+    "version": "1.1.1",
+    "updated": "2025-11-18T13:55:00+03:00",
     "edited_by": [
-      "co-76ca"
+      "co-76ca",
+      "co-3c63"
     ]
   },
   "logs": [
@@ -95,6 +96,23 @@
         "tech"
       ],
       "summary": "Org/Tech planning call; align realistic plan and deadlines, scope, and the role of AI in delivery."
+    },
+    {
+      "id": "nx-tasks-sync-20251117",
+      "path": "./memory-bank/Scrum/20251117-coding-based-infra-branch/20251117-1518-conversation-AlexA-AleksandrO.md",
+      "type": "chat-log",
+      "participants": [
+        "alex-a",
+        "aleksandr-o"
+      ],
+      "timestamp": "2025-11-17T15:18:00+03:00",
+      "tags": [
+        "nx-tasks",
+        "gitflow",
+        "planning",
+        "agents"
+      ],
+      "summary": "Conversation between Alex A. and Aleksandr O. about NX tasks, gitflow expectations, and how agents should work from tasks/docs/context."
     }
   ]
 }

@@ -6,6 +6,10 @@
       "description": "This directory. Contains all project manifest files. The SSOT for project structure.",
       "role": "TRUNK"
     },
+    ".claude/": {
+      "description": "Agent configuration for this mono-repo (Meta-Guard, commands, skills, cli settings).",
+      "role": "AGENT_CONFIG"
+    },
     "memory-bank/": {
       "description": "The project's 'data lake'. Contains all raw and processed information.",
       "role": "DATA"
@@ -22,16 +26,29 @@
       "description": "The official documentation repository. Contains the canonical architecture, legal, and security documents.",
       "role": "BRANCH_DOCS"
     },
+    "repositories/customer-gitlab/ois-cfa/": {
+      "description": "Core application repository (OIS-CFA) as a submodule. Main target for application-level work.",
+      "role": "APP_REPO"
+    },
+    "snapshots/reposcan/": {
+      "description": "RepoScan JSON snapshots per repo/branch, used by agents and CodeMachine as maps of the territory.",
+      "role": "SNAPSHOTS"
+    },
+    ".codemachine/": {
+      "description": "CodeMachine workflows and runtime artefacts (plans, tasks, logs) for agent-driven pipelines.",
+      "role": "WORKFLOW_RUNTIME"
+    },
     "scripts/": {
       "description": "Utility scripts for project automation (e.g., manifest validation, ETL).",
       "role": "TOOLS"
     }
   },
   "meta": {
-    "version": "1.1.0",
-    "updated": "2025-11-10T19:04:00+03:00",
+    "version": "1.2.0",
+    "updated": "2025-11-18T13:55:00+03:00",
     "edited_by": [
-      "co-76ca"
+      "co-76ca",
+      "co-3c63"
     ]
   }
 }
