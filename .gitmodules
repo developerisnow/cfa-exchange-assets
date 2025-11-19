@@ -1,12 +1,16 @@
 [submodule "repositories/customer-gitlab/docs-cfa-rwa"]
 	path = repositories/customer-gitlab/docs-cfa-rwa
 	url = git@git.telex.global:cfa/docs-cfa.git
+	branch = main
 [submodule "repositories/customer-gitlab/ois-cfa"]
 	path = repositories/customer-gitlab/ois-cfa
 	url = git@git.telex.global:npk/ois-cfa.git
+	branch = infra.defis.deploy
 [submodule "repositories/customer-gitlab/velvet"]
 	path = repositories/customer-gitlab/velvet
 	url = git@git.telex.global:npk/velvet.git
+	branch = main
 [submodule "repositories/ai/SDD-shotgun-pro"]
 	path = repositories/ai/SDD-shotgun-pro
 	url = git@github.com:developerisnow/SDD-shotgun-pro.git
+	branch = main
