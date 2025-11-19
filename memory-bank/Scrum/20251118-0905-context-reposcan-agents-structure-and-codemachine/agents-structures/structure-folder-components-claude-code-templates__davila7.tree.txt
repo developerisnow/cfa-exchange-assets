@@ -1,0 +1,1020 @@
+/Users/user/.claude/claude-code-templates__davila7/cli-tool/components
+├── agents
+│   ├── ai-specialists
+│   │   ├── ai-ethics-advisor.md
+│   │   ├── hackathon-ai-strategist.md
+│   │   ├── llms-maintainer.md
+│   │   ├── model-evaluator.md
+│   │   ├── prompt-engineer.md
+│   │   ├── search-specialist.md
+│   │   └── task-decomposition-expert.md
+│   ├── api-graphql
+│   │   ├── graphql-architect.md
+│   │   ├── graphql-performance-optimizer.md
+│   │   └── graphql-security-specialist.md
+│   ├── blockchain-web3
+│   │   ├── smart-contract-auditor.md
+│   │   ├── smart-contract-specialist.md
+│   │   └── web3-integration-specialist.md
+│   ├── business-marketing
+│   │   ├── business-analyst.md
+│   │   ├── content-marketer.md
+│   │   ├── customer-support.md
+│   │   ├── legal-advisor.md
+│   │   ├── marketing-attribution-analyst.md
+│   │   ├── payment-integration.md
+│   │   ├── product-strategist.md
+│   │   ├── risk-manager.md
+│   │   └── sales-automator.md
+│   ├── data-ai
+│   │   ├── ai-engineer.md
+│   │   ├── computer-vision-engineer.md
+│   │   ├── data-engineer.md
+│   │   ├── data-scientist.md
+│   │   ├── ml-engineer.md
+│   │   ├── mlops-engineer.md
+│   │   ├── nlp-engineer.md
+│   │   └── quant-analyst.md
+│   ├── database
+│   │   ├── database-admin.md
+│   │   ├── database-architect.md
+│   │   ├── database-optimization.md
+│   │   ├── database-optimizer.md
+│   │   ├── neon-auth-specialist.md
+│   │   ├── neon-database-architect.md
+│   │   ├── neon-expert.md
+│   │   ├── nosql-specialist.md
+│   │   └── supabase-schema-architect.md
+│   ├── deep-research-team
+│   │   ├── academic-researcher.md
+│   │   ├── agent-overview.md
+│   │   ├── competitive-intelligence-analyst.md
+│   │   ├── data-analyst.md
+│   │   ├── fact-checker.md
+│   │   ├── nia-oracle.md
+│   │   ├── query-clarifier.md
+│   │   ├── report-generator.md
+│   │   ├── research-brief-generator.md
+│   │   ├── research-coordinator.md
+│   │   ├── research-orchestrator.md
+│   │   ├── research-synthesizer.md
+│   │   └── technical-researcher.md
+│   ├── development-team
+│   │   ├── backend-architect.md
+│   │   ├── cli-ui-designer.md
+│   │   ├── devops-engineer.md
+│   │   ├── frontend-developer.md
+│   │   ├── fullstack-developer.md
+│   │   ├── ios-developer.md
+│   │   ├── mobile-developer.md
+│   │   └── ui-ux-designer.md
+│   ├── development-tools
+│   │   ├── code-reviewer.md
+│   │   ├── command-expert.md
+│   │   ├── context-manager.md
+│   │   ├── debugger.md
+│   │   ├── dx-optimizer.md
+│   │   ├── error-detective.md
+│   │   ├── flutter-go-reviewer.md
+│   │   ├── mcp-expert.md
+│   │   ├── performance-profiler.md
+│   │   ├── test-engineer.md
+│   │   └── unused-code-cleaner.md
+│   ├── devops-infrastructure
+│   │   ├── cloud-architect.md
+│   │   ├── deployment-engineer.md
+│   │   ├── devops-troubleshooter.md
+│   │   ├── monitoring-specialist.md
+│   │   ├── network-engineer.md
+│   │   ├── security-engineer.md
+│   │   ├── terraform-specialist.md
+│   │   └── vercel-deployment-specialist.md
+│   ├── documentation
+│   │   ├── api-documenter.md
+│   │   ├── changelog-generator.md
+│   │   ├── docusaurus-expert.md
+│   │   └── technical-writer.md
+│   ├── expert-advisors
+│   │   ├── agent-expert.md
+│   │   ├── architect-review.md
+│   │   ├── dependency-manager.md
+│   │   └── documentation-expert.md
+│   ├── ffmpeg-clip-team
+│   │   ├── audio-mixer.md
+│   │   ├── audio-quality-controller.md
+│   │   ├── podcast-content-analyzer.md
+│   │   ├── podcast-metadata-specialist.md
+│   │   ├── podcast-transcriber.md
+│   │   ├── social-media-clip-creator.md
+│   │   ├── timestamp-precision-specialist.md
+│   │   └── video-editor.md
+│   ├── game-development
+│   │   ├── 3d-artist.md
+│   │   ├── game-designer.md
+│   │   ├── unity-game-developer.md
+│   │   └── unreal-engine-developer.md
+│   ├── git
+│   │   └── git-flow-manager.md
+│   ├── mcp-dev-team
+│   │   ├── mcp-deployment-orchestrator.md
+│   │   ├── mcp-integration-engineer.md
+│   │   ├── mcp-protocol-specialist.md
+│   │   ├── mcp-registry-navigator.md
+│   │   ├── mcp-security-auditor.md
+│   │   ├── mcp-server-architect.md
+│   │   └── mcp-testing-engineer.md
+│   ├── modernization
+│   │   ├── architecture-modernizer.md
+│   │   ├── cloud-migration-specialist.md
+│   │   └── legacy-modernizer.md
+│   ├── obsidian-ops-team
+│   │   ├── connection-agent.md
+│   │   ├── content-curator.md
+│   │   ├── metadata-agent.md
+│   │   ├── moc-agent.md
+│   │   ├── review-agent.md
+│   │   ├── Scripts
+│   │   │   ├── daily_notes_connector.py
+│   │   │   ├── enhance_tag_standardizer.py
+│   │   │   ├── find_keyword_connections.py
+│   │   │   ├── fix_quoted_tags.py
+│   │   │   ├── implement_entity_connections.py
+│   │   │   ├── link_suggester.py
+│   │   │   ├── metadata_adder.py
+│   │   │   ├── moc_generator.py
+│   │   │   ├── parse_keyword_connections.py
+│   │   │   └── tag_standardizer.py
+│   │   ├── tag-agent.md
+│   │   └── vault-optimizer.md
+│   ├── ocr-extraction-team
+│   │   ├── document-structure-analyzer.md
+│   │   ├── markdown-syntax-formatter.md
+│   │   ├── ocr-grammar-fixer.md
+│   │   ├── ocr-preprocessing-optimizer.md
+│   │   ├── ocr-quality-assurance.md
+│   │   ├── text-comparison-validator.md
+│   │   └── visual-analysis-ocr.md
+│   ├── performance-testing
+│   │   ├── load-testing-specialist.md
+│   │   ├── performance-engineer.md
+│   │   ├── react-performance-optimization.md
+│   │   ├── test-automator.md
+│   │   └── web-vitals-optimizer.md
+│   ├── podcast-creator-team
+│   │   ├── academic-research-synthesizer.md
+│   │   ├── comprehensive-researcher.md
+│   │   ├── episode-orchestrator.md
+│   │   ├── guest-outreach-coordinator.md
+│   │   ├── market-research-analyst.md
+│   │   ├── podcast-editor.md
+│   │   ├── podcast-trend-scout.md
+│   │   ├── project-supervisor-orchestrator.md
+│   │   ├── seo-podcast-optimizer.md
+│   │   ├── social-media-copywriter.md
+│   │   └── twitter-ai-influencer-manager.md
+│   ├── programming-languages
+│   │   ├── c-pro.md
+│   │   ├── c-sharp-pro.md
+│   │   ├── cpp-pro.md
+│   │   ├── golang-pro.md
+│   │   ├── javascript-pro.md
+│   │   ├── php-pro.md
+│   │   ├── python-pro.md
+│   │   ├── rust-pro.md
+│   │   ├── shell-scripting-pro.md
+│   │   ├── sql-pro.md
+│   │   └── typescript-pro.md
+│   ├── realtime
+│   │   └── supabase-realtime-optimizer.md
+│   ├── security
+│   │   ├── api-security-audit.md
+│   │   ├── compliance-specialist.md
+│   │   ├── incident-responder.md
+│   │   ├── penetration-tester.md
+│   │   └── security-auditor.md
+│   └── web-tools
+│       ├── nextjs-architecture-expert.md
+│       ├── react-performance-optimizer.md
+│       ├── seo-analyzer.md
+│       ├── url-context-validator.md
+│       ├── url-link-extractor.md
+│       └── web-accessibility-checker.md
+├── commands
+│   ├── automation
+│   │   ├── act.md
+│   │   ├── ci-pipeline.md
+│   │   ├── husky.md
+│   │   └── workflow-orchestrator.md
+│   ├── database
+│   │   ├── supabase-backup-manager.md
+│   │   ├── supabase-data-explorer.md
+│   │   ├── supabase-migration-assistant.md
+│   │   ├── supabase-performance-optimizer.md
+│   │   ├── supabase-realtime-monitor.md
+│   │   ├── supabase-schema-sync.md
+│   │   ├── supabase-security-audit.md
+│   │   └── supabase-type-generator.md
+│   ├── deployment
+│   │   ├── add-changelog.md
+│   │   ├── blue-green-deployment.md
+│   │   ├── changelog-demo-command.md
+│   │   ├── ci-setup.md
+│   │   ├── containerize-application.md
+│   │   ├── deployment-monitoring.md
+│   │   ├── hotfix-deploy.md
+│   │   ├── prepare-release.md
+│   │   ├── rollback-deploy.md
+│   │   ├── setup-automated-releases.md
+│   │   └── setup-kubernetes-deployment.md
+│   ├── documentation
+│   │   ├── create-architecture-documentation.md
+│   │   ├── create-onboarding-guide.md
+│   │   ├── doc-api.md
+│   │   ├── docs-maintenance.md
+│   │   ├── generate-api-documentation.md
+│   │   ├── interactive-documentation.md
+│   │   ├── load-llms-txt.md
+│   │   ├── migration-guide.md
+│   │   ├── troubleshooting-guide.md
+│   │   └── update-docs.md
+│   ├── game-development
+│   │   ├── game-analytics-integration.md
+│   │   ├── game-asset-pipeline.md
+│   │   ├── game-performance-profiler.md
+│   │   ├── game-testing-framework.md
+│   │   └── unity-project-setup.md
+│   ├── git
+│   │   ├── feature.md
+│   │   ├── finish.md
+│   │   ├── flow-status.md
+│   │   ├── hotfix.md
+│   │   └── release.md
+│   ├── git-workflow
+│   │   ├── branch-cleanup.md
+│   │   ├── commit.md
+│   │   ├── create-pr.md
+│   │   ├── create-pull-request.md
+│   │   ├── create-worktrees.md
+│   │   ├── fix-github-issue.md
+│   │   ├── gemini-review.md
+│   │   ├── git-bisect-helper.md
+│   │   ├── pr-review.md
+│   │   └── update-branch-name.md
+│   ├── marketing
+│   │   ├── publisher-all.md
+│   │   ├── publisher-devto.md
+│   │   ├── publisher-linkedin.md
+│   │   ├── publisher-medium.md
+│   │   └── publisher-x.md
+│   ├── nextjs-vercel
+│   │   ├── nextjs-api-tester.md
+│   │   ├── nextjs-bundle-analyzer.md
+│   │   ├── nextjs-component-generator.md
+│   │   ├── nextjs-middleware-creator.md
+│   │   ├── nextjs-migration-helper.md
+│   │   ├── nextjs-performance-audit.md
+│   │   ├── nextjs-scaffold.md
+│   │   ├── vercel-deploy-optimize.md
+│   │   ├── vercel-edge-function.md
+│   │   └── vercel-env-sync.md
+│   ├── orchestration
+│   │   ├── archive.md
+│   │   ├── commit.md
+│   │   ├── find.md
+│   │   ├── log.md
+│   │   ├── move.md
+│   │   ├── optimize.md
+│   │   ├── remove.md
+│   │   ├── report.md
+│   │   ├── resume.md
+│   │   ├── start.md
+│   │   ├── status.md
+│   │   └── sync.md
+│   ├── performance
+│   │   ├── add-performance-monitoring.md
+│   │   ├── implement-caching-strategy.md
+│   │   ├── optimize-api-performance.md
+│   │   ├── optimize-build.md
+│   │   ├── optimize-bundle-size.md
+│   │   ├── optimize-database-performance.md
+│   │   ├── optimize-memory-usage.md
+│   │   ├── performance-audit.md
+│   │   ├── setup-cdn-optimization.md
+│   │   └── system-behavior-simulator.md
+│   ├── project-management
+│   │   ├── add-package.md
+│   │   ├── add-to-changelog.md
+│   │   ├── create-feature.md
+│   │   ├── create-jtbd.md
+│   │   ├── create-prd.md
+│   │   ├── create-prp.md
+│   │   ├── init-project.md
+│   │   ├── milestone-tracker.md
+│   │   ├── pac-configure.md
+│   │   ├── pac-create-epic.md
+│   │   ├── pac-create-ticket.md
+│   │   ├── pac-update-status.md
+│   │   ├── pac-validate.md
+│   │   ├── project-health-check.md
+│   │   ├── project-timeline-simulator.md
+│   │   ├── project-to-linear.md
+│   │   ├── release.md
+│   │   └── todo.md
+│   ├── security
+│   │   ├── add-authentication-system.md
+│   │   ├── dependency-audit.md
+│   │   ├── penetration-test.md
+│   │   ├── secrets-scanner.md
+│   │   ├── security-audit.md
+│   │   └── security-hardening.md
+│   ├── setup
+│   │   ├── create-database-migrations.md
+│   │   ├── design-database-schema.md
+│   │   ├── design-rest-api.md
+│   │   ├── implement-graphql-api.md
+│   │   ├── migrate-to-typescript.md
+│   │   ├── setup-ci-cd-pipeline.md
+│   │   ├── setup-development-environment.md
+│   │   ├── setup-docker-containers.md
+│   │   ├── setup-formatting.md
+│   │   ├── setup-linting.md
+│   │   ├── setup-monitoring-observability.md
+│   │   ├── setup-monorepo.md
+│   │   ├── setup-rate-limiting.md
+│   │   ├── update-dependencies.md
+│   │   └── vercel-analytics.md
+│   ├── simulation
+│   │   ├── business-scenario-explorer.md
+│   │   ├── constraint-modeler.md
+│   │   ├── decision-tree-explorer.md
+│   │   ├── digital-twin-creator.md
+│   │   ├── future-scenario-generator.md
+│   │   ├── market-response-modeler.md
+│   │   ├── monte-carlo-simulator.md
+│   │   ├── simulation-calibrator.md
+│   │   ├── system-dynamics-modeler.md
+│   │   └── timeline-compressor.md
+│   ├── svelte
+│   │   ├── svelte-a11y.md
+│   │   ├── svelte-component.md
+│   │   ├── svelte-debug.md
+│   │   ├── svelte-migrate.md
+│   │   ├── svelte-optimize.md
+│   │   ├── svelte-scaffold.md
+│   │   ├── svelte-storybook-migrate.md
+│   │   ├── svelte-storybook-mock.md
+│   │   ├── svelte-storybook-setup.md
+│   │   ├── svelte-storybook-story.md
+│   │   ├── svelte-storybook-troubleshoot.md
+│   │   ├── svelte-storybook.md
+│   │   ├── svelte-test-coverage.md
+│   │   ├── svelte-test-fix.md
+│   │   ├── svelte-test-setup.md
+│   │   └── svelte-test.md
+│   ├── sync
+│   │   ├── bidirectional-sync.md
+│   │   ├── bulk-import-issues.md
+│   │   ├── cross-reference-manager.md
+│   │   ├── issue-to-linear-task.md
+│   │   ├── linear-task-to-issue.md
+│   │   ├── sync-automation-setup.md
+│   │   ├── sync-conflict-resolver.md
+│   │   ├── sync-health-monitor.md
+│   │   ├── sync-issues-to-linear.md
+│   │   ├── sync-linear-to-issues.md
+│   │   ├── sync-migration-assistant.md
+│   │   ├── sync-pr-to-task.md
+│   │   ├── sync-status.md
+│   │   └── task-from-pr.md
+│   ├── team
+│   │   ├── architecture-review.md
+│   │   ├── decision-quality-analyzer.md
+│   │   ├── dependency-mapper.md
+│   │   ├── estimate-assistant.md
+│   │   ├── issue-triage.md
+│   │   ├── memory-spring-cleaning.md
+│   │   ├── migration-assistant.md
+│   │   ├── retrospective-analyzer.md
+│   │   ├── session-learning-capture.md
+│   │   ├── sprint-planning.md
+│   │   ├── standup-report.md
+│   │   ├── team-knowledge-mapper.md
+│   │   ├── team-velocity-tracker.md
+│   │   └── team-workload-balancer.md
+│   ├── testing
+│   │   ├── add-mutation-testing.md
+│   │   ├── add-property-based-testing.md
+│   │   ├── e2e-setup.md
+│   │   ├── generate-test-cases.md
+│   │   ├── generate-tests.md
+│   │   ├── setup-comprehensive-testing.md
+│   │   ├── setup-load-testing.md
+│   │   ├── setup-visual-testing.md
+│   │   ├── test-automation-orchestrator.md
+│   │   ├── test-changelog-automation.md
+│   │   ├── test-coverage.md
+│   │   ├── test-quality-analyzer.md
+│   │   ├── testing_plan_integration.md
+│   │   └── write-tests.md
+│   └── utilities
+│       ├── all-tools.md
+│       ├── architecture-scenario-explorer.md
+│       ├── check-file.md
+│       ├── clean-branches.md
+│       ├── clean.md
+│       ├── code-permutation-tester.md
+│       ├── code-review.md
+│       ├── code-to-task.md
+│       ├── context-prime.md
+│       ├── debug-error.md
+│       ├── directory-deep-dive.md
+│       ├── explain-code.md
+│       ├── fix-issue.md
+│       ├── generate-linear-worklog.md
+│       ├── git-status.md
+│       ├── initref.md
+│       ├── prime.md
+│       ├── refactor-code.md
+│       └── ultra-think.md
+├── hooks
+│   ├── automation
+│   │   ├── agents-md-loader.json
+│   │   ├── build-on-change.json
+│   │   ├── dependency-checker.json
+│   │   ├── deployment-health-monitor.json
+│   │   ├── discord-detailed-notifications.json
+│   │   ├── discord-error-notifications.json
+│   │   ├── discord-notifications.json
+│   │   ├── simple-notifications.json
+│   │   ├── slack-detailed-notifications.json
+│   │   ├── slack-error-notifications.json
+│   │   ├── slack-notifications.json
+│   │   ├── telegram-detailed-notifications.json
+│   │   ├── telegram-error-notifications.json
+│   │   ├── telegram-notifications.json
+│   │   ├── vercel-auto-deploy.json
+│   │   └── vercel-environment-sync.json
+│   ├── development-tools
+│   │   ├── change-tracker.json
+│   │   ├── command-logger.json
+│   │   ├── file-backup.json
+│   │   ├── lint-on-save.json
+│   │   ├── nextjs-code-quality-enforcer.json
+│   │   └── smart-formatting.json
+│   ├── git
+│   │   ├── conventional-commits.json
+│   │   ├── conventional-commits.py
+│   │   ├── prevent-direct-push.json
+│   │   ├── prevent-direct-push.py
+│   │   ├── validate-branch-name.json
+│   │   └── validate-branch-name.py
+│   ├── git-workflow
+│   │   ├── auto-git-add.json
+│   │   └── smart-commit.json
+│   ├── HOOK_PATTERNS_COMPRESSED.json
+│   ├── performance
+│   │   ├── performance-budget-guard.json
+│   │   └── performance-monitor.json
+│   ├── post-tool
+│   │   ├── format-javascript-files.json
+│   │   ├── format-python-files.json
+│   │   ├── git-add-changes.json
+│   │   └── run-tests-after-changes.json
+│   ├── pre-tool
+│   │   ├── backup-before-edit.json
+│   │   ├── notify-before-bash.json
+│   │   └── update-search-year.json
+│   ├── security
+│   │   ├── file-protection.json
+│   │   └── security-scanner.json
+│   └── testing
+│       └── test-runner.json
+├── mcps
+│   ├── audio
+│   │   └── elevenlabs.json
+│   ├── browser_automation
+│   │   ├── browser-use-mcp-server.json
+│   │   ├── browsermcp.json
+│   │   ├── mcp-server-browserbase.json
+│   │   ├── mcp-server-playwright.json
+│   │   ├── playwright-mcp-server.json
+│   │   └── playwright-mcp.json
+│   ├── database
+│   │   ├── mysql-integration.json
+│   │   ├── neon.json
+│   │   ├── postgresql-integration.json
+│   │   └── supabase.json
+│   ├── deepgraph
+│   │   ├── deepgraph-nextjs.json
+│   │   ├── deepgraph-react.json
+│   │   ├── deepgraph-typescript.json
+│   │   └── deepgraph-vue.json
+│   ├── deepresearch
+│   │   └── mcp-server-nia.json
+│   ├── devtools
+│   │   ├── azure-kubernetes-service.json
+│   │   ├── box.json
+│   │   ├── chrome-devtools.json
+│   │   ├── circleci.json
+│   │   ├── codacy.json
+│   │   ├── context7.json
+│   │   ├── dynatrace.json
+│   │   ├── elasticsearch.json
+│   │   ├── figma-dev-mode.json
+│   │   ├── firecrawl.json
+│   │   ├── firefly-mcp.json
+│   │   ├── grafana.json
+│   │   ├── huggingface.json
+│   │   ├── imagesorcery.json
+│   │   ├── ios-simulator-mcp.json
+│   │   ├── jfrog.json
+│   │   ├── just-mcp.json
+│   │   ├── launchdarkly.json
+│   │   ├── leetcode.json
+│   │   ├── logfire.json
+│   │   ├── markitdown.json
+│   │   ├── mcp-server-atlassian-bitbucket.json
+│   │   ├── mcp-server-trello.json
+│   │   ├── microsoft-clarity.json
+│   │   ├── microsoft-dev-box.json
+│   │   ├── mongodb.json
+│   │   ├── postman.json
+│   │   ├── pulumi.json
+│   │   ├── sentry.json
+│   │   ├── serena.json
+│   │   ├── stripe.json
+│   │   ├── terraform.json
+│   │   ├── testsprite.json
+│   │   └── webflow.json
+│   ├── filesystem
+│   │   └── filesystem-access.json
+│   ├── integration
+│   │   ├── github-integration.json
+│   │   └── memory-integration.json
+│   ├── marketing
+│   │   ├── facebook-ads-mcp-server.json
+│   │   └── google-ads-mcp-server.json
+│   ├── productivity
+│   │   ├── monday.json
+│   │   └── notion.json
+│   └── web
+│       └── web-fetch.json
+├── sandbox
+│   ├── cloudflare
+│   │   ├── claude-code-sandbox.md
+│   │   ├── IMPLEMENTATION_SUMMARY.md
+│   │   ├── launcher.ts
+│   │   ├── monitor.ts
+│   │   ├── package.json
+│   │   ├── QUICKSTART.md
+│   │   ├── README.md
+│   │   ├── SANDBOX_DEBUGGING.md
+│   │   ├── src
+│   │   │   └── index.ts
+│   │   ├── tsconfig.json
+│   │   └── wrangler.toml
+│   ├── docker
+│   │   ├── docker-launcher.js
+│   │   ├── Dockerfile
+│   │   ├── execute.js
+│   │   ├── package.json
+│   │   └── README.md
+│   ├── e2b
+│   │   ├── claude-code-sandbox.md
+│   │   ├── e2b-launcher.py
+│   │   ├── e2b-monitor.py
+│   │   ├── requirements.txt
+│   │   └── SANDBOX_DEBUGGING.md
+│   └── README.md
+├── settings
+│   ├── api
+│   │   ├── bedrock-configuration.json
+│   │   ├── corporate-proxy.json
+│   │   ├── custom-headers.json
+│   │   └── vertex-configuration.json
+│   ├── authentication
+│   │   ├── api-key-helper.json
+│   │   ├── force-claudeai-login.json
+│   │   └── force-console-login.json
+│   ├── cleanup
+│   │   ├── retention-7-days.json
+│   │   └── retention-90-days.json
+│   ├── environment
+│   │   ├── bash-timeouts.json
+│   │   ├── development-utils.json
+│   │   ├── performance-optimization.json
+│   │   └── privacy-focused.json
+│   ├── git
+│   │   └── git-flow-settings.json
+│   ├── global
+│   │   ├── aws-credentials.json
+│   │   ├── custom-model.json
+│   │   └── git-commit-settings.json
+│   ├── mcp
+│   │   ├── disable-risky-servers.json
+│   │   ├── enable-all-project-servers.json
+│   │   ├── enable-specific-servers.json
+│   │   └── mcp-timeouts.json
+│   ├── model
+│   │   ├── use-haiku.json
+│   │   └── use-sonnet.json
+│   ├── permissions
+│   │   ├── additional-directories.json
+│   │   ├── allow-git-operations.json
+│   │   ├── allow-npm-commands.json
+│   │   ├── deny-sensitive-files.json
+│   │   ├── development-mode.json
+│   │   └── read-only-mode.json
+│   ├── statusline
+│   │   ├── asset-pipeline-controller-statusline.json
+│   │   ├── bug-circus-statusline.json
+│   │   ├── code-casino-statusline.json
+│   │   ├── code-spaceship-statusline.json
+│   │   ├── colorful-statusline.json
+│   │   ├── command-statusline.json
+│   │   ├── context-monitor.json
+│   │   ├── context-monitor.py
+│   │   ├── data-ocean-statusline.json
+│   │   ├── emotion-theater-statusline.json
+│   │   ├── game-performance-monitor-statusline.json
+│   │   ├── git-branch-statusline.json
+│   │   ├── git-flow-status.json
+│   │   ├── minimal-statusline.json
+│   │   ├── multiplatform-build-status-statusline.json
+│   │   ├── neon-database-dev.json
+│   │   ├── neon-database-resources.json
+│   │   ├── productivity-rainbow-statusline.json
+│   │   ├── programmer-tamagotchi-statusline.json
+│   │   ├── programming-fitness-tracker-statusline.json
+│   │   ├── project-info-statusline.json
+│   │   ├── rpg-status-bar-statusline.json
+│   │   ├── time-statusline.json
+│   │   ├── unity-project-dashboard-statusline.json
+│   │   ├── vercel-deployment-monitor.json
+│   │   ├── vercel-error-alert-system.json
+│   │   ├── vercel-multi-env-status.json
+│   │   ├── virtual-code-garden-statusline.json
+│   │   └── zero-config-deployment-monitor.json
+│   └── telemetry
+│       ├── custom-telemetry.json
+│       ├── disable-telemetry.json
+│       └── enable-telemetry.json
+└── skills
+    ├── ANTHROPIC_ATTRIBUTION.md
+    ├── creative-design
+    │   ├── algorithmic-art
+    │   │   ├── LICENSE.txt
+    │   │   ├── SKILL.md
+    │   │   └── templates
+    │   │       ├── generator_template.js
+    │   │       └── viewer.html
+    │   ├── canvas-design
+    │   │   ├── canvas-fonts
+    │   │   │   ├── ArsenalSC-OFL.txt
+    │   │   │   ├── ArsenalSC-Regular.ttf
+    │   │   │   ├── BigShoulders-Bold.ttf
+    │   │   │   ├── BigShoulders-OFL.txt
+    │   │   │   ├── BigShoulders-Regular.ttf
+    │   │   │   ├── Boldonse-OFL.txt
+    │   │   │   ├── Boldonse-Regular.ttf
+    │   │   │   ├── BricolageGrotesque-Bold.ttf
+    │   │   │   ├── BricolageGrotesque-OFL.txt
+    │   │   │   ├── BricolageGrotesque-Regular.ttf
+    │   │   │   ├── CrimsonPro-Bold.ttf
+    │   │   │   ├── CrimsonPro-Italic.ttf
+    │   │   │   ├── CrimsonPro-OFL.txt
+    │   │   │   ├── CrimsonPro-Regular.ttf
+    │   │   │   ├── DMMono-OFL.txt
+    │   │   │   ├── DMMono-Regular.ttf
+    │   │   │   ├── EricaOne-OFL.txt
+    │   │   │   ├── EricaOne-Regular.ttf
+    │   │   │   ├── GeistMono-Bold.ttf
+    │   │   │   ├── GeistMono-OFL.txt
+    │   │   │   ├── GeistMono-Regular.ttf
+    │   │   │   ├── Gloock-OFL.txt
+    │   │   │   ├── Gloock-Regular.ttf
+    │   │   │   ├── IBMPlexMono-Bold.ttf
+    │   │   │   ├── IBMPlexMono-OFL.txt
+    │   │   │   ├── IBMPlexMono-Regular.ttf
+    │   │   │   ├── IBMPlexSerif-Bold.ttf
+    │   │   │   ├── IBMPlexSerif-BoldItalic.ttf
+    │   │   │   ├── IBMPlexSerif-Italic.ttf
+    │   │   │   ├── IBMPlexSerif-Regular.ttf
+    │   │   │   ├── InstrumentSans-Bold.ttf
+    │   │   │   ├── InstrumentSans-BoldItalic.ttf
+    │   │   │   ├── InstrumentSans-Italic.ttf
+    │   │   │   ├── InstrumentSans-OFL.txt
+    │   │   │   ├── InstrumentSans-Regular.ttf
+    │   │   │   ├── InstrumentSerif-Italic.ttf
+    │   │   │   ├── InstrumentSerif-Regular.ttf
+    │   │   │   ├── Italiana-OFL.txt
+    │   │   │   ├── Italiana-Regular.ttf
+    │   │   │   ├── JetBrainsMono-Bold.ttf
+    │   │   │   ├── JetBrainsMono-OFL.txt
+    │   │   │   ├── JetBrainsMono-Regular.ttf
+    │   │   │   ├── Jura-Light.ttf
+    │   │   │   ├── Jura-Medium.ttf
+    │   │   │   ├── Jura-OFL.txt
+    │   │   │   ├── LibreBaskerville-OFL.txt
+    │   │   │   ├── LibreBaskerville-Regular.ttf
+    │   │   │   ├── Lora-Bold.ttf
+    │   │   │   ├── Lora-BoldItalic.ttf
+    │   │   │   ├── Lora-Italic.ttf
+    │   │   │   ├── Lora-OFL.txt
+    │   │   │   ├── Lora-Regular.ttf
+    │   │   │   ├── NationalPark-Bold.ttf
+    │   │   │   ├── NationalPark-OFL.txt
+    │   │   │   ├── NationalPark-Regular.ttf
+    │   │   │   ├── NothingYouCouldDo-OFL.txt
+    │   │   │   ├── NothingYouCouldDo-Regular.ttf
+    │   │   │   ├── Outfit-Bold.ttf
+    │   │   │   ├── Outfit-OFL.txt
+    │   │   │   ├── Outfit-Regular.ttf
+    │   │   │   ├── PixelifySans-Medium.ttf
+    │   │   │   ├── PixelifySans-OFL.txt
+    │   │   │   ├── PoiretOne-OFL.txt
+    │   │   │   ├── PoiretOne-Regular.ttf
+    │   │   │   ├── RedHatMono-Bold.ttf
+    │   │   │   ├── RedHatMono-OFL.txt
+    │   │   │   ├── RedHatMono-Regular.ttf
+    │   │   │   ├── Silkscreen-OFL.txt
+    │   │   │   ├── Silkscreen-Regular.ttf
+    │   │   │   ├── SmoochSans-Medium.ttf
+    │   │   │   ├── SmoochSans-OFL.txt
+    │   │   │   ├── Tektur-Medium.ttf
+    │   │   │   ├── Tektur-OFL.txt
+    │   │   │   ├── Tektur-Regular.ttf
+    │   │   │   ├── WorkSans-Bold.ttf
+    │   │   │   ├── WorkSans-BoldItalic.ttf
+    │   │   │   ├── WorkSans-Italic.ttf
+    │   │   │   ├── WorkSans-OFL.txt
+    │   │   │   ├── WorkSans-Regular.ttf
+    │   │   │   ├── YoungSerif-OFL.txt
+    │   │   │   └── YoungSerif-Regular.ttf
+    │   │   ├── LICENSE.txt
+    │   │   └── SKILL.md
+    │   ├── slack-gif-creator
+    │   │   ├── core
+    │   │   │   ├── color_palettes.py
+    │   │   │   ├── easing.py
+    │   │   │   ├── frame_composer.py
+    │   │   │   ├── gif_builder.py
+    │   │   │   ├── typography.py
+    │   │   │   ├── validators.py
+    │   │   │   └── visual_effects.py
+    │   │   ├── LICENSE.txt
+    │   │   ├── requirements.txt
+    │   │   ├── SKILL.md
+    │   │   └── templates
+    │   │       ├── bounce.py
+    │   │       ├── explode.py
+    │   │       ├── fade.py
+    │   │       ├── flip.py
+    │   │       ├── kaleidoscope.py
+    │   │       ├── morph.py
+    │   │       ├── move.py
+    │   │       ├── pulse.py
+    │   │       ├── shake.py
+    │   │       ├── slide.py
+    │   │       ├── spin.py
+    │   │       ├── wiggle.py
+    │   │       └── zoom.py
+    │   └── theme-factory
+    │       ├── LICENSE.txt
+    │       ├── SKILL.md
+    │       ├── theme-showcase.pdf
+    │       └── themes
+    │           ├── arctic-frost.md
+    │           ├── botanical-garden.md
+    │           ├── desert-rose.md
+    │           ├── forest-canopy.md
+    │           ├── golden-hour.md
+    │           ├── midnight-galaxy.md
+    │           ├── modern-minimalist.md
+    │           ├── ocean-depths.md
+    │           ├── sunset-boulevard.md
+    │           └── tech-innovation.md
+    ├── development
+    │   ├── artifacts-builder
+    │   │   ├── LICENSE.txt
+    │   │   ├── scripts
+    │   │   │   ├── bundle-artifact.sh
+    │   │   │   ├── init-artifact.sh
+    │   │   │   └── shadcn-components.tar.gz
+    │   │   └── SKILL.md
+    │   ├── git-commit-helper
+    │   │   └── SKILL.md
+    │   ├── mcp-builder
+    │   │   ├── LICENSE.txt
+    │   │   ├── reference
+    │   │   │   ├── evaluation.md
+    │   │   │   ├── mcp_best_practices.md
+    │   │   │   ├── node_mcp_server.md
+    │   │   │   └── python_mcp_server.md
+    │   │   ├── scripts
+    │   │   │   ├── connections.py
+    │   │   │   ├── evaluation.py
+    │   │   │   ├── example_evaluation.xml
+    │   │   │   └── requirements.txt
+    │   │   └── SKILL.md
+    │   ├── skill-creator
+    │   │   ├── LICENSE.txt
+    │   │   ├── scripts
+    │   │   │   ├── init_skill.py
+    │   │   │   ├── package_skill.py
+    │   │   │   └── quick_validate.py
+    │   │   └── SKILL.md
+    │   └── webapp-testing
+    │       ├── examples
+    │       │   ├── console_logging.py
+    │       │   ├── element_discovery.py
+    │       │   └── static_html_automation.py
+    │       ├── LICENSE.txt
+    │       ├── scripts
+    │       │   └── with_server.py
+    │       └── SKILL.md
+    ├── document-processing
+    │   ├── docx
+    │   │   ├── docx-js.md
+    │   │   ├── LICENSE.txt
+    │   │   ├── ooxml
+    │   │   │   ├── schemas
+    │   │   │   │   ├── ecma
+    │   │   │   │   │   └── fouth-edition
+    │   │   │   │   │       ├── opc-contentTypes.xsd
+    │   │   │   │   │       ├── opc-coreProperties.xsd
+    │   │   │   │   │       ├── opc-digSig.xsd
+    │   │   │   │   │       └── opc-relationships.xsd
+    │   │   │   │   ├── ISO-IEC29500-4_2016
+    │   │   │   │   │   ├── dml-chart.xsd
+    │   │   │   │   │   ├── dml-chartDrawing.xsd
+    │   │   │   │   │   ├── dml-diagram.xsd
+    │   │   │   │   │   ├── dml-lockedCanvas.xsd
+    │   │   │   │   │   ├── dml-main.xsd
+    │   │   │   │   │   ├── dml-picture.xsd
+    │   │   │   │   │   ├── dml-spreadsheetDrawing.xsd
+    │   │   │   │   │   ├── dml-wordprocessingDrawing.xsd
+    │   │   │   │   │   ├── pml.xsd
+    │   │   │   │   │   ├── shared-additionalCharacteristics.xsd
+    │   │   │   │   │   ├── shared-bibliography.xsd
+    │   │   │   │   │   ├── shared-commonSimpleTypes.xsd
+    │   │   │   │   │   ├── shared-customXmlDataProperties.xsd
+    │   │   │   │   │   ├── shared-customXmlSchemaProperties.xsd
+    │   │   │   │   │   ├── shared-documentPropertiesCustom.xsd
+    │   │   │   │   │   ├── shared-documentPropertiesExtended.xsd
+    │   │   │   │   │   ├── shared-documentPropertiesVariantTypes.xsd
+    │   │   │   │   │   ├── shared-math.xsd
+    │   │   │   │   │   ├── shared-relationshipReference.xsd
+    │   │   │   │   │   ├── sml.xsd
+    │   │   │   │   │   ├── vml-main.xsd
+    │   │   │   │   │   ├── vml-officeDrawing.xsd
+    │   │   │   │   │   ├── vml-presentationDrawing.xsd
+    │   │   │   │   │   ├── vml-spreadsheetDrawing.xsd
+    │   │   │   │   │   ├── vml-wordprocessingDrawing.xsd
+    │   │   │   │   │   ├── wml.xsd
+    │   │   │   │   │   └── xml.xsd
+    │   │   │   │   ├── mce
+    │   │   │   │   │   └── mc.xsd
+    │   │   │   │   └── microsoft
+    │   │   │   │       ├── wml-2010.xsd
+    │   │   │   │       ├── wml-2012.xsd
+    │   │   │   │       ├── wml-2018.xsd
+    │   │   │   │       ├── wml-cex-2018.xsd
+    │   │   │   │       ├── wml-cid-2016.xsd
+    │   │   │   │       ├── wml-sdtdatahash-2020.xsd
+    │   │   │   │       └── wml-symex-2015.xsd
+    │   │   │   └── scripts
+    │   │   │       ├── pack.py
+    │   │   │       ├── unpack.py
+    │   │   │       ├── validate.py
+    │   │   │       └── validation
+    │   │   │           ├── __init__.py
+    │   │   │           ├── base.py
+    │   │   │           ├── docx.py
+    │   │   │           ├── pptx.py
+    │   │   │           └── redlining.py
+    │   │   ├── ooxml.md
+    │   │   ├── scripts
+    │   │   │   ├── __init__.py
+    │   │   │   ├── document.py
+    │   │   │   ├── templates
+    │   │   │   │   ├── comments.xml
+    │   │   │   │   ├── commentsExtended.xml
+    │   │   │   │   ├── commentsExtensible.xml
+    │   │   │   │   ├── commentsIds.xml
+    │   │   │   │   └── people.xml
+    │   │   │   └── utilities.py
+    │   │   └── SKILL.md
+    │   ├── pdf-anthropic
+    │   │   ├── forms.md
+    │   │   ├── LICENSE.txt
+    │   │   ├── reference.md
+    │   │   ├── scripts
+    │   │   │   ├── check_bounding_boxes_test.py
+    │   │   │   ├── check_bounding_boxes.py
+    │   │   │   ├── check_fillable_fields.py
+    │   │   │   ├── convert_pdf_to_images.py
+    │   │   │   ├── create_validation_image.py
+    │   │   │   ├── extract_form_field_info.py
+    │   │   │   ├── fill_fillable_fields.py
+    │   │   │   └── fill_pdf_form_with_annotations.py
+    │   │   └── SKILL.md
+    │   ├── pdf-processing
+    │   │   ├── FORMS.md
+    │   │   └── SKILL.md
+    │   ├── pdf-processing-pro
+    │   │   ├── FORMS.md
+    │   │   ├── OCR.md
+    │   │   ├── scripts
+    │   │   │   └── analyze_form.py
+    │   │   ├── SKILL.md
+    │   │   └── TABLES.md
+    │   ├── pptx
+    │   │   ├── html2pptx.md
+    │   │   ├── LICENSE.txt
+    │   │   ├── ooxml
+    │   │   │   ├── schemas
+    │   │   │   │   ├── ecma
+    │   │   │   │   │   └── fouth-edition
+    │   │   │   │   │       ├── opc-contentTypes.xsd
+    │   │   │   │   │       ├── opc-coreProperties.xsd
+    │   │   │   │   │       ├── opc-digSig.xsd
+    │   │   │   │   │       └── opc-relationships.xsd
+    │   │   │   │   ├── ISO-IEC29500-4_2016
+    │   │   │   │   │   ├── dml-chart.xsd
+    │   │   │   │   │   ├── dml-chartDrawing.xsd
+    │   │   │   │   │   ├── dml-diagram.xsd
+    │   │   │   │   │   ├── dml-lockedCanvas.xsd
+    │   │   │   │   │   ├── dml-main.xsd
+    │   │   │   │   │   ├── dml-picture.xsd
+    │   │   │   │   │   ├── dml-spreadsheetDrawing.xsd
+    │   │   │   │   │   ├── dml-wordprocessingDrawing.xsd
+    │   │   │   │   │   ├── pml.xsd
+    │   │   │   │   │   ├── shared-additionalCharacteristics.xsd
+    │   │   │   │   │   ├── shared-bibliography.xsd
+    │   │   │   │   │   ├── shared-commonSimpleTypes.xsd
+    │   │   │   │   │   ├── shared-customXmlDataProperties.xsd
+    │   │   │   │   │   ├── shared-customXmlSchemaProperties.xsd
+    │   │   │   │   │   ├── shared-documentPropertiesCustom.xsd
+    │   │   │   │   │   ├── shared-documentPropertiesExtended.xsd
+    │   │   │   │   │   ├── shared-documentPropertiesVariantTypes.xsd
+    │   │   │   │   │   ├── shared-math.xsd
+    │   │   │   │   │   ├── shared-relationshipReference.xsd
+    │   │   │   │   │   ├── sml.xsd
+    │   │   │   │   │   ├── vml-main.xsd
+    │   │   │   │   │   ├── vml-officeDrawing.xsd
+    │   │   │   │   │   ├── vml-presentationDrawing.xsd
+    │   │   │   │   │   ├── vml-spreadsheetDrawing.xsd
+    │   │   │   │   │   ├── vml-wordprocessingDrawing.xsd
+    │   │   │   │   │   ├── wml.xsd
+    │   │   │   │   │   └── xml.xsd
+    │   │   │   │   ├── mce
+    │   │   │   │   │   └── mc.xsd
+    │   │   │   │   └── microsoft
+    │   │   │   │       ├── wml-2010.xsd
+    │   │   │   │       ├── wml-2012.xsd
+    │   │   │   │       ├── wml-2018.xsd
+    │   │   │   │       ├── wml-cex-2018.xsd
+    │   │   │   │       ├── wml-cid-2016.xsd
+    │   │   │   │       ├── wml-sdtdatahash-2020.xsd
+    │   │   │   │       └── wml-symex-2015.xsd
+    │   │   │   └── scripts
+    │   │   │       ├── pack.py
+    │   │   │       ├── unpack.py
+    │   │   │       ├── validate.py
+    │   │   │       └── validation
+    │   │   │           ├── __init__.py
+    │   │   │           ├── base.py
+    │   │   │           ├── docx.py
+    │   │   │           ├── pptx.py
+    │   │   │           └── redlining.py
+    │   │   ├── ooxml.md
+    │   │   ├── scripts
+    │   │   │   ├── html2pptx.js
+    │   │   │   ├── inventory.py
+    │   │   │   ├── rearrange.py
+    │   │   │   ├── replace.py
+    │   │   │   └── thumbnail.py
+    │   │   └── SKILL.md
+    │   └── xlsx
+    │       ├── LICENSE.txt
+    │       ├── recalc.py
+    │       └── SKILL.md
+    └── enterprise-communication
+        ├── brand-guidelines
+        │   ├── LICENSE.txt
+        │   └── SKILL.md
+        ├── email-composer
+        │   └── SKILL.md
+        ├── excel-analysis
+        │   └── SKILL.md
+        └── internal-comms
+            ├── examples
+            │   ├── 3p-updates.md
+            │   ├── company-newsletter.md
+            │   ├── faq-answers.md
+            │   └── general-comms.md
+            ├── LICENSE.txt
+            └── SKILL.md
+
+146 directories, 871 files

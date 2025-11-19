@@ -21,7 +21,7 @@ cfa
 exchange-assets-tokenization-rwa/
 *data/*
 # memory-bank/_unstructured/
-*.txt
+# *.txt
 # Ignore customer gitlab submodules until configured
 repositories/customer-gitlab/**
 data/

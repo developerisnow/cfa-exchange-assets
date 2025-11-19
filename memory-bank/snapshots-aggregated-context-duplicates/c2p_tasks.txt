@@ -1,0 +1,415 @@
+Project Path: tasks
+
+Source Tree:
+
+```txt
+tasks
+├── NX-01-spec-validate-and-matrix.md
+├── NX-02-gateway-routing-and-health.md
+├── NX-03-issuance-endpoints-coverage.md
+├── NX-04-registry-orders-flow.md
+├── NX-05-issuer-dashboard-and-reports.md
+├── NX-06-issuer-payout-schedule-spec-and-ui.md
+├── NX-07-backoffice-kyc-and-user-registry.md
+└── NX-08-backoffice-audit-log-ui.md
+
+```
+
+`tasks/NX-01-spec-validate-and-matrix.md`:
+
+```md
+# NX-01 — Валидация спецификаций и API/Event Matrix
+
+Цель: Провести линтинг и базовую валидацию OpenAPI/AsyncAPI/JSON Schemas, собрать проверенную матрицу API ↔ сервисы и событий ↔ продьюсер/консьюмер, зафиксировать результаты.
+
+Входы
+- OpenAPI/AsyncAPI/JSON Schema: `packages/contracts/*`
+- Код сервисов: `services/*`
+- Текущий контекст: `docs/context/PROJECT-CONTEXT.md`
+
+Шаги
+1. OpenAPI lint (Spectral) всех `packages/contracts/openapi-*.yaml`.
+2. AsyncAPI CLI — синтаксис и базовая проверка `packages/contracts/asyncapi.yaml`.
+3. AJV — валидация JSON Schemas (`packages/contracts/schemas/*.json`) на корректность и ссылки `$ref`.
+4. Сверка топиков из AsyncAPI с фактическими продьюсерами/консьюмерами в коде (`services/*`).
+5. Сверка основных endpoint из `openapi-gateway.yaml` с соответствующими сервисами (issuance/registry/...): наличие обработчиков/DTO.
+6. Сформировать раздел "API/Event Matrix" в `docs/context/PROJECT-CONTEXT.md` (обновить/уточнить), вынести несовпадения в Gap List.
+
+Команды (варианты)
+- Spectral (Node): `npx -y @stoplight/spectral-cli@6 lint packages/contracts/openapi-*.yaml`
+- Spectral (Docker): `docker run --rm -v "$PWD:/work" stoplight/spectral:6 lint /work/packages/contracts/openapi-*.yaml`
+- AsyncAPI (Docker): `docker run --rm -v "$PWD:/work" asyncapi/cli:2.10.0 validate /work/packages/contracts/asyncapi.yaml`
+- AJV (Node): `npx -y ajv-cli@5 compile -s packages/contracts/schemas/*.json`
+
+Файлы/артефакты
+- `artifacts/spec-lint-openapi.txt` — вывод Spectral.
+- `artifacts/spec-validate-asyncapi.txt` — вывод AsyncAPI CLI.
+- `artifacts/spec-validate-jsonschema.txt` — вывод AJV.
+- Обновлённый `docs/context/PROJECT-CONTEXT.md` — разделы API/Event Matrix и Gap List.
+
+Критерии приёмки
+- Все указанные команды выполнены, отчёты сохранены в `artifacts/` и приложены к MR.
+- Матрица API/Event отражает текущий код и спецификации; все расхождения перечислены как SPEC DIFF/TODO с точными путями.
+- Нет блокирующих ошибок линтинга/валидации; предупреждения задокументированы.
+
+
+```
+
+`tasks/NX-02-gateway-routing-and-health.md`:
+
+```md
+# NX-02 — API Gateway маршрутизация + health/metrics
+
+Цель: Проверить/задокументировать маршрутизацию API Gateway к сервисам, обеспечить единообразные `/health` и `/metrics` во всех сервисах, обновить документацию.
+
+Входы
+- Gateway/OpenAPI: `packages/contracts/openapi-gateway.yaml`
+- Код gateway: `apps/api-gateway/*`
+- Сервисы: `services/*`
+
+Шаги
+1. Инвентаризировать эндпойнты из `openapi-gateway.yaml` и сопоставить сервисам (issuance/registry/settlement/compliance).
+2. Проверить наличие health‑проб (`/health`) и метрик (`/metrics` Prometheus) в каждом сервисе. Для отсутствующих — добавить.
+3. Убедиться, что gateway проксирует/маршрутизирует запросы корректно (YARP/ReverseProxy или контроллеры). Если используется YARP — описать маршруты.
+4. Обновить `docs/context/PROJECT-CONTEXT.md` (Architecture Snapshot и API/Event Matrix) с фактической схемой маршрутизации.
+5. Добавить Makefile цели: `make check-health` — параллельные GET запросы ко всем сервисам `/health` и сбор статуса.
+
+Подсказки/кодовые точки
+- Примеры telemetry/health уже есть в `services/issuance`, `services/compliance`.
+- Проверить `Program.cs` в каждом сервисе на `MapHealthChecks`/Prometheus endpoints.
+
+Команды
+- `dotnet build` (сборка gateway и сервисов)
+- Локальные проверки health: `curl -sf http://localhost:PORT/health`
+
+Файлы/артефакты
+- `Makefile` — цель `check-health`.
+- Обновлённый `docs/context/PROJECT-CONTEXT.md` с таблицей маршрутов.
+- `artifacts/gateway-routing-report.md` — краткий отчёт о сопоставлении эндпойнтов.
+
+Критерии приёмки
+- Все сервисы отвечают 200 на `/health`; метрики доступны как минимум в Issuance/Compliance/Registry/Settlement.
+- Gateway корректно маршрутизирует как минимум эндпойнты Issuance и Registry, подтверждено ручной проверкой (curl) или интеграционным тестом.
+- Обновлённая документация.
+
+
+```
+
+`tasks/NX-03-issuance-endpoints-coverage.md`:
+
+```md
+# NX-03 — Issuance: выравнивание эндпойнтов с OpenAPI + тесты
+
+Цель: Синхронизировать реализацию сервиса Issuance с `openapi-issuance.yaml` и `openapi-gateway.yaml`, добавить юнит/интеграционные тесты, проверить публикацию событий из outbox.
+
+Входы
+- Спеки: `packages/contracts/openapi-issuance.yaml`, `packages/contracts/openapi-gateway.yaml`
+- Код: `services/issuance/*`
+
+Шаги
+1. Сопоставить операции `/issuances` (create/get/publish/close) между спеками и текущими контроллерами/сервисами.
+2. Для отсутствующих DTO/валидаторов — добавить в `services/issuance/DTOs`, `Validators` согласно схемам в `packages/contracts/schemas/*`.
+3. Проверить/настроить аутентификацию/политики для операций (Bearer/Keycloak) — согласовать со спецификацией SecuritySchemes.
+4. Убедиться, что события `ois.issuance.published` и `ois.issuance.closed` публикуются через outbox и соответствуют AsyncAPI payload.
+5. Добавить тесты: `services/issuance/issuance.Tests` — юнит на сервис, интеграционный на эндпойнты (WebApplicationFactory).
+6. Обновить документацию при расхождениях (SPEC DIFF → MR на YAML перед кодом).
+
+Команды
+- `dotnet test services/issuance/issuance.Tests -v minimal`
+- Проверка событий: временный consumer или логи outbox publisher (unit)
+
+Файлы/артефакты
+- Код и тесты в `services/issuance/*`
+- `artifacts/issuance-test-report.txt` — результаты тестов
+
+Критерии приёмки
+- Эндпойнты Issuance соответствуют OpenAPI; тесты зелёные.
+- События соответствуют AsyncAPI (имена топиков и payload).
+
+
+```
+
+`tasks/NX-04-registry-orders-flow.md`:
+
+```md
+# NX-04 — Registry: поток заказа (create→reserve→paid) + события
+
+Цель: Завершить и покрыть тестами ключевой поток заказа в Registry, обеспечить публикацию событий (`ois.order.*`, `ois.registry.transferred`) и потребление в Settlement.
+
+Входы
+- Спеки: `packages/contracts/openapi-gateway.yaml`, `packages/contracts/schemas/Order.json`, `Wallet.json`, др.
+- Код: `services/registry/*`, `services/settlement/Consumers/*`
+
+Шаги
+1. Сопоставить `RegistryService` методам OpenAPI: создание заказа, резервирование, пометка как оплаченный, отмена, получение.
+2. Проверить outbox‑вставки в `RegistryService` — топики/поля соответствуют AsyncAPI и JSON Schemas.
+3. Реализовать/уточнить консьюмер в Settlement для события `ois.order.paid` (см. `Consumers/OrderPaidEventConsumer.cs`).
+4. Добавить интеграционные тесты: успешный happy‑path create→reserve→paid (с заглушкой bank/ledger), проверка изменений кошелька/холдинга.
+5. Уточнить метрики/логи (время операций, корреляция X‑Request‑ID) и health.
+
+Команды
+- `dotnet test services/registry/registry.Tests -v minimal`
+- Локальная проверка: curl эндпойнтов gateway/registry (см. NX‑02)
+
+Файлы/артефакты
+- Код и тесты в `services/registry/*`, `services/settlement/*`
+- `artifacts/registry-flow-report.md` — краткий отчёт и логи запуска теста
+
+Критерии приёмки
+- Поток заказа проходит e2e (без реальных внешних интеграций); тесты зелёные.
+- Публикация событий соответствует AsyncAPI; консьюмер Settlement корректно обрабатывает `ois.order.paid`.
+
+
+```
+
+`tasks/NX-05-issuer-dashboard-and-reports.md`:
+
+```md
+# NX-05 — Portal Issuer: дашборд и базовые отчёты с реальными данными
+
+Цель: сделать дашборд и страницу `/reports` портала эмитента полезными для бизнеса: реальные данные о выпусках и базовая отчётность, синхронизированные с backend через API Gateway.
+
+Контекст
+- Общий контекст системы: `docs/context/PROJECT-CONTEXT.md`.
+- Правила/качество: `docs/context/RULES-SUMMARY.md`, промпты BACKEND-OIS и BACKEND-BUILD-AND-TEST.
+- Frontend статус/пробелы: `docs/context/FRONTEND-CONTEXT.md`, `artifacts/FRONTEND-FUNCTIONALITY-ANALYSIS.md`.
+
+Скоуп (что должно быть по итогу)
+- `/dashboard` показывает агрегированные метрики по активным/закрытым выпускам и базовые KPI.
+- `/reports` предоставляет минимум 2 отчёта:
+  - Отчёт по выпускам (кол-во, объёмы, статусы).
+  - Отчёт по выплатам (если данные есть в backend; иначе — заглушка с TODO + SPEC DIFF).
+- Данные загружаются через API Gateway по существующим или добавленным (через SPEC DIFF) эндпойнтам.
+
+Шаги
+1. **Уточнить контракты отчётов**
+   - Изучить `docs/frontend/MVP-impl.md` секцию Issuer/Reports.
+   - Проверить в `packages/contracts/openapi-gateway.yaml`, какие отчётные эндпойнты уже задекларированы.
+   - Если отчётов нет или не хватает — подготовить SPEC DIFF (YAML-патч) и сохранить в `tasks/` как отдельный файл (например, `TASK-issuer-reports-SPEC-DIFF.md`).
+
+2. **API-клиент и вызовы на фронте**
+   - Проверить наличие и актуальность TS SDK (`packages/sdks/ts`); при необходимости сгенерировать/обновить.
+   - В `apps/portal-issuer` реализовать функции получения данных для:
+     - Сводки по выпускам для дашборда.
+     - Списка выпусков и/или агрегированных показателей для отчётов.
+   - Добавить в запросы заголовки наблюдаемости (`x-request-id`, `traceparent`, `x-client-app`), если это не делается централизованно.
+
+3. **Реализация UI-для дашборда**
+   - Используя имеющийся layout `/dashboard`, заменить заглушки на реальные данные.
+   - Показать как минимум:
+     - Кол-во активных выпусков / закрытых выпусков.
+     - Общий объём эмиссий (сумма номиналов активных выпусков).
+     - Кол-во инвесторов (если метрика доступна; иначе — TODO с описанием, какие данные нужны из backend).
+
+4. **Реализация UI-для `/reports`**
+   - Сделать список доступных отчётов (карточки или таблицу): "Отчёт по выпускам", "Отчёт по выплатам".
+   - Для отчёта по выпускам:
+     - Таблица с основными полями (ID выпуска, наименование, статус, объём, дата выпуска/закрытия).
+     - Возможность выгрузки CSV/XLSX (если backend предоставляет; иначе — CSV на клиенте).
+   - Для отчёта по выплатам (если данные есть): аналогичный список выплат с фильтрами по выпуску/дате.
+
+5. **Интеграционные проверки и тесты**
+   - Добавить/обновить компонентные тесты для ключевых компонентов дашборда/отчётов (если в проекте уже есть тестовый каркас).
+   - Добавить/обновить e2e-сценарий для портала эмитента (Playwright), проходящий последовательность:
+     - Логин (можно с заглушкой сессии).
+     - Переход на `/dashboard` → проверка отображения метрик.
+     - Переход на `/reports` → проверка, что отчёты загружаются и отображаются.
+
+Команды
+- Frontend dev:
+  - `cd apps/portal-issuer`
+  - `npm install`
+  - `npm run dev`
+- Backend (для проверки реальных данных): см. `BACKEND-BUILD-AND-TEST.md` и Makefile/скрипты в корне.
+- E2E (если Playwright настроен): `npm run test:e2e` или аналогичная команда из `package.json`.
+
+Артефакты
+- Изменения в `apps/portal-issuer` (страницы `/dashboard`, `/reports`, сервисы данных/SDK).
+- При необходимости: SPEC DIFF для отчётных эндпойнтов → отдельный `.md` в `tasks/`.
+- `artifacts/issuer-dashboard-and-reports.md` — краткий отчёт с:
+  - Использованными эндпойнтами и примерами ответов.
+  - Скриншотами или описанием результатов E2E.
+
+Критерии приёмки
+- Дашборд `/dashboard` отображает реальные данные по выпускам (без заглушек) при запущенном backend.
+- Страница `/reports` предоставляет как минимум один рабочий отчёт по выпускам с возможностью выгрузки данных.
+- Все вызовы к API соответствуют спецификациям OpenAPI; расхождения задокументированы SPEC DIFF.
+- Наличие описанного артефакта `artifacts/issuer-dashboard-and-reports.md`.
+
+
+```
+
+`tasks/NX-06-issuer-payout-schedule-spec-and-ui.md`:
+
+```md
+# NX-06 — Issuer: расписание выплат (SPEC DIFF + UI)
+
+Цель: подготовить и согласовать минимальную спецификацию CRUD по расписанию выплат для выпусков ЦФА и реализовать базовый UI в портале эмитента, не выходя за рамки spec-first подхода.
+
+Контекст
+- Общий контекст: `docs/context/PROJECT-CONTEXT.md`.
+- Frontend контекст: `docs/context/FRONTEND-CONTEXT.md` (раздел про Portal Issuer).
+- План MVP фронтенда: `docs/frontend/MVP-impl.md` (Issuer /reports + payout schedule Spec Diff).
+
+Скоуп
+- На уровне спеки: предложить минимальный набор эндпойнтов и схем для управления расписанием выплат по выпуску.
+- На уровне UI: добавить в портал эмитента (страницу деталей выпуска или отдельную страницу) отображение расписания выплат в read-only виде, опираясь на доступные поля backend (например, `Issuance.scheduleJson` или аналогичные).
+
+Шаги
+1. **Анализ текущих спецификаций и кода**
+   - Проверить `packages/contracts/openapi-gateway.yaml` и `openapi-issuance.yaml` на наличие любых эндпойнтов, связанных с payout schedule.
+   - Проверить domain/DTO в backend (services/issuance, services/settlement, services/registry) на наличие полей, связанных с распорядком выплат.
+
+2. **Подготовка SPEC DIFF для payout schedule**
+   - Если в спецификациях нет CRUD для расписания выплат, подготовить YAML-патч (SPEC DIFF) с предложением добавить:
+     - `POST /v1/issuances/{id}/payouts/schedule`
+     - `GET /v1/issuances/{id}/payouts/schedule`
+     - `PATCH /v1/issuances/{id}/payouts/schedule/{itemId}`
+     - `DELETE /v1/issuances/{id}/payouts/schedule/{itemId}`
+   - Описать схему `PayoutScheduleItem` (id, date, amount, status) и возможные статусы.
+   - Сохранить SPEC DIFF как отдельный файл, например `tasks/NX-06-payout-schedule-SPEC-DIFF.md`.
+
+3. **Read-only UI расписания (до реализации backend)**
+   - В `apps/portal-issuer` расширить страницу деталей выпуска `/issuances/[id]` или создать вложенную секцию/таб.
+   - Отобразить расписание выплат в виде таблицы (дата, сумма, статус), используя:
+     - Либо реальные поля из backend (если уже есть).
+     - Либо временный read-only маппинг из существующих данных (например, JSON-поле), с чёткой пометкой TODO.
+   - Не реализовывать создание/редактирование/отмену выплат до согласования SPEC DIFF.
+
+4. **Тесты и артефакты**
+   - Добавить/обновить компонентные тесты для UI-блока расписания.
+   - Если есть Playwright-сценарий для Issuer, добавить шаги проверки отображения расписания.
+   - Сохранить SPEC DIFF и краткий отчёт в `artifacts/issuer-payout-schedule.md` с:
+     - Описанием предложенных эндпойнтов.
+     - Скриншотами или описанием UI.
+
+Команды
+- Frontend dev: `cd apps/portal-issuer && npm install && npm run dev`.
+- Для генерации/проверки OpenAPI (при необходимости): команды из `ops/scripts/validate-specs.sh` и `BACKEND-BUILD-AND-TEST.md`.
+
+Критерии приёмки
+- Подготовлен SPEC DIFF для payout schedule, согласованный с архитектурными правилами (spec-first).
+- В портале эмитента на странице выпуска видно read-only расписание выплат (на основе доступных данных).
+- Созданы/обновлены тесты; есть артефакт `artifacts/issuer-payout-schedule.md`.
+
+
+```
+
+`tasks/NX-07-backoffice-kyc-and-user-registry.md`:
+
+```md
+# NX-07 — Backoffice: полный KYC-флоу и реестр пользователей
+
+Цель: реализовать в backoffice полноценный KYC-workflow (просмотр заявок, approve/reject, статусы) и базовый реестр пользователей, опираясь на существующие backend-сервисы Compliance/Identity.
+
+Контекст
+- Общий контекст: `docs/context/PROJECT-CONTEXT.md`.
+- Frontend контекст: `docs/context/FRONTEND-CONTEXT.md` (раздел про Backoffice).
+- Backend контекст: `docs/services/compliance.md`, `docs/services/registry.md`, `packages/contracts/openapi-compliance.yaml` (если есть).
+- Регуляторные ожидания по реестру: `docs/legal/07-Реестр-пользователей.md`.
+
+Скоуп
+- В портале backoffice (`apps/backoffice`) страница `/kyc` должна позволять:
+  - видеть список KYC-заявок со статусами;
+  - открывать детали заявки;
+  - выносить решение approve/reject с комментарием.
+- Добавить простую страницу реестра пользователей (таблица с фильтрами/поиском) на основе данных backend.
+
+Шаги
+1. **Уточнить backend-контракты KYC и пользователей**
+   - Изучить спецификации в `packages/contracts` и документацию `docs/services/compliance.md`, `docs/services/registry.md`.
+   - Проверить, какие эндпойнты уже есть (например, получение KYC-статуса, списка документов, принятие решения).
+   - При отсутствии необходимых рест-эндпойнтов — подготовить SPEC DIFF (отдельный `.md` файл в `tasks/`).
+
+2. **API-клиент для KYC и реестра пользователей**
+   - В TS SDK (`packages/sdks/ts`) добавить/проверить методы для:
+     - получения списка KYC-заявок;
+     - принятия решения (approve/reject);
+     - получения списка пользователей с основными полями (Id, Email, Role, Status, CreatedAt).
+   - Прокинуть эти методы в `apps/backoffice` через слой API-клиента.
+
+3. **UI `/kyc`**
+   - Список заявок (таблица) с колонками: InvestorId, статус, дата создания, дата решения.
+   - Возможность кликнуть по заявке и открыть детали (поля инвестора, документы, флаги AML, если доступны).
+   - Кнопки "Approve"/"Reject" с подтверждением и optional-комментарием.
+   - Отображение результата (toast/notification) и обновление списка.
+
+4. **UI "Реестр пользователей"**
+   - Создать страницу (например, `/users`) в `apps/backoffice`.
+   - Таблица с полями: UserId, Email, Role(s), Status, CreatedAt.
+   - Фильтры по роли/статусу, поиск по Email.
+   - Ссылка из основного меню backoffice на `/users`.
+
+5. **Тесты и артефакты**
+   - Добавить компонентные тесты для таблиц/форм KYC и списка пользователей.
+   - При наличии е2е — добавить сценарий: логин backoffice → `/kyc` (approve заявки) → `/users` (проверить обновлённый статус).
+   - Сохранить `artifacts/backoffice-kyc-and-users.md` с описанием использованных эндпойнтов и скриншотами/результатами.
+
+Команды
+- Frontend dev:
+  - `cd apps/backoffice`
+  - `npm install`
+  - `npm run dev`
+- Backend dev/test: `dotnet build`, `dotnet test` по сервисам compliance/identity/registry согласно `BACKEND-BUILD-AND-TEST.md`.
+
+Критерии приёмки
+- Страница `/kyc` позволяет просматривать заявки и выносить решение, эти действия отражаются в backend.
+- Страница `/users` отображает корректный список пользователей и позволяет фильтровать/искать.
+- Все вызовы API соответствуют спецификациям; для отсутствующих контрактов есть SPEC DIFF.
+- Создан артефакт `artifacts/backoffice-kyc-and-users.md`.
+
+
+```
+
+`tasks/NX-08-backoffice-audit-log-ui.md`:
+
+```md
+# NX-08 — Backoffice: журнал аудита (Audit Log UI)
+
+Цель: предоставить операторам backoffice удобный UI для просмотра журнала аудита (audit log), который уже формируется backend-сервисами, с возможностью фильтрации и поиска.
+
+Контекст
+- Общий контекст: `docs/context/PROJECT-CONTEXT.md`.
+- Правила/качество: `docs/context/RULES-SUMMARY.md`.
+- Backend события аудита: `packages/contracts/schemas/AuditEvent.json`, `packages/contracts/asyncapi.yaml`, `docs/services/compliance.md`.
+- Frontend контекст backoffice: `docs/context/FRONTEND-CONTEXT.md`.
+
+Скоуп
+- В портале backoffice реализовать страницу `/audit`, отображающую аудит-события.
+- Минимальные возможности:
+  - фильтрация по типу события, пользователю, дате;
+  - постраничная загрузка;
+  - отображение ключевых полей события.
+
+Шаги
+1. **Разобрать модель AuditEvent и API-доступ**
+   - Изучить `packages/contracts/schemas/AuditEvent.json` для структуры события.
+   - Проверить, есть ли REST-эндпойнт для получения списка audit-событий в `packages/contracts/openapi-*`.
+   - При отсутствии — предложить SPEC DIFF (например, `GET /v1/audit`) и сохранить в `tasks/` отдельным файлом.
+
+2. **API-клиент для журнала аудита**
+   - Добавить соответствующий метод в TS SDK (`packages/sdks/ts`), если его ещё нет.
+   - Реализовать функцию запроса журнала в `apps/backoffice` с поддержкой фильтров и пагинации.
+
+3. **UI `/audit`**
+   - Таблица с полями: Timestamp, UserId/Subject, Action (eventType), Target (resource/aggregate), Result/Status.
+   - Фильтры по диапазону дат, типу события, идентификатору пользователя.
+   - Отображение подробной информации по клику (модальное окно или отдельный блок) с payload события.
+
+4. **Тесты и артефакты**
+   - Добавить компонентные тесты для таблицы и фильтров.
+   - Е2Е-сценарий (если есть): логин в backoffice → переход на `/audit` → изменение фильтров.
+   - Сохранить `artifacts/backoffice-audit-log.md` с описанием эндпойнтов, примерами payload и скриншотами.
+
+Команды
+- Frontend dev: `cd apps/backoffice && npm install && npm run dev`.
+- Backend dev/test: команды для сборки и тестов compliance/registry/settlement по `BACKEND-BUILD-AND-TEST.md`.
+
+Критерии приёмки
+- Страница `/audit` отображает список событий аудита и позволяет фильтровать их по ключевым параметрам.
+- Структура выводимых данных соответствует `AuditEvent.json`.
+- API-вызовы согласованы со спецификациями или задокументированы SPEC DIFF.
+- Создан артефакт `artifacts/backoffice-audit-log.md`.
+
+
+```

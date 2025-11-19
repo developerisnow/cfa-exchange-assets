@@ -1,0 +1,232 @@
+Project Path: SDD-shotgun-pro
+
+Source Tree:
+
+```txt
+SDD-shotgun-pro
+├── 00-ENTRYPOINT-QUICKSTART.md
+├── 01-reposcan.shtgn.template.json
+├── 02-shtgn.mapping.rules.json
+├── 03-intake.shtgn.prompt.md
+├── 04-tags-taxonomy.md
+└── 05-usage.cheatsheet.md
+
+```
+
+`SDD-shotgun-pro/00-ENTRYPOINT-QUICKSTART.md`:
+
+```md
+# Shotgun‑Pro Templates · ENTRYPOINT
+
+Minimal, practical flow (no overengineering):
+
+1) Attach repo files (or a compact tree + key sources) in Gemini
+2) Paste 03-intake.shtgn.prompt.md to generate reposcan.shtgn.json
+3) Use 05-usage.cheatsheet.md to read/act on results
+
+Files here are numbered for quick navigation.
+
+File map:
+- 01-reposcan.shtgn.template.json — skeleton JSON to fill
+- 02-shtgn.mapping.rules.json — filename→role mapping, anchors, C4 infer
+- 03-intake.shtgn.prompt.md — prompts Gemini to build the JSON
+- 04-tags-taxonomy.md — common tags for components/services
+- 05-usage.cheatsheet.md — how to consume results (fast)
+
+Pick the shortest path:
+- Need JSON quickly → 03-intake → save as <project>.reposcan.shtgn.json
+- Want to hand‑edit/guide → 01-reposcan.shtgn.template.json
+
+```
+
+`SDD-shotgun-pro/01-reposcan.shtgn.template.json`:
+
+```json
+{
+  "meta": {
+    "project": "<name>",
+    "generated_at": "<ISO8601>",
+    "source": ["<path or url>"],
+    "version": "shtgn-1.0"
+  },
+  "contexts": {
+    "<ContextName>": {
+      "description": "<short high-level summary>",
+      "c4_level": "Context"
+    }
+  },
+  "containers": {
+    "<key>": {
+      "name": "<Container Name>",
+      "description": "<what it does + runtime>",
+      "technology": "<stack>",
+      "c4_level": "Container"
+    }
+  },
+  "components": {
+    "<key>": {
+      "name": "<Component Name>",
+      "description": "<responsibility + boundaries>",
+      "technology": "<lang/lib>",
+      "dependencies": ["<other components/services>"],
+      "c4_level": "Component"
+    }
+  },
+  "domain_glossary": {
+    "<Term>": {
+      "description": "<domain definition>",
+      "c4_level": "Context"
+    }
+  },
+  "deployment_topology": {
+    "<deployment_key>": {
+      "name": "<Deployment name>",
+      "description": "<where/how it runs>",
+      "relationships": [
+        { "source": "<A>", "destination": "<B>", "description": "<edge>" }
+      ],
+      "c4_level": "Container"
+    }
+  },
+  "data_schema": {
+    "description": "<db summary>",
+    "tables": {
+      "<table>": {
+        "description": "<table role>",
+        "columns": ["<name (type/constraints)>"]
+      }
+    },
+    "relationships": [
+      { "from": "<table>", "to": "<table>", "type": "One-to-Many", "description": "<why>" }
+    ]
+  },
+  "api_endpoints": [
+    {
+      "name": "<API group>",
+      "prefix": "/<base>",
+      "description": "<purpose>",
+      "endpoints": [
+        { "method": "GET", "path": "/...", "description": "<what>", "authentication": "<none|jwt|service>" }
+      ]
+    }
+  ],
+  "external_services": {
+    "<ServiceName>": {
+      "type": "<db|cache|queue|third-party|llm>",
+      "description": "<role>",
+      "technology": "<Redis|PostgreSQL|NATS|OpenAI|...>"
+    }
+  },
+  "sources": [
+    { "path": "<file>", "role": "<inventory|schema|api|infra|component>", "anchors": ["<heading or line>"] }
+  ]
+}
+
+
+```
+
+`SDD-shotgun-pro/02-shtgn.mapping.rules.json`:
+
+```json
+{
+  "classification_rules": [
+    { "match": "(?i)(readme|architecture|design|adr|overview)", "role": "context" },
+    { "match": "(?i)(dockerfile|compose|helm|terraform|k8s|cloud.?run)", "role": "deployment" },
+    { "match": "(?i)(route|controller|api|openapi|swagger)", "role": "api" },
+    { "match": "(?i)(model|schema|entity|alembic|migration|prisma|typeorm|sql)", "role": "data_schema" },
+    { "match": "(?i)(service|provider|client|usecase|worker|job|cron)", "role": "component" },
+    { "match": "(?i)(nats|pubsub|queue|kafka|sns|sqs)", "role": "messaging" },
+    { "match": "(?i)(redis|cache|kv)", "role": "cache" },
+    { "match": "(?i)(postgres|mysql|sqlite|db)", "role": "database" },
+    { "match": "(?i)(openai|claude|gemini|llm)", "role": "llm" }
+  ],
+  "anchors": {
+    "extract": true,
+    "max_per_file": 8
+  },
+  "c4_infer": [
+    { "role": "context", "c4_level": "Context" },
+    { "role": "deployment", "c4_level": "Container" },
+    { "role": "component", "c4_level": "Component" },
+    { "role": "api", "c4_level": "Component" },
+    { "role": "data_schema", "c4_level": "Code" }
+  ],
+  "external_infer": [
+    { "match": "(?i)redis", "service": "Redis", "type": "cache" },
+    { "match": "(?i)postgres", "service": "PostgreSQL", "type": "db" },
+    { "match": "(?i)nats", "service": "NATS", "type": "queue" },
+    { "match": "(?i)openai", "service": "OpenAI", "type": "llm" },
+    { "match": "(?i)gcp|cloud run|gcloud", "service": "GCP Cloud Run", "type": "platform" }
+  ],
+  "limits": {
+    "summary_words_max": 60,
+    "ingest_first_pass_tokens": 300000
+  }
+}
+
+
+```
+
+`SDD-shotgun-pro/03-intake.shtgn.prompt.md`:
+
+```md
+/shtgn_intake
+You are Shotgun Intake Agent. Read attached repository files and produce a compact, human‑readable yet machine‑parsable JSON per 01-reposcan.shtgn.template.json.
+
+Rules:
+- Use 02-shtgn.mapping.rules.json to classify files into roles (context, deployment, api, data_schema, component, messaging, cache, database, llm)
+- Infer C4 levels per rules; keep entries concise
+- Extract anchors (≤8 per file) and add to `sources`
+- Populate top sections: contexts, containers, components, domain_glossary (terms repeated across files), deployment_topology, data_schema (tables+relationships), api_endpoints, external_services
+- Columns can be strings with inline constraints; do not expand into full DDL
+- Respect budget: first‑pass ingest ≤300k tokens; queue overflow but still infer high‑level facts if possible
+- Output strictly valid JSON. No prose.
+
+Return only the JSON body.
+
+```
+
+`SDD-shotgun-pro/04-tags-taxonomy.md`:
+
+```md
+# Shotgun Tags · Minimal Taxonomy
+
+- tech/backend: python | node | go | java | ts
+- tech/web: fastapi | nestjs | express | django | flask
+- data/db: postgres | mysql | sqlite
+- data/cache: redis | memcached
+- messaging: nats | kafka | sns | sqs
+- platform: gcp | cloudrun | k8s | docker | terraform | helm
+- llm: openai | claude | gemini
+- boundary: acl | integration | adapter | client
+- layer: api | service | repository | worker | job | scheduler
+
+```
+
+`SDD-shotgun-pro/05-usage.cheatsheet.md`:
+
+```md
+# Shotgun‑Pro JSON · Usage Cheatsheet
+
+- Generate JSON:
+  - Attach repo files → paste 03-intake.shtgn.prompt.md
+  - Save output as `<project>.reposcan.shtgn.json`
+
+- Read order:
+  1) contexts → containers → components
+  2) deployment_topology → external_services
+  3) data_schema → relationships
+  4) api_endpoints
+
+- Typical actions:
+  - Build C4 diagram from contexts/containers/components
+  - Draft runbook from deployment_topology + external_services
+  - Create DB ERD from data_schema
+  - Expose API table from api_endpoints
+
+- Keep it light:
+  - Do not expand columns into full types; keep as strings
+  - Prefer anchors in `sources` over large quotes
+  - If JSON too big → split by section (contexts.json, schema.json, etc.)
+
+```

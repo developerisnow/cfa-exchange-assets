@@ -1,0 +1,381 @@
+Project Path: context
+
+Source Tree:
+
+```txt
+context
+├── FRONTEND-CONTEXT.md
+├── PROJECT-CONTEXT.md
+├── PROMPTS-MAP.md
+├── RULES-SUMMARY.md
+└── WBS-OIS.md
+
+```
+
+`context/FRONTEND-CONTEXT.md`:
+
+```md
+# FRONTEND-CONTEXT — статус порталов и требования MVP
+
+## 1. Источники
+- `docs/apps/backoffice.md`, `docs/apps/portal-issuer.md`, `docs/apps/portal-investor.md` — описания приложений.
+- `docs/frontend/MVP-impl.md` — план MVP по фронтенду.
+- `artifacts/FRONTEND-FUNCTIONALITY-ANALYSIS.md` — анализ реализованного функционала и пробелов.
+
+## 2. Portal Issuer (эмитент)
+
+### Реализовано (по артефактам)
+- `/dashboard` — базовый дашборд с метриками (сейчас данные в основном заглушки).
+- `/issuances` — список выпусков, есть кнопка создания, интеграция с API для создания.
+- `/issuances/create` — форма создания выпуска (валидация через Zod, отправка в API).
+- `/issuances/[id]` — детали выпуска с возможностью publish/close (интеграция с API).
+- `/reports` — страница-заглушка для отчётов.
+
+### Пробелы (MVP критичные)
+- Нет редактирования черновика выпуска.
+- Нет управления расписанием выплат (payout schedule) — требует SPEC DIFF в OpenAPI.
+- Нет отчётов для эмитента (по выпускам, выплатам, инвесторам, регуляторные отчёты).
+- Нет мониторинга продаж (графики, статистика по выпускам, список инвесторов по выпуску).
+
+## 3. Backoffice
+
+### Задуманная функциональность
+- `/kyc` — управление KYC (approve/reject).
+- `/qualification` — управление квалификацией инвесторов (tiers/limits).
+- `/payouts` — управление выплатами (запуск/мониторинг).
+- `/audit` — аудит-лог.
+
+### Пробелы (MVP критичные)
+- KYC только частично реализован; нужен полноценный workflow approve/reject с отображением статусов.
+- Нет полноценного реестра пользователей (5625-У) с фильтрами и поиском.
+- Нет UI для просмотра журнала аудита (хотя события аудита уже есть в backend).
+- Нет управления квалификацией (установка/изменение лимитов, статусов квалификации).
+
+## 4. Portal Investor (для контекста)
+- `/portfolio` — портфель инвестора (wallet, holdings).
+- `/orders/new` — размещение заказа на покупку.
+- `/history` — история операций.
+- По анализу артефактов: реализована базовая покупка ЦФА, но не полностью каталог выпусков, история операций, выплаты и погашения.
+
+## 5. Приоритеты MVP (из FRONTEND-FUNCTIONALITY-ANALYSIS)
+- Критично (MVP):
+  - Portal Issuer: управление расписанием выплат; отчёты для эмитента.
+  - Backoffice: полноценный KYC, квалификация инвесторов, журнал аудита, реестр пользователей.
+- Важно: мониторинг/аналитика, документооборот, уведомления.
+- Желательно: i18n, WCAG AA, расширенная аналитика.
+
+Эти приоритеты должны напрямую транслироваться в продуктовые задачи спринтов.
+
+
+```
+
+`context/PROJECT-CONTEXT.md`:
+
+```md
+# PROJECT-CONTEXT (OIS-CFA)
+
+Generated: 2025-01-27  
+Last Updated: 2025-11-17 (context extended for frontend/backoffice sprint)
+
+## Executive Summary
+
+Репозиторий содержит mono‑repo ОИС для ЦФА с backend‑сервисами на .NET 8/9, фронт‑порталами (Next.js), спецификациями OpenAPI/AsyncAPI и инфраструктурой (K8s/Helm/GitLab CI). Спецификация‑first артефакты присутствуют в `packages/contracts`. Основные bounded contexts: issuance, registry, settlement, compliance, identity, а также шлюз к Fabric (`fabric-gateway`) и API‑gateway.
+
+Текущий статус по признакам в репозитории:
+- Спеки: OpenAPI для gateway/issuance/registry/settlement, AsyncAPI событий, JSON Schema доменных сущностей.
+- Сервисы: исходники для всех ключевых сервисов, telemetry (OTel/Prometheus) и health‑пробы у большинства.
+- События: Kafka/MassTransit, outbox‑паттерн реализован (issuance, registry, compliance) и consumer в settlement.
+- Инфра/CI: Helm/K8s манифесты и GitLab CI присутствуют; есть заметки и гайты по GitLab Runner/ArgoCD.
+- Артефакты: собраны отчеты (Keycloak, frontend, build), но тестовые отчеты/coverage не обнаружены.
+
+## Rules Digest (.cursor/rules)
+
+См. также: `docs/context/RULES-SUMMARY.md` для полной выжимки.
+
+- Нулевая галлюцинация и spec‑first/test‑first подход.
+- .NET 8/9, C# 12+, DDD/CQRS, EF Core 8, MassTransit, Kafka/RabbitMQ, Redis, Keycloak.
+- Наличие OTEL, HealthChecks, Prometheus — обязательно для всех сервисов.
+- Любые изменения сопровождаются тестами и командами запуска.
+
+## Architecture Snapshot
+
+Сервисы (backend, `services/`):
+- compliance — KYC/аудит, публикует `ois.kyc.updated`, `ois.audit.logged`, `ois.compliance.flagged` (см. `services/compliance/Services/ComplianceService.cs`).
+- identity — заглушка OIDC/Keycloak интеграций (см. `services/identity/Program.cs`).
+- issuance — выпуск ЦФА, Kafka outbox (`services/issuance/Background/OutboxPublisher.cs`).
+- registry — заказы/кошельки/транзакции, события `ois.order.*`, `ois.registry.transferred` (см. `services/registry/Services/RegistryService.cs`).
+- settlement — расчет/консьюмеры событий (например, `services/settlement/Consumers/OrderPaidEventConsumer.cs`).
+- fabric-gateway — HTTP‑шлюз к Fabric с resilient HttpClient.
+
+Приложения (frontend, `apps/`):
+- api-gateway (ASP.NET Core), backoffice, broker-portal, portal‑investor, portal‑issuer, shared‑ui.
+
+Подробный контекст по фронтенду см. в `docs/context/FRONTEND-CONTEXT.md`.
+
+Опорные документы (`docs/architecture/*`): C4‑снимок, последовательности ЕСИА/OIDC, модель данных, дизайн сети Fabric, NFR targets.
+
+## API/Event Matrix
+
+Источники: `packages/contracts/openapi-*.yaml`, `packages/contracts/asyncapi.yaml`.  
+Валидация выполнена: 2025-01-27 (NX-01). Отчёты: `artifacts/spec-lint-openapi.txt`, `artifacts/spec-validate-asyncapi.txt`, `artifacts/spec-validate-jsonschema.txt`.
+
+### REST API Matrix (Gateway → Services)
+
+**Gateway Implementation:** YARP (Yet Another Reverse Proxy)  
+**Configuration:** `apps/api-gateway/appsettings.json`  
+**Last Updated:** 2025-01-27 (NX-02)
+
+| Gateway Endpoint | Method | YARP Route | Target Service | Service Endpoint | Status | Notes |
+|-----------------|--------|------------|----------------|------------------|--------|-------|
+| `/health` | GET | Direct | Gateway | `/health` | ✅ | Gateway health probe |
+| `/issuances` | POST | `issuances` | Issuance | `/v1/issuances` | ✅ | YARP transform: `/issuances` → `/v1/issuances` |
+| `/issuances/{id}` | GET | `issuances` | Issuance | `/v1/issuances/{id}` | ✅ | `services/issuance/Program.cs:216` |
+| `/issuances/{id}/publish` | POST | `issuances` | Issuance | `/v1/issuances/{id}/publish` | ✅ | `services/issuance/Program.cs:228` |
+| `/issuances/{id}/close` | POST | `issuances` | Issuance | `/v1/issuances/{id}/close` | ✅ | `services/issuance/Program.cs:253` |
+| `/v1/issuances/{id}/redeem` | POST | `redeem` | Registry | `/v1/issuances/{id}/redeem` | ✅ | `services/registry/Program.cs:261` |
+| `/v1/orders` | POST | `orders` | Registry | `/v1/orders` | ✅ | `services/registry/Program.cs:212` |
+| `/orders/{id}` | GET | `orders` | Registry | `/v1/orders/{id}` | ⚠️ | OpenAPI: `/orders/{id}`, но YARP ожидает `/v1/orders/{id}` |
+| `/v1/wallets/{investorId}` | GET | `wallets` | Registry | `/v1/wallets/{investorId}` | ✅ | `services/registry/Program.cs:249` |
+| `/v1/settlement/run` | POST | `settlement` | Settlement | `/v1/settlement/run` | ✅ | `services/settlement/Program.cs:182` |
+| `/v1/reports/payouts` | GET | `reports` | Settlement | `/v1/reports/payouts` | ✅ | `services/settlement/Program.cs:205` |
+| `/v1/compliance/kyc/check` | POST | `compliance` | Compliance | `/v1/compliance/kyc/check` | ✅ | `services/compliance/Program.cs:192` |
+| `/v1/compliance/qualification/evaluate` | POST | `compliance` | Compliance | `/v1/compliance/qualification/evaluate` | ✅ | `services/compliance/Program.cs:204` |
+| `/v1/compliance/investors/{id}/status` | GET | `compliance` | Compliance | `/v1/compliance/investors/{id}/status` | ✅ | `services/compliance/Program.cs:216` |
+| `/v1/complaints` | POST | `complaints` | Compliance | `/v1/complaints` | ✅ | `services/compliance/Program.cs:230` |
+
+**YARP Clusters:**
+- `issuance` → `http://issuance-service:8080`
+- `registry` → `http://registry-service:8080`
+- `settlement` → `http://settlement-service:8080`
+- `compliance` → `http://compliance-service:8080`
+- `identity` → `http://identity-service:8080`
+
+**SPEC DIFF**: 
+- Gateway OpenAPI определяет `/issuances` без `/v1`, но YARP корректно трансформирует в `/v1/issuances` для сервиса.
+- Gateway OpenAPI определяет `/orders/{id}` без `/v1`, но YARP маршрут `orders` ожидает `/v1/orders/{**catch-all}`. Требуется либо обновить OpenAPI на `/v1/orders/{id}`, либо добавить дополнительный маршрут.
+
+**Health & Metrics:**
+- Все основные сервисы имеют `/health` endpoint (✅)
+- Issuance, Registry, Settlement, Compliance имеют `/metrics` (Prometheus) (✅)
+- Gateway имеет `/health`, но не имеет `/metrics` (⚠️ рекомендуется добавить)
+
+### Events Matrix (AsyncAPI ↔ Code)
+
+| Topic | AsyncAPI | Producer (Service) | Consumer | Status | Notes |
+|-------|----------|---------------------|-----------|--------|------|
+| `ois.issuance.published` | ✅ | Issuance (`IssuanceService.cs:121`) | — | ✅ | Outbox: `services/issuance/Background/OutboxPublisher.cs:67` |
+| `ois.issuance.closed` | ✅ | Issuance (`IssuanceService.cs:177`) | — | ✅ | Outbox: `services/issuance/Background/OutboxPublisher.cs:71` |
+| `ois.order.placed` | ✅ | — | — | ⚠️ | В AsyncAPI, но нет в коде (только в тестах: `registry.Tests/OutboxPublishTests.cs:37`) |
+| `ois.order.created` | ✅ | Registry (`RegistryService.cs:83`) | — | ✅ | Outbox: `services/registry/Background/OutboxPublisher.cs:67` |
+| `ois.order.reserved` | ✅ | Registry (`RegistryService.cs:112`) | — | ✅ | Outbox: `services/registry/Background/OutboxPublisher.cs:71` |
+| `ois.order.paid` | ✅ | Registry (`RegistryService.cs:268`) | Settlement (`OrderPaidEventConsumer.cs`, `OrderPaidConsumer.cs`) | ✅ | MassTransit: `services/settlement/Program.cs:69` |
+| `ois.order.confirmed` | ✅ | — | — | ⚠️ | В AsyncAPI, но нет продьюсера в коде |
+| `ois.registry.transferred` | ✅ | Registry (`RegistryService.cs:278`) | — | ✅ | Outbox: `services/registry/Background/OutboxPublisher.cs:79` |
+| `ois.payout.executed` | ✅ | Settlement (`SettlementService.cs:175`) | — | ✅ | Outbox: `services/settlement/Background/OutboxPublisher.cs:85` |
+| `ois.payout.scheduled` | ✅ | — | — | ⚠️ | В AsyncAPI, но нет продьюсера в коде |
+| `ois.audit.logged` | ✅ | Compliance (`ComplianceService.cs:64`) | — | ✅ | Outbox: `services/compliance/Background/OutboxPublisher.cs:75` |
+| `ois.transfer.completed` | ✅ | — | — | ⚠️ | В AsyncAPI, но нет продьюсера в коде |
+| `ois.compliance.flagged` | ✅ | Compliance (`ComplianceService.cs:150,226`) | — | ✅ | Outbox: `services/compliance/Background/OutboxPublisher.cs:67` |
+| `ois.kyc.updated` | ✅ | Compliance (`ComplianceService.cs:55`) | — | ✅ | Outbox: `services/compliance/Background/OutboxPublisher.cs:71` |
+
+**SPEC DIFF**: Топики `ois.order.placed`, `ois.order.confirmed`, `ois.payout.scheduled`, `ois.transfer.completed` объявлены в AsyncAPI, но не имеют продьюсеров в коде. Требуется либо реализация, либо удаление из AsyncAPI.
+
+## Quality Summary (artifacts/*)
+
+Найдено:
+- Build/Frontend/Keycloak отчёты: `artifacts/*`. Диагностики и гайды по GitLab Runner/Keycloak.
+- **Спецификации валидация (NX-01, 2025-01-27)**:
+  - `artifacts/spec-lint-openapi.txt` — Spectral lint: ✅ No errors (9 OpenAPI файлов)
+  - `artifacts/spec-validate-asyncapi.txt` — AsyncAPI CLI: ✅ Valid
+  - `artifacts/spec-validate-jsonschema.txt` — AJV: ⚠️ Предупреждения о форматах `uuid`/`decimal` (не критично)
+
+Не найдено/Требуется:
+- Unit/Integration/E2E отчёты (JUnit/Allure), coverage отчёты.
+
+## Gap List (spec/code/tests)
+
+### Спеки (✅ Обновлено NX-01)
+
+**Решено:**
+- ✅ Spectral lint для OpenAPI выполнен: 9 файлов, ошибок нет (`artifacts/spec-lint-openapi.txt`)
+- ✅ AsyncAPI CLI валидация выполнена: синтаксис корректен (`artifacts/spec-validate-asyncapi.txt`)
+- ✅ JSON Schema валидация выполнена: предупреждения о форматах `uuid`/`decimal` (не критично, AJV игнорирует неизвестные форматы)
+
+**Осталось:**
+- ⚠️ JSON Schemas: форматы `uuid` и `decimal` не поддерживаются AJV по умолчанию. Рекомендация: использовать `pattern` для UUID или добавить кастомные форматы.
+- ⚠️ AsyncAPI: топики `ois.order.placed`, `ois.order.confirmed`, `ois.payout.scheduled`, `ois.transfer.completed` объявлены, но нет продьюсеров в коде.
+
+### Код
+
+**API Gateway маршрутизация:**
+- ⚠️ Gateway использует `/issuances` без `/v1`, сервисы — с `/v1`. Требуется согласование или проксирование через YARP (`apps/api-gateway`).
+- ✅ Основные endpoints соответствуют спецификациям (см. API Matrix выше).
+
+**События:**
+- ⚠️ Топики в AsyncAPI без продьюсеров: `ois.order.placed` (только в тестах), `ois.order.confirmed`, `ois.payout.scheduled`, `ois.transfer.completed`.
+- ✅ Реализованные топики соответствуют AsyncAPI схемам.
+
+**Сервисы:**
+- ⚠️ Identity — минимальная заглушка; требуется проработка Keycloak интеграции и защищённых политик на всех эндпойнтах.
+- ✅ Health/metrics: все основные сервисы имеют `/health` и Prometheus метрики (`/metrics`).
+- ⚠️ Gateway: имеет `/health`, но не имеет `/metrics` для мониторинга проксируемых запросов.
+
+**API Gateway маршрутизация (✅ Обновлено NX-02):**
+- ✅ YARP настроен корректно: маршруты определены в `apps/api-gateway/appsettings.json`
+- ✅ Трансформация путей работает: `/issuances` → `/v1/issuances` для Issuance сервиса
+- ⚠️ Несоответствие OpenAPI: `/orders/{id}` в OpenAPI, но YARP ожидает `/v1/orders/{id}`
+- ✅ Health check цель: `make check-health` проверяет все сервисы параллельно
+
+**Issuance Service (✅ Обновлено NX-03):**
+- ✅ Endpoints соответствуют OpenAPI: POST/GET `/v1/issuances`, POST `/publish`, POST `/close`
+- ✅ DTO и валидаторы соответствуют схемам OpenAPI
+- ✅ Аутентификация: JWT Bearer + политики `role:issuer` / `role:any-auth`
+- ✅ События: `ois.issuance.published` и `ois.issuance.closed` публикуются через outbox
+- ⚠️ SPEC DIFF: События содержат `dltTxHash`, которого нет в AsyncAPI (рекомендуется добавить)
+- ✅ Тесты: Unit и Integration тесты созданы в `services/issuance/issuance.Tests/`
+- **Отчёт:** `artifacts/issuance-endpoints-coverage-report.md`
+
+### Тесты/CI
+
+- ⚠️ Нет артефактов нагрузочного теста (k6) и e2e сценариев выпуска/покупки/погашения.
+- ⚠️ Не видно отчетов покрытия; нет Pact/контрактных тестов между gateway и сервисами.
+
+## References
+
+- Спеки: `packages/contracts/*` (OpenAPI/AsyncAPI/JSON Schemas).
+- Сервисы: `services/*` (Program.cs, Services/*, DTOs/*, Migrations/*).
+- Приложения: `apps/*`.
+- Инфра/CI: `ops/*`, `.gitlab-ci.yml`, Helm/K8s в `ops/infra/*`.
+- Правила/промпты: `.cursor/rules/*`, `.cursor/promts/*`.
+- Gateway Routing: `artifacts/gateway-routing-report.md` (NX-02, 2025-01-27).
+- Issuance Coverage: `artifacts/issuance-endpoints-coverage-report.md` (NX-03, 2025-01-27).
+
+```
+
+`context/PROMPTS-MAP.md`:
+
+```md
+# PROMPTS-MAP — Карта мастер-промтов
+
+## 1. MASTER-CONTEXT-OIS (.cursor/promts/MASTER-CONTEXT-OIS.md)
+- Роль: Codex-Architect-OIS (principal architect & delivery lead).
+- Цель: собрать единый контекст ОИС (спеки, код, артефакты, задачи) и сформировать план работ + новые задачи для Cursor-агентов.
+- Основные выходы:
+  - `docs/context/PROJECT-CONTEXT.md` — данный файл и связанные контекстные материалы.
+  - `docs/context/WBS-OIS.md` — иерархия работ (WBS) по фронту/бэку/инфре.
+  - `tasks/NX-**` — конкретные задачи для следующего этапа.
+
+## 2. BACKEND-OIS (.cursor/promts/BACKEND-OIS.md)
+- Роль: Codex-Backend-OIS (principal backend engineer).
+- Фокус:
+  - SPEC-FIRST & TEST-FIRST backend-реализация по OpenAPI/AsyncAPI/JSON Schemas.
+  - Вертикали MVP: Investor buy flow, issuer payouts/redemption, compliance KYC/audit.
+  - Чёткие acceptance criteria для backend сервисов и e2e-потоков.
+
+## 3. BACKEND-BUILD-AND-TEST (.cursor/promts/BACKEND-BUILD-AND-TEST.md)
+- Роль: Codex-Backend-Build-OIS (principal .NET engineer & CI sherpa).
+- Фокус:
+  - Стандартизированные команды сборки/тестов/миграций (`dotnet build/test`, Makefile, скрипты в `tools/`).
+- Ожидаемые артефакты:
+  - JUnit/TRX отчёты тестов, coverage-отчёты, smoke-health скрипты.
+
+## 4. CURSOR RULES (main-promt.mdc, develop-promt.mdc)
+- Роль: Codex-CTO-OIS / старший архитектор.
+- Фокус:
+  - Регуляторный и архитектурный контекст (259-ФЗ, 746-П, 5625-У, ГОСТ 57580, СТО БР).
+  - Требование к документам (legal/architecture/security/testing) и чек-листам.
+
+## 5. Использование этой карты
+- При постановке задач ссылаться на конкретные промпты:
+  - Backend-реализация: «см. BACKEND-OIS».
+  - Сборка и тесты: «см. BACKEND-BUILD-AND-TEST».
+  - Архитектурные/регуляторные требования: «см. main-promt.mdc и develop-promt.mdc».
+- Это позволяет разработчику и ИИ-агенту быстро понять контекст и ожидаемый уровень качества.
+
+
+```
+
+`context/RULES-SUMMARY.md`:
+
+```md
+# RULES-SUMMARY — Выжимка из .cursor/rules
+
+## 1. Общие принципы (global.mdc, composer.mdc)
+- План сначала, код потом; небольшие, обратимые диффы (<200 строк) с явным планом.
+- Нулевая галлюцинация: только факты из репозитория и официальных документов.
+- Spec-first и test-first: сначала OpenAPI/AsyncAPI/JSON Schemas и их валидация, затем реализация и тесты.
+- Обязательны юнит, интеграционные и e2e-тесты для новых/изменённых функций.
+- Всегда указывать команды для сборки/тестов и минимальный manual-check.
+
+## 2. Backend (.NET, DDD/CQRS) — dotnet-ddd.mdc, BACKEND-OIS.md
+- Архитектура слоёв: Domain, Application, Infrastructure, API.
+- Domain: сущности/агрегаты, Value Objects (immutable), доменные события.
+- Application: команды/запросы (CQRS, MediatR-подход), FluentValidation, политики авторизации.
+- Infrastructure: EF Core 8 (без lazy loading), контексты, конфигурации, outbox, MassTransit (Kafka/RabbitMQ).
+- API: контроллеры/минимальные API строго по OpenAPI; версия API; валидация входа.
+- События: MassTransit + Kafka, саги, idempotent-консьюмеры, outbox/inbox паттерны.
+- Observability: OpenTelemetry (traces, metrics), Prometheus `/metrics`, HealthChecks `/health`.
+
+## 3. Observability & Security — observability.mdc, security.mdc
+- Добавлять/проверять OTEL: ресурс (service.name, environment), экспортер OTLP.
+- HealthChecks с проверкой зависимностей (БД, брокер, Redis) и готовностью.
+- Политики ретраев/таймаутов/сircuit-breaker (Polly) для внешних вызовов.
+- OWASP ASVS: входные данные валидируются, полезные нагрузки внешних систем проверяются.
+- Секреты — только из окружения/секрет-менеджера; PII-safe логирование, маскирование токенов.
+
+## 4. Testing Discipline — testing.mdc
+- Любое изменение сопровождается изменением/добавлением тестов (xUnit + FluentAssertions).
+- Для багов: сначала падающий тест, потом фикс.
+- Критичные пути ≥90% покрытия, адаптеры ≥70%.
+- Рекомендованный запуск: `dotnet test -m:1` + генерация отчётов покрытия.
+
+## 5. Project Rules — develop-promt.mdc, main-promt.mdc
+- Цель: MVP ОИС по вертикалям выпуск→покупка→выплаты→погашение с регуляторным комплектом.
+- Все артефакты должны быть валидны (lint/build/test), с указанием источников и дат.
+- Для любых допущений — фиксировать в `ARCHIVE/assumptions.md`.
+- Документы: структурированы, с оглавлением, версионностью и матрицей соответствия НПА.
+
+## 6. Frontend (из MVP-impl и промптов)
+- Next.js 15 для порталов (`portal-investor`, `portal-issuer`, `backoffice`).
+- SDK на TypeScript из OpenAPI (`packages/sdks/ts`), единый `OisApiClient` с заголовками `x-request-id`, `traceparent`, `x-client-app`.
+- Auth: Keycloak OIDC через NextAuth, роли: investor, issuer, backoffice/admin.
+- E2E: Playwright-journeys для ключевых пользовательских сценариев.
+
+
+```
+
+`context/WBS-OIS.md`:
+
+```md
+# WBS-OIS (Work Breakdown Structure)
+
+Generated: 2025-11-13
+
+## Tracks
+- Spec & Contracts
+- Backend Services (Issuance, Registry, Settlement, Compliance, Identity)
+- API Gateway & Frontends
+- Observability & Security
+- CI/CD & Infra
+
+## Milestones
+- M1: Spec linted + API/Event Matrix (NX-01)
+- M2: Gateway health/metrics/routing verified (NX-02)
+- M3: Issuance + Registry core paths green with tests (NX-03, NX-04)
+- M4: Identity/Keycloak baseline + policies (planned)
+- M5: CI quality gates + artifacts (planned)
+
+## Next Tasks
+- NX-01: Spec validation + API/Event Matrix — tasks/NX-01-spec-validate-and-matrix.md
+- NX-02: API Gateway routing + health/metrics — tasks/NX-02-gateway-routing-and-health.md
+- NX-03: Issuance endpoints alignment + tests — tasks/NX-03-issuance-endpoints-coverage.md
+- NX-04: Registry order flow (create→reserve→paid) + events — tasks/NX-04-registry-orders-flow.md
+- NX-05: Identity/Keycloak integration baseline — planned
+- NX-06: CI quality gates (Spectral/AJV/tests/coverage artifacts) — planned
+
+## Notes
+- Вся реализация — spec-first. При расхождениях в спеке → сперва YAML‑патч и ревью, затем реализация.
+- Для событий Kafka — синхронизировать AsyncAPI топики и payload c фактическими DTO/схемами.
+
+
+```
