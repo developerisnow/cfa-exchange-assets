@@ -2,10 +2,6 @@
 version: "2.1.3"
 ---
 # Main Rules
-## 🔴 P0 MUST-HAVES (Non-Negotiable)
-
-## PATH STORE EACH OUTPUT Location: `/Users/user/____Sandruk/___PKM/__SecondBrain/Dailies_Outputs/`
-It's important to check current time and date - be precise in it.
 
 # 🛑 ANTI-RUSH PROTOCOL (P0 PRIORITY - OVERRIDES ALL)
 
@@ -175,18 +171,6 @@ tags: [2-5 tags following rules below]
 prompt: <user's original request summarized>
 ---
 
-COMPLETE SPHERE → TOPICS MAPPING:
-health: breathing, yoga, meditation, biohacking, supplements, nootropics, trips, fasting, healthy-food, hydration, activity
-sport: running, cycling, swimming, triathlon, workout, gym
-family: wife, kids, parents, relatives
-finance: crypto, personal-finance-management, investing, realty
-profession: ai-integration-engineer, software-architect, tech-lead, backend-developer, engineering-manager, ai-consultant, project-management, devops, product-management, fullstack-developer
-entrepreneurship: startup, business-development, monetization, scaling
-development: notion, obsidian, graph-databases, ai-memory, sdd-spec-driven-development, vector-database, knowledge-graphs, pkm-second-brain
-social: friends, comrades, familiars, community-members, networking
-rest: vacation, leisure, hobbies, relaxation
-sharing: content-creation, teaching, mentoring, public-speaking
-other: home-deals, daily-life, misc
 
 TAGS SELECTION RULES:
 - PREFER tags from vocabulary below (65% target)
@@ -200,12 +184,6 @@ TECHNICAL: ai, llm, coding, machine-learning, blockchain, backend, frontend, typ
 PROFESSION (extended): consulting, personal-branding, community-tech-experts, cto, cio, sre-engineer, system-architect, staff-principal, developer-advocate, dx-engineer, architect-automations, crisis-manager, tech-analytic, technical-project-manager, program-manager, ai-coding, ai-solution-architect, ai-digitalization-expert, developer-relations-head, auditor-manager, investigation-infrastructure
 
 TOOLS: notion, obsidian, pkm-second-brain, ai-twin, digital-garden
-
-LIFESTYLE: biohacking, supplements, triathlon, tracking, self-discovery-reflection, oura, garmin
-
-LOCATIONS: antalya, turkey, russia, ukraine, france, usa, netherlands, uk
-
-GENERAL: finance, healthcare, kids
 
 CONTEXTUAL TAGS (35% flexibility):
 - Project-specific terminology
