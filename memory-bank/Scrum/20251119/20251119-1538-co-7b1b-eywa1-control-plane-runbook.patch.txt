@@ -1,0 +1,519 @@
+From dc83eec1b358edbaf3a0d751c74722e7a0d94bff Mon Sep 17 00:00:00 2001
+From: Your Name <you@example.com>
+Date: Wed, 19 Nov 2025 15:39:03 +0000
+Subject: [PATCH] =?UTF-8?q?feat(ops):=20[co-7b1b]=20-=20Eywa1=20control-pl?=
+ =?UTF-8?q?ane=20runbook=20and=20deploy=20scripts=20=E2=80=A2=20Add=20eywa?=
+ =?UTF-8?q?1=20multi-VPS=20control-plane=20runbook=20under=20docker-compos?=
+ =?UTF-8?q?e-at-vps=20=E2=80=A2=20Add=20provision/deploy=20script=20scaffo?=
+ =?UTF-8?q?lds=20for=20OIS-CFA=20VPS=20nodes=20via=20eywa1=20agentID=3D019?=
+ =?UTF-8?q?a9c47-7b1b-7112-9672-694674728b0e?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ .../10-eywa1-control-plane-runbook.md         | 262 ++++++++++++++++++
+ ops/scripts/deploy/deploy-node.sh             |  93 +++++++
+ ops/scripts/deploy/provision-node.sh          | 121 ++++++++
+ 3 files changed, 476 insertions(+)
+ create mode 100644 docs/deploy/docker-compose-at-vps/10-eywa1-control-plane-runbook.md
+ create mode 100755 ops/scripts/deploy/deploy-node.sh
+ create mode 100755 ops/scripts/deploy/provision-node.sh
+
+diff --git a/docs/deploy/docker-compose-at-vps/10-eywa1-control-plane-runbook.md b/docs/deploy/docker-compose-at-vps/10-eywa1-control-plane-runbook.md
+new file mode 100644
+index 0000000..e9f2ab9
+--- /dev/null
++++ b/docs/deploy/docker-compose-at-vps/10-eywa1-control-plane-runbook.md
+@@ -0,0 +1,262 @@
++---
++created: 2025-11-19 18:30
++updated: 2025-11-19 18:30
++type: runbook
++sphere: [devops]
++topic: [deploy, control-plane, vps]
++author: alex-a
++agentID: co-76ca
++partAgentID: [co-76ca]
++version: 0.1.0
++tags: [eywa1, tmux, ssh, cloudflare, docker-compose]
++---
++
++# OIS‑CFA · Eywa1 Control Plane — Multi‑VPS Runbook
++
++Цель: превратить `eywa1` в управляющий узел (Control Plane) для однотипного деплоя OIS‑CFA на VPS (`cfa1`, `fin2`, `germ1`, …), не ломая рабочий UK1.
++
++## Scope
++- Workspace: `eywa1`, директория проекта `~/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets`.
++- Код: рабочий `worktree` `repositories/customer-gitlab/wt__ois-cfa__NX01` (ветка `tasks/NX-01-spec-validate-and-matrix` / `infra.defis.deploy`).
++- Целевые узлы: `cfa1`, `fin2`, `germ1`, … (UK1 — только как референс, без изменений).
++- DNS: Cloudflare для `*.cfa.llmneighbors.com`, `*.cfa{1,2,3}.llmneighbors.com`.
++
++## TL;DR
++- Eywa1 становится единым Control Plane: все операции — через SSH + `tmux` на целевых узлах, логи сохраняются в сессии `p-cfa`.
++- На каждом VPS создаётся пользователь `user` с sudo, базовый стек (Docker, Node 20, tmux, nginx, postfix) и директория `/srv/cfa`.
++- Новый деплой стандартизирован через два скрипта в `wt__ois-cfa__NX01`: `ops/scripts/deploy/provision-node.sh` (bootstrap) и `ops/scripts/deploy/deploy-node.sh` (деплой стека).
++- UK1 остаётся каноническим демо‑стендом (см. `docs/deploy/20251113-cloudflare-ingress.md` и `docker-compose-at-vps/*`); на нём ничего не меняем без отдельного плана.
++- Для NX‑05/06 рабочим окружением для кода считаем `wt__ois-cfa__NX01`, а для проверок UI/flows — новые VPS, развернутые по этому runbook’у.
++
++## Architecture (High‑Level)
++
++```mermaid
++flowchart LR
++  subgraph Eywa1["eywa1 · Control Plane"]
++    Agent[CLI agent / user]
++    Repo[prj_Cifra-rwa-exachange-assets\nwt__ois-cfa__NX01]
++    CF[Cloudflare CLI/API]
++    SSHKeys[SSH keys]
++  end
++
++  subgraph Nodes["Target VPS nodes"]
++    subgraph Node1["cfa1"]
++      User1[user (sudo)]
++      Tmux1[tmux session\np-cfa]
++      Stack1[OIS-CFA stack\nDocker + PM2]
++    end
++    subgraph Node2["fin2"]
++      User2[user (sudo)]
++      Tmux2[tmux session\np-cfa]
++      Stack2[OIS-CFA stack\nDocker + PM2]
++    end
++  end
++
++  Agent --> Repo
++  Agent --> CF
++  Agent --> SSHKeys
++
++  SSHKeys --> User1
++  SSHKeys --> User2
++
++  Agent -->|provision-node.sh| Node1
++  Agent -->|deploy-node.sh| Node1
++  Agent -->|provision-node.sh| Node2
++  Agent -->|deploy-node.sh| Node2
++```
++
++## Phases Overview
++
++1. **Phase 0 — Rules & Safety**: фиксируем запреты и инварианты (UK1 не трогаем, только `user`, только `/srv/cfa`).
++2. **Phase 1 — Prepare Eywa1**: убеждаемся, что есть SSH‑ключи, Cloudflare CLI, актуальный `wt__ois-cfa__NX01`.
++3. **Phase 2 — Provision Node**: подготавливаем VPS (user, SSH, базовые пакеты, tmux, `/srv/cfa`, сессия `p-cfa`).
++4. **Phase 3 — Deploy OIS‑CFA Stack**: клонируем `ois-cfa`, включаем docker‑compose, подключаем фронты через PM2 и nginx.
++5. **Phase 4 — Verify & Handover**: health‑чеки, smoke‑тесты, фиксация итогового состояния в memory‑bank.
++
++---
++
++## Phase 0 — Rules & Safety
++
++Why  
++- Минимизировать риск сломать единственный рабочий стенд и превратить деплой в «необратимый эксперимент».
++
++What  
++- Описать инварианты, которые агент/инженер не имеет права нарушать.
++
++How  
++- Перед запуском любых скриптов проговорить/прописать ограничения.
++
++Result  
++- Любые действия по bootstrap/deploy выполняются только в рамках согласованных узлов и веток.
++
++### Invariants
++- **UK1 не трогаем** — используем только как эталон (см. `docs/deploy/20251113-cloudflare-ingress.md` и `docker-compose-at-vps/*`).
++- **Только пользователь `user`** для приложений и деплоя (никаких сервисов от `root`).
++- **Единый путь проекта**: `/srv/cfa` на всех узлах.
++- **Все длительные команды** — только внутри `tmux`‑сессии `p-cfa` на целевом VPS.
++- **Только зафиксированные ветки**: для деплоя используем `infra.defis.deploy` (или явно согласованную ветку), код для NX‑05/06 — из `wt__ois-cfa__NX01`.
++
++---
++
++## Phase 1 — Prepare Eywa1 (Control Plane)
++
++Why  
++- Без корректного состояния на `eywa1` невозможен безопасный bootstrap узлов.
++
++What  
++- Проверяем наличие SSH‑ключей, Cloudflare‑кредов, актуальной копии репо и утилит.
++
++How  
++- Ручной чеклист + точечные команды.
++
++Result  
++- `eywa1` готов отдавать команды на `cfa1`/`fin2` и управлять DNS.
++
++### Checklist
++- [ ] SSH‑ключ `~/.ssh/id_rsa` (или другой) привязан к `root`/`user` на целевых VPS (`ssh cfa1`, `ssh fin2` работает без пароля).
++- [ ] В `~/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets` актуален `git pull` для монорепо.
++- [ ] В `repositories/customer-gitlab/wt__ois-cfa__NX01` подтянуты последние изменения ветки `infra.defis.deploy` / `tasks/NX-01-spec-...`.
++- [ ] На `eywa1` установлен Cloudflare CLI или подготовлен `curl` + `.env` с `CLOUDFLARE_API_TOKEN` (см. `docs/deploy/20251113-cloudflare-ingress.md`).
++- [ ] Установлены базовые утилиты: `jq`, `tmux`, `git`, `docker` (на `eywa1` только если нужно).
++
++---
++
++## Phase 2 — Provision Node (Bootstrap VPS)
++
++Why  
++- Нужно стандартизировать базовый образ сервера, чтобы все последующие шаги не превращались в «каждый VPS по‑своему».
++
++What  
++- Скрипт `ops/scripts/deploy/provision-node.sh` выполняет bootstrap: пользователь `user`, пакеты, Docker, Node, tmux, `p-cfa`.
++
++How  
++- Запускаем скрипт с `eywa1`, который через SSH конфигурирует целевой VPS.
++
++Result  
++- На `cfa1`/`fin2` есть готовый «пустой, но правильный» хост для деплоя OIS‑CFA.
++
++### Minimal usage
++
++```bash
++cd ~/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets/repositories/customer-gitlab/wt__ois-cfa__NX01
++ops/scripts/deploy/provision-node.sh cfa1
++ops/scripts/deploy/provision-node.sh fin2
++```
++
++### What it standardizes
++- Создаёт (если нет) пользователя `user` с группой `sudo`.
++- Настраивает базовые пакеты: `curl`, `git`, `tmux`, `jq`, `ufw`, `docker`, `docker-compose-plugin`, `nginx`, `postfix`.
++- Устанавливает Node.js 20 для `user` (через `nvm` или системный пакет, зависит от окружения).
++- Создаёт `/srv/cfa`, назначает владельца `user:user`.
++- Добавляет в `~user/.tmux.conf` параметр `set-option -g history-limit 1000000`.
++- Создаёт (если нет) `tmux`‑сессию `p-cfa`, рабочий каталог `/srv/cfa`.
++
++---
++
++## Phase 3 — Deploy OIS‑CFA Stack
++
++Why  
++- Поддерживать один сценарий деплоя для всех узлов, чтобы не плодить «уникальные» стенды.
++
++What  
++- Скрипт `ops/scripts/deploy/deploy-node.sh` клонирует `ois-cfa`, подтягивает ветку и запускает docker‑compose + фронты.
++
++How  
++- Из `eywa1` вызываем скрипт для выбранного узла; скрипт отправляет команды в `tmux`‑сессию `p-cfa` на VPS.
++
++Result  
++- На целевом VPS развёрнут стек OIS‑CFA, готовый к smoke‑тестам NX‑05/06.
++
++### Minimal usage
++
++```bash
++cd ~/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets/repositories/customer-gitlab/wt__ois-cfa__NX01
++OIS_CFA_BRANCH=infra.defis.deploy ops/scripts/deploy/deploy-node.sh cfa1
++OIS_CFA_BRANCH=infra.defis.deploy ops/scripts/deploy/deploy-node.sh fin2
++```
++
++### Notes
++- По умолчанию используется репозиторий `git@git.telex.global:npk/ois-cfa.git` и ветка `infra.defis.deploy` (можно переопределить переменными окружения).
++- Скрипт **не заполняет секреты** — `.env`‑файлы должны быть подготовлены отдельно (см. `docs/deploy/docker-compose-at-vps/02-env-and-compose.md`).
++- Для фронтендов (Next.js) скрипт создаёт базовый scaffold команд в `tmux`, но конкретные `pm2`‑процессы и `env.local` лучше выровнять по UK1 (см. сессии `co-3dd7` и `20251113-cloudflare-ingress.md`).
++
++---
++
++## Phase 4 — Verify & Handover
++
++Why  
++- Без чётких health‑чеков легко получить «оно где‑то крутится, но не факт, что работает».
++
++What  
++- Проверяем `/health` и ключевые UI‑флоу, фиксируем результаты и риски.
++
++How  
++- Команды curl, базовый UI walkthrough, при возможности — Playwright e2e.
++
++Result  
++- Описанный, воспроизводимый стенд с понятным статусом готовности.
++
++### Basic health
++- [ ] `curl http://<host>:55000/health` (gateway) → `200 OK`.
++- [ ] `curl http://<host>:55005/health` (issuance), `55006` (registry), `55007` (settlement), `55008` (compliance).
++- [ ] Keycloak доступен по HTTP (до настройки ingress/TLS).
++
++### Smoke‑flows (минимум)
++- [ ] Issuer портал открывается (локальный порт или домен через nginx/Cloudflare).
++- [ ] Базовый issuance‑flow (создание простого выпуска без сложного payout schedule).
++- [ ] Просмотр отчётности `/reports` (после NX‑05 implementation).
++
++### Memory‑bank / Logging
++- [ ] Создан файл в `memory-bank/Scrum/<date>/<timestamp>-<host>-bootstrap.session.md` с кратким логом команд и ссылками на tmux‑сессии.
++
++---
++
++## Definition of Done (DoD)
++
++- [ ] На `eywa1` зафиксирован этот runbook и скрипты в `ops/scripts/deploy`.
++- [ ] Минимум один новый узел (`cfa1` или `fin2`) успешно прошёл Phases 2–4.
++- [ ] Состояние UK1 **не изменено** в процессе работ.
++- [ ] Для каждого узла есть:
++  - [ ] DNS‑записи в Cloudflare (`*.cfa{N}.llmneighbors.com`) с документированными IP.
++  - [ ] Описание портов/URL и health‑команд в таблице (отдельный раздел или memory‑bank).
++- [ ] Для NX‑05/06 зафиксировано, на каких стендах проводится тестирование (uk1 vs cfa1/fin2).
++
++---
++
++## Agent Kickoff Prompt (Codex/Claude/Gemini)
++
++Ниже — заготовка промпта для CLI‑агента, заточенная под этот runbook и `wt__ois-cfa__NX01`. Её можно адаптировать под конкретную задачу (например, «подними cfa1» или «подготовь fin2 для NX‑05/06»).
++
++```text
++You are a DevOps/Backend engineer working on the OIS-CFA project.
++
++Workspace:
++- You are running on host "eywa1".
++- Local repo: ~/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets
++- Main backend worktree: repositories/customer-gitlab/wt__ois-cfa__NX01 (branch tasks/NX-01-spec-validate-and-matrix / infra.defis.deploy)
++
++Goal:
++- Provision and deploy the OIS-CFA stack to a target VPS (e.g. cfa1 or fin2)
++  using the "Eywa1 Control Plane" approach described in:
++  - docs/deploy/docker-compose-at-vps/00-overview.md
++  - docs/deploy/docker-compose-at-vps/10-eywa1-control-plane-runbook.md
++
++Hard rules:
++- DO NOT touch or modify the existing UK1 environment (prod demo).
++- Use only the "user" account with sudo on target nodes (no root-only services).
++- Use /srv/cfa as the project root on all nodes.
++- Run all long-running commands inside tmux session "p-cfa" on the target node.
++- For code changes and NX-05/06 work, treat wt__ois-cfa__NX01 as the primary tree.
++
++Phases:
++1) Phase 1 – validate Eywa1: SSH keys, Cloudflare token, local repo state.
++2) Phase 2 – run ops/scripts/deploy/provision-node.sh <host> to bootstrap the node.
++3) Phase 3 – run ops/scripts/deploy/deploy-node.sh <host> with the correct branch.
++4) Phase 4 – run health checks (/health, Keycloak, portals) and record results in memory-bank.
++
++Output expectations:
++- Follow Why → What → How → Result structure.
++- Use numbered steps and small tables where helpful.
++- Explicitly call out any deviations from the runbook (SPEC DIFF-like).
++```
++
+diff --git a/ops/scripts/deploy/deploy-node.sh b/ops/scripts/deploy/deploy-node.sh
+new file mode 100755
+index 0000000..d10c096
+--- /dev/null
++++ b/ops/scripts/deploy/deploy-node.sh
+@@ -0,0 +1,93 @@
++#!/bin/bash
++set -euo pipefail
++
++# OIS-CFA · Deploy Node Script
++# Usage:
++#   ./ops/scripts/deploy/deploy-node.sh <host>
++#
++# Responsibilities:
++#   - Ensure tmux session "p-cfa" exists on target host
++#   - Clone or update ois-cfa repo under /srv/cfa (or REMOTE_PROJECT_ROOT)
++#   - Checkout desired branch (infra.defis.deploy by default)
++#   - Run docker compose to start backend stack
++#   - Prepare basic commands for frontends (Next.js + PM2) inside tmux
++
++usage() {
++  echo "Usage: $0 <host>" >&2
++  echo "Environment (optional):" >&2
++  echo "  SSH_USER             - SSH user for connection (default: user)" >&2
++  echo "  REMOTE_PROJECT_ROOT  - Project root on target (default: /srv/cfa)" >&2
++  echo "  OIS_CFA_GIT_URL      - Git URL for ois-cfa (default: git@git.telex.global:npk/ois-cfa.git)" >&2
++  echo "  OIS_CFA_BRANCH       - Branch to checkout (default: infra.defis.deploy)" >&2
++  exit 1
++}
++
++if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
++  usage
++fi
++
++TARGET_HOST="${1:-}"
++if [ -z "$TARGET_HOST" ]; then
++  usage
++fi
++
++SSH_USER="${SSH_USER:-user}"
++REMOTE_PROJECT_ROOT="${REMOTE_PROJECT_ROOT:-/srv/cfa}"
++OIS_CFA_GIT_URL="${OIS_CFA_GIT_URL:-git@git.telex.global:npk/ois-cfa.git}"
++OIS_CFA_BRANCH="${OIS_CFA_BRANCH:-infra.defis.deploy}"
++SSH_OPTS="-o StrictHostKeyChecking=accept-new"
++
++echo ">>> Deploying OIS-CFA to host '${TARGET_HOST}' as ${SSH_USER}"
++echo "    REMOTE_PROJECT_ROOT=${REMOTE_PROJECT_ROOT}"
++echo "    OIS_CFA_GIT_URL=${OIS_CFA_GIT_URL}"
++echo "    OIS_CFA_BRANCH=${OIS_CFA_BRANCH}"
++
++SSH_CMD="ssh ${SSH_OPTS} ${SSH_USER}@${TARGET_HOST}"
++
++$SSH_CMD bash -s << EOF
++set -euo pipefail
++
++echo ">>> [\$(hostname)] Phase 3 · Deploy OIS-CFA Stack"
++
++if ! command -v tmux >/dev/null 2>&1; then
++  echo "ERROR: tmux is not installed. Run provision-node.sh first." >&2
++  exit 1
++fi
++
++mkdir -p "${REMOTE_PROJECT_ROOT}"
++cd "${REMOTE_PROJECT_ROOT}"
++
++if ! tmux has-session -t p-cfa 2>/dev/null; then
++  echo ">>> Creating tmux session 'p-cfa'"
++  tmux new-session -d -s p-cfa -c "${REMOTE_PROJECT_ROOT}"
++else
++  echo ">>> Reusing existing tmux session 'p-cfa'"
++fi
++
++tmux send-keys -t p-cfa "set -euo pipefail" C-m
++tmux send-keys -t p-cfa "cd '${REMOTE_PROJECT_ROOT}'" C-m
++
++if [ ! -d "${REMOTE_PROJECT_ROOT}/ois-cfa/.git" ]; then
++  echo ">>> Cloning ois-cfa repo"
++  tmux send-keys -t p-cfa "git clone '${OIS_CFA_GIT_URL}' ois-cfa" C-m
++  tmux send-keys -t p-cfa "cd ois-cfa" C-m
++else
++  echo ">>> Updating existing ois-cfa repo"
++  tmux send-keys -t p-cfa "cd ois-cfa" C-m
++fi
++
++tmux send-keys -t p-cfa "git fetch origin" C-m
++tmux send-keys -t p-cfa "git checkout '${OIS_CFA_BRANCH}'" C-m
++tmux send-keys -t p-cfa "git pull --ff-only origin '${OIS_CFA_BRANCH}'" C-m
++
++tmux send-keys -t p-cfa "echo '>>> NOTE: ensure .env files are prepared as per docs/deploy/docker-compose-at-vps/02-env-and-compose.md'" C-m
++
++tmux send-keys -t p-cfa "docker compose -f docker-compose.yml -f docker-compose.override.yml up -d" C-m
++
++tmux send-keys -t p-cfa "echo '>>> Backend stack started. Next steps: configure Keycloak, nginx, and PM2 frontends as per docs/deploy/docker-compose-at-vps/* and 20251113-cloudflare-ingress.md'" C-m
++
++echo ">>> Commands sent to tmux session 'p-cfa'. Attach with: tmux attach -t p-cfa"
++EOF
++
++echo ">>> Deploy commands dispatched to host '${TARGET_HOST}'"
++
+diff --git a/ops/scripts/deploy/provision-node.sh b/ops/scripts/deploy/provision-node.sh
+new file mode 100755
+index 0000000..1cd4efd
+--- /dev/null
++++ b/ops/scripts/deploy/provision-node.sh
+@@ -0,0 +1,121 @@
++#!/bin/bash
++set -euo pipefail
++
++# OIS-CFA · Provision Node Script
++# Usage:
++#   ./ops/scripts/deploy/provision-node.sh <host>
++#
++# Responsibilities (idempotent as much as possible):
++#   - Ensure sudo user "user" exists on target host
++#   - Install base packages (curl, git, tmux, jq, docker, docker-compose plugin, nginx, postfix)
++#   - Install Node.js 20 for "user" (via nvm or system package)
++#   - Create /srv/cfa and set ownership to user:user
++#   - Configure tmux history-limit (1_000_000) for user
++#   - Create tmux session "p-cfa" with working dir /srv/cfa
++
++usage() {
++  echo "Usage: $0 <host>" >&2
++  echo "Environment (optional):" >&2
++  echo "  SSH_USER         - SSH user for initial connection (default: root)" >&2
++  echo "  REMOTE_USER      - App user to create/use (default: user)" >&2
++  echo "  REMOTE_PROJECT_ROOT - Project root on target (default: /srv/cfa)" >&2
++  exit 1
++}
++
++if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
++  usage
++fi
++
++TARGET_HOST="${1:-}"
++if [ -z "$TARGET_HOST" ]; then
++  usage
++fi
++
++SSH_USER="${SSH_USER:-root}"
++REMOTE_USER="${REMOTE_USER:-user}"
++REMOTE_PROJECT_ROOT="${REMOTE_PROJECT_ROOT:-/srv/cfa}"
++
++SSH_OPTS="-o StrictHostKeyChecking=accept-new"
++
++echo ">>> Provisioning host '${TARGET_HOST}' via ${SSH_USER}"
++
++ssh $SSH_OPTS "${SSH_USER}@${TARGET_HOST}" \
++  REMOTE_USER="$REMOTE_USER" REMOTE_PROJECT_ROOT="$REMOTE_PROJECT_ROOT" bash -s << 'EOF'
++set -euo pipefail
++
++echo ">>> [$(hostname)] Phase 2 · Provision Node"
++echo "    REMOTE_USER=${REMOTE_USER}"
++echo "    REMOTE_PROJECT_ROOT=${REMOTE_PROJECT_ROOT}"
++
++if ! id "${REMOTE_USER}" >/dev/null 2>&1; then
++  echo ">>> Creating user '${REMOTE_USER}' with sudo"
++  useradd -m -s /bin/bash "${REMOTE_USER}"
++  usermod -aG sudo "${REMOTE_USER}"
++else
++  echo ">>> User '${REMOTE_USER}' already exists, skipping creation"
++fi
++
++echo ">>> Installing base packages (curl, git, tmux, jq, ufw, docker, nginx, postfix)"
++export DEBIAN_FRONTEND=noninteractive
++apt-get update -y
++apt-get install -y \
++  ca-certificates curl git tmux jq ufw \
++  nginx postfix
++
++if ! command -v docker >/dev/null 2>&1; then
++  echo ">>> Installing Docker Engine + compose plugin"
++  install -m 0755 -d /etc/apt/keyrings
++  if [ ! -f /etc/apt/keyrings/docker.gpg ]; then
++    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
++    chmod a+r /etc/apt/keyrings/docker.gpg
++  fi
++  . /etc/os-release
++  echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
++  "$VERSION_CODENAME" stable" >/etc/apt/sources.list.d/docker.list
++  apt-get update -y
++  apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
++  systemctl enable --now docker
++else
++  echo ">>> Docker already installed, skipping"
++fi
++
++echo ">>> Ensuring ${REMOTE_PROJECT_ROOT} exists"
++mkdir -p "${REMOTE_PROJECT_ROOT}"
++chown -R "${REMOTE_USER}:${REMOTE_USER}" "${REMOTE_PROJECT_ROOT}"
++
++echo ">>> Installing Node.js 20 for ${REMOTE_USER} (via nvm if not present)"
++su - "${REMOTE_USER}" -c 'bash -s' << 'EONVM'
++set -euo pipefail
++if [ ! -d "$HOME/.nvm" ]; then
++  echo ">>> Installing nvm for ${USER}"
++  curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
++fi
++
++export NVM_DIR="$HOME/.nvm"
++[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
++
++if ! nvm ls 20 >/dev/null 2>&1; then
++  echo ">>> Installing Node.js 20 via nvm"
++  nvm install 20
++fi
++nvm alias default 20
++EONVM
++
++TMUX_CONF="/home/${REMOTE_USER}/.tmux.conf"
++if [ -f "\$TMUX_CONF" ]; then
++  if ! grep -q 'history-limit' "\$TMUX_CONF"; then
++    echo "set-option -g history-limit 1000000" >> "\$TMUX_CONF"
++  fi
++else
++  echo "set-option -g history-limit 1000000" > "\$TMUX_CONF"
++fi
++chown "${REMOTE_USER}:${REMOTE_USER}" "\$TMUX_CONF"
++
++echo ">>> Creating tmux session 'p-cfa' (if not exists)"
++su - "${REMOTE_USER}" -c "tmux has-session -t p-cfa 2>/dev/null || tmux new-session -d -s p-cfa -c '${REMOTE_PROJECT_ROOT}'"
++
++echo ">>> Provisioning done on \$(hostname)"
++EOF
++
++echo ">>> Host '${TARGET_HOST}' provisioned successfully"
++
+-- 
+2.34.1
+
