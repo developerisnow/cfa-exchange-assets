@@ -7,8 +7,9 @@
 1. Текстовый отчёт с DoD/Kickoff (этот файл) размещён в `memory-bank/Scrum/20251120/`.
 2. Создан skill-файл `oracle-evaluator-context-packaging` в `.claude/skills/` с инструкциями:
    - как собирать `context.txt` + `prompt.md` при отсутствии FS доступа;
-   - как ссылаться на composer файлы и zip-ветки.
-3. В каталоге `memory-bank/snapshots-aggregated-context-duplicates/composers/code2promp/20251120-1412-oracle-evaluator/` лежат два файла: `context.txt` и `prompt.md`, собранные по skill`у `context-composer-repomix-code2prompt.md`.
+   - как ссылаться на composer файлы и zip-ветки;
+   - какие CLI-команды `code2prompt`/`repomix` использовать (ref: `context-composer-repomix-code2prompt`).
+3. В каталоге `memory-bank/snapshots-aggregated-context-duplicates/composers/code2promp/20251120-1412-oracle-evaluator/` лежат два файла: `context.txt` и `prompt.md`, собранные **через `code2prompt`** (не вручную), покрывающие NX-03…NX-08, деплой-скрипты и zip-политику.
 4. Все изменения закоммичены/запушены: документация в monorepo, skill и composer‑артефакты в соответствующих репозиториях.
 
 ## 🏁 Kickoff Tasks

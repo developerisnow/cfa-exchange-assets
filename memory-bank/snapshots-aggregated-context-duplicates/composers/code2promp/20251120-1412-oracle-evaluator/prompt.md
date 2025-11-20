@@ -1,22 +1,26 @@
-# Oracle Evaluator Prompt — NX-Deploy Readiness
+# Oracle Evaluator Prompt · OIS-CFA Readiness Review
 
-**Role:** Senior Oracle Evaluator (GPT-5 Pro / Gemini). You cannot read repository files; use the attached `context.txt` only.
+**Role:** Senior Oracle/Evaluator (GPT-5 Pro / Gemini). You have no filesystem access; rely on `context.txt` only.
 
 ## Objective
-1. Validate that recent merges (NX-01/03/05/06/08) and the branch zip policy leave no loose ends before spinning up a **new** VPS environment (different domain + Cloudflare zone).
-2. Produce a checklist + risk assessment for deploying `infra.defis.deploy` on a fresh server, reusing `provision-node.sh`, `deploy-node.sh`, and `cloudflare-dns-upsert.sh`.
-3. Highlight gaps that block NX-07 (Backoffice KYC/User Registry) from being production ready.
+1. Проверить, что ветки NX-01/03/05/06/08 корректно интегрированы в `infra.defis.deploy`, а архивы `zip/*` покрывают все сделанные merge’и.
+2. Оценить готовность деплоя на новый VPS/домен (отличается от UK1): runbooks, scripts, DNS/Cloudflare, secrets.
+3. Выявить пробелы, блокирующие NX-07 (Backoffice KYC/User Registry) от запуска после релиза NX-05/06/08.
+4. Подготовить actionable feedback (issues + next steps) для CLI-агентов.
 
-## What to analyze
-- Branch/tags snapshot and zip workflow description (ensure no missing refs, identify ops gotchas).
-- Deployment runbook + scripts (clarify assumptions that will break with a new zone / domain / network).
-- Pending tasks (NX-07) vs. delivered items; call out missing specs/tests or infra steps.
+## Checklist
+- Архитектура/контекст: нет ли рассинхрона между docs/context, docs/architecture и текущим кодом?
+- Backend/services: Issuance, Registry, Settlement, связанные scripts (особенно после fix NX-03).
+- Frontends: apps/backoffice, portal-issuer, portal-investor, shared-ui — проверить, что новые API используются корректно.
+- Ops: runbook `10-eywa1-control-plane`, `provision-node.sh`, `deploy-node.sh`, `cloudflare-dns-upsert.sh` — достаточно ли шагов для нового сервера/зоны?
+- Zip workflow: соответствуют ли теги списку merged branches? нет ли worktree, которые забыли почистить?
+- NX-07 status: достаточно ли API/компонентов, чтобы продолжить работу? какие блокеры видны.
 
-## Deliverables
-Please return one Markdown response with the following sections:
-1. **Findings & Issues** — bullet list ordered by severity. Each item should cite the relevant section/title from `context.txt`.
-2. **Deployment Checklist for New VPS** — actionable steps grouped by phase (Provision, Deploy, DNS/SSL, Smoke). Mention required secrets/env vars explicitly.
-3. **NX-07 Readiness** — what is missing (code, contracts, runbooks) plus recommended actions.
-4. **Open Questions** — things the engineering team must clarify before running the scripts on the new infrastructure.
+## Expected Output Format
+Please return Markdown with four sections:
+1. **Findings (severity order)** — каждая запись = `[Severity] Summary (reference)` + детали/последствия.
+2. **Deployment Checklist for New VPS** — табличка `Phase | Steps | Required Inputs/Secrets`.
+3. **NX-07 Readiness** — что готово, что блокирует, предложенные действия.
+4. **Open Questions** — что нужно уточнить у инженеров перед rollout.
 
-Use concise language. If everything is green for a section, explicitly say “No blockers found”. EOF
+Keep it concise (<= 600 tokens). Если проблем нет, явно напиши “No blockers found” в соответствующем разделе.
