@@ -1,0 +1,734 @@
+Project Path: manifests
+
+Source Tree:
+
+```txt
+manifests
+├── communication.manifest.json
+├── docs.manifest.json
+├── domains.manifest.json
+├── people.manifest.json
+├── project.manifest.json
+├── repo-structure.manifest.json
+├── repositories.manifest.json
+└── workflow.manifest.json
+
+```
+
+`manifests/communication.manifest.json`:
+
+```json
+{
+  "id": "communication",
+  "description": "Index of key project communication logs.",
+  "meta": {
+    "version": "1.1.0",
+    "updated": "2025-11-10T19:04:00+03:00",
+    "edited_by": [
+      "co-76ca"
+    ]
+  },
+  "logs": [
+    {
+      "id": "intro-call-20251022",
+      "path": "./memory-bank/context/current-context/communication-log/20251022-1930-yury-founder-intro-call.md",
+      "type": "call-transcript",
+      "participants": [
+        "yury-m",
+        "alex-a"
+      ],
+      "timestamp": "2025-10-22T19:30:00+03:00",
+      "tags": [
+        "intro",
+        "vision",
+        "mvp"
+      ],
+      "summary": "Initial project introduction. Yury outlines the vision for a licensed RWA platform in Russia. Discusses team, tech, and a one-month MVP goal."
+    },
+    {
+      "id": "setup-call-20251103",
+      "path": "./memory-bank/context/current-context/communication-log/20251103-1530-call-Yury-Aleksandr-Alex-setup-work.md",
+      "type": "call-transcript",
+      "participants": [
+        "yury-m",
+        "aleksandr-o",
+        "alex-a"
+      ],
+      "timestamp": "2025-11-03T15:30:00+03:00",
+      "tags": [
+        "team-sync",
+        "architecture",
+        ".NET",
+        "C4"
+      ],
+      "summary": "First team sync. Discussion on roles, tech stack (.NET vs others), architecture (C4, domains), and initial deliverables. Yury pushes for speed, Alex A. and Aleksandr O. discuss need for proper architecture."
+    },
+    {
+      "id": "tech-sync-20251105",
+      "path": "./memory-bank/context/current-context/communication-log/20251105-1030-call-Alex-and-Aleksandr__Tech-Sync.md",
+      "type": "call-transcript",
+      "participants": [
+        "alex-a",
+        "aleksandr-o"
+      ],
+      "timestamp": "2025-11-05T10:30:00+03:00",
+      "tags": [
+        "tech-sync",
+        "SSOT",
+        "Kubernetes",
+        "Keycloak"
+      ],
+      "summary": "Technical alignment between Alex A. and Aleksandr O. Discussed SSOT, GitLab vs. Nextcloud, existing Kubernetes/Keycloak setup, and the need to align on a development process."
+    },
+    {
+      "id": "main-chat-yury-oct",
+      "path": "./memory-bank/context/current-context/communication-log/20251004-20251029-chat-telegram-main-YuryMyshinskiy-1016927916.md",
+      "type": "chat-log",
+      "participants": [
+        "yury-m",
+        "alex-a"
+      ],
+      "period": {
+        "from": "2025-10-04",
+        "to": "2025-10-29"
+      },
+      "tags": [
+        "payment",
+        "planning",
+        "competitors"
+      ],
+      "summary": "Early discussions, payment negotiations, initial research on competitors and tech."
+    },
+    {
+      "id": "org-tech-planning-20251110",
+      "path": "./memory-bank/context/current-context/communication-log/20251110-1200-call-Org-Tech-Planning-Yury-AleksandrO-AlexA.call.md",
+      "type": "call-transcript",
+      "participants": [
+        "yury-m",
+        "aleksandr-o",
+        "alex-a"
+      ],
+      "timestamp": "2025-11-10T12:00:00+03:00",
+      "tags": [
+        "planning",
+        "org",
+        "tech"
+      ],
+      "summary": "Org/Tech planning call; align realistic plan and deadlines, scope, and the role of AI in delivery."
+    }
+  ]
+}
+```
+
+`manifests/docs.manifest.json`:
+
+```json
+{
+    "id": "docs",
+    "description": "Catalog of critical project documents.",
+  "meta": {
+      "version": "1.2.1",
+      "updated": "2025-11-17T15:12:00+03:00",
+      "edited_by": ["co-76ca", "co-3c63"]
+    },
+    "documents": [
+      {
+        "id": "competitor-analysis-xlsx",
+        "path": "./memory-bank/_unstructured/Действующие информационные платформы и операторы ЦФА.xlsx",
+        "type": "spreadsheet",
+        "owner": "yury-m",
+        "tags": ["competitors", "analysis"],
+        "summary": "Primary spreadsheet with analysis of ~20 Russian RWA competitors."
+      },
+      {
+        "id": "outsource-estimation-pdf",
+        "path": "./memory-bank/context/current-context/additional-info-for-analysing/20251004-estimation-from-outsource-company/20251004-estimation-from-outsource-company.md",
+        "type": "estimation",
+        "owner": "yury-m",
+        "tags": ["estimation", "budget"],
+        "summary": "An external company's estimation for the project, mentioned as ~6000 hours."
+      },
+      {
+        "id": "tokeon-guide-pdf",
+        "path": "./memory-bank/data/memory-bank/files/Цифровые_активы_Руководство_по_ЦФА_и_платформе_Токеон.md",
+        "type": "competitor-doc",
+        "owner": "boris-m",
+        "tags": ["competitor", "tokeon"],
+        "summary": "Official guide for the Tokeon platform, a key competitor."
+      },
+      {
+        "id": "atomyze-book-pdf",
+        "path": "./memory-bank/data/memory-bank/files/Цифровые_финансовые_активы_Атомайз.pdf",
+        "type": "competitor-doc",
+        "owner": "boris-m",
+        "tags": ["competitor", "atomyze"],
+        "summary": "Official book from Atomyze, another key competitor."
+      },
+      {
+        "id": "infra-discovery-20251114",
+        "path": "./memory-bank/Scrum/20251114-discovery-infra-branch/20251114-1038-report-infra-branch-audit.md",
+        "type": "analysis-pack",
+        "owner": "alex-a",
+        "tags": ["devops", "infra", "git-audit"],
+        "summary": "Infra branch audit and timeline for ois-cfa, including scope, cadence, risks, and merge recommendations (infra vs deploy)."
+      },
+      {
+        "id": "infra-merge-strategy-20251114",
+        "path": "./memory-bank/Scrum/20251114-discovery-infra-branch/20251114-1055-analysis-merge-strategy-infra-vs-deploy.md",
+        "type": "analysis",
+        "owner": "alex-a",
+        "tags": ["devops", "merge-strategy", "infra"],
+        "summary": "Analysis of merge strategy between infra and deploy branches, with options, risks, and recommended approach."
+      },
+      {
+        "id": "infra-defis-deploy-progress-20251114",
+        "path": "./memory-bank/Scrum/20251114-discovery-infra-branch/20251114-1230-report-infra-defis-deploy-progress.md",
+        "type": "progress-log",
+        "owner": "alex-a",
+        "tags": ["devops", "merge", "progress-log"],
+        "summary": "Practical progress log for the infra.defis.deploy branch, capturing conflicts, resolutions, and resulting state."
+      },
+      {
+        "id": "billing-yury-20251115",
+        "path": "./memory-bank/Scrum/20251115-billing-Yury/20251115-1115-gem2.5p-help-with-Billing-Reporting-Results-STAR-Yury.md",
+        "type": "billing-report",
+        "owner": "alex-a",
+        "tags": ["reporting", "billing", "client-management"],
+        "summary": "Value-driven report for Yury covering work from 25.10.2025 to 15.11.2025, including infra/demos and negotiation context."
+      },
+      {
+        "id": "billing-yury-strategy-v4-20251115",
+        "path": "./memory-bank/Scrum/20251115-billing-Yury/20251115-1344-gpt5p-msg6-billing-Yury.md",
+        "type": "strategy",
+        "owner": "alex-a",
+        "tags": ["billing", "negotiation", "scope-management"],
+        "summary": "Consolidated Version 4 strategy message for Yury, framing blocks-of-hours model, epics map, and negotiation stance."
+      },
+      {
+        "id": "context-snapshot-week47-20251117",
+        "path": "./memory-bank/Scrum/20251117-context-snapshot/20251117-context-snapshot-on-date-Monday-Week47-start.md",
+        "type": "context-snapshot",
+        "owner": "alex-a",
+        "tags": ["context-snapshot", "week47", "onboarding"],
+        "summary": "Week47 context snapshot for new agents: people/domains, repositories/branches, environments, infra and billing state, and manifest gaps."
+      }
+    ]
+  }
+
+```
+
+`manifests/domains.manifest.json`:
+
+```json
+{
+    "id": "domains",
+    "description": "Core business domains of the RWA platform.",
+    "meta": {
+      "version": "1.2.1",
+      "updated": "2025-11-17T15:12:00+03:00",
+      "edited_by": ["co-76ca", "co-3c63"]
+    },
+    "domains": [
+      {
+        "id": "identity",
+        "description": "Handles user/entity registration, KYC/KYB, authentication (Keycloak), and authorization (RBAC/ABAC).",
+        "owner": "aleksandr-o",
+        "status": "planned",
+        "capabilities": ["kyc", "kyb", "authn", "authz"],
+        "repos": ["ois-cfa", "main-docs"],
+        "critical_docs": ["docs-cfa-rwa/architecture/11-Sequence-ESIA-OIDC.md"]
+      },
+      {
+        "id": "tokenization",
+        "description": "Manages the lifecycle of digital assets: creation (minting), issuance, and corporate actions.",
+        "owner": "alex-a",
+        "status": "planned",
+        "capabilities": ["minting", "issuance", "corp-actions"],
+        "repos": ["ois-cfa", "main-docs"],
+        "critical_docs": ["docs-cfa-rwa/legal/01-ПравилаИС-template.md"]
+      },
+      {
+        "id": "exchange",
+        "description": "Core trading functionality: order book, matching engine, market data. Initially focused on primary issuance.",
+        "owner": "alex-a",
+        "status": "in-progress",
+        "capabilities": ["orderbook", "matching", "market-data"],
+        "repos": ["ois-cfa", "velvet", "main-docs"],
+        "critical_docs": [
+          "docs-cfa-rwa/architecture/10-HighLevel-Architecture.md",
+          "memory-bank/Scrum/20251114-discovery-infra-branch/20251114-1038-report-infra-branch-audit.md"
+        ]
+      },
+      {
+        "id": "settlement",
+        "description": "Handles Delivery-vs-Payment (DvP) logic, integration with banking rails, and transaction reconciliation.",
+        "owner": "aleksandr-o",
+        "status": "planned",
+        "capabilities": ["dvp", "bank-integration", "reconciliation"],
+        "repos": ["ois-cfa", "main-docs"],
+        "critical_docs": []
+      },
+      {
+        "id": "compliance",
+        "description": "AML/CFT monitoring, rule engine, sanctions screening, and regulatory reporting.",
+        "owner": "yury-m",
+        "status": "planned",
+        "capabilities": ["aml", "cft", "rule-engine", "sanctions"],
+        "repos": ["main-docs"],
+        "critical_docs": ["docs-cfa-rwa/security/20-ГОСТ57580-Чеклист.md"]
+      },
+      {
+        "id": "custody",
+        "description": "Manages wallets and keys, likely integrating with an HSM or external custodian.",
+        "owner": "aleksandr-o",
+        "status": "planned",
+        "capabilities": ["wallets", "keys", "hsm"],
+        "repos": ["ois-cfa", "main-docs"],
+        "critical_docs": []
+      }
+    ]
+  }
+
+```
+
+`manifests/people.manifest.json`:
+
+```json
+{
+  "id": "people",
+  "description": "Key project members and stakeholders.",
+  "people": [
+    {
+      "id": "yury-m",
+      "name": "Yury Mishinsky",
+      "role": "Customer / Founder / Visionary",
+      "handles": {
+        "telegram": "YuryMyshinskiy"
+      },
+      "notes": "Drives the vision, sets deadlines, manages business/legal side. Prefers high-level results and weekly syncs."
+    },
+    {
+      "id": "alex-a",
+      "name": "Alex A (Aleksandruk)",
+      "role": "AI Architect / Context Engineering / System Architect / DX Engineer / Evangelist / Spec-Driven Development Lead",
+      "handles": {
+        "telegram": "herewegohereiam",
+        "gitlab": "alexa@cfa.capital"
+      },
+      "notes": "Responsible for overall technical architecture, agent-driven workflows, and context engineering. Bridges business requirements and technical implementation."
+    },
+    {
+      "id": "aleksandr-o",
+      "name": "Aleksandr Ozherelev",
+      "role": "Technical Director / DevOps / Backend Lead (.NET)",
+      "handles": {
+        "gitlab": "ao@cfa.capital"
+      },
+      "notes": "Owner of the backend implementation, Keycloak setup, and Kubernetes infrastructure. Prefers .NET stack."
+    },
+    {
+      "id": "boris-m",
+      "name": "Boris Markevich",
+      "role": "Project Coordinator / Personal Yury's Assistant",
+      "handles": {
+        "telegram": "bmarkevich"
+      },
+      "notes": "Manages access, credentials, and coordinates tasks between technical and business teams. Go-to person for access to competitor platforms."
+    },
+    {
+      "id": "alex-s",
+      "name": "Alex Semenov",
+      "role": "Legacy Velvet Exchange Project Code Expert / Consultant",
+      "handles": {},
+      "notes": "Expert on the legacy crypto exchange codebase (Node.js). Key person for understanding existing assets."
+    }
+  ],
+  "meta": {
+    "version": "1.1.0",
+    "updated": "2025-11-10T19:04:00+03:00",
+    "edited_by": [
+      "co-76ca"
+    ]
+  }
+}
+```
+
+`manifests/project.manifest.json`:
+
+```json
+{
+  "schemaVersion": "1.2",
+  "project": {
+    "id": "prj_Cifra-rwa-exachange-assets",
+    "name": "Cifra RWA Exchange Assets",
+    "description": "Root project manifest (SSOT) for agents and operators.",
+    "version": "1.2.1",
+    "updated": "2025-11-17T13:40:00+03:00",
+    "status": "active"
+  },
+  "goals": [
+    "Prepare demos for OSCVA and Velvet on AVA1",
+    "Stabilize manifests as machine-readable SSOT",
+    "Align submodules and repository mirrors"
+  ],
+  "conventions": {
+    "agents_md": "./AGENTS.md",
+    "notes": "Follow commit style and folder naming from AGENTS.md."
+  },
+  "git": {
+    "root": ".",
+    "submodules": [
+      {
+        "id": "main-docs",
+        "path": "repositories/customer-gitlab/docs-cfa-rwa",
+        "remotes": {
+          "origin": "git@git.telex.global:cfa/docs-cfa.git"
+        }
+      },
+      {
+        "id": "ois-cfa",
+        "path": "repositories/customer-gitlab/ois-cfa",
+        "remotes": {
+          "origin": "git@git.telex.global:npk/ois-cfa.git",
+          "github-mirror": "git@github.com:developerisnow/cfa-ois-cfa.git"
+        }
+      },
+      {
+        "id": "velvet",
+        "path": "repositories/customer-gitlab/velvet",
+        "remotes": {
+          "origin": "git@git.telex.global:npk/velvet.git",
+          "github-mirror": "git@github.com:developerisnow/cfa-velvet.git"
+        }
+      },
+      {
+        "id": "sdd-shotgun-pro",
+        "path": "repositories/ai/SDD-shotgun-pro",
+        "remotes": {
+          "origin": "git@github.com:developerisnow/SDD-shotgun-pro.git"
+        }
+      }
+    ]
+  },
+  "environments": {
+    "servers": [
+      {
+        "id": "AVA1",
+        "purpose": "demos",
+        "notes": "Hosts OSCVA and Velvet demo services."
+      },
+      {
+        "id": "uk1",
+        "purpose": "interim demo host",
+        "notes": "Temporary demo environment where the OIS-CFA stack was successfully deployed with HTTPS/SMTP during November 2025 while CFA1 issues were investigated."
+      }
+    ]
+  },
+  "indices": [
+    {
+      "id": "people",
+      "path": "./manifests/people.manifest.json",
+      "checksum": "42101920df33f13fe507306cff306ee5c8bb80a1c775d0b90c6978f16bf05d3f",
+      "description": "Registry of project members and stakeholders."
+    },
+    {
+      "id": "repositories",
+      "path": "./manifests/repositories.manifest.json",
+      "checksum": "06d565720e40642004e4e3af19d2d0f6209c927baf24c15ea6139c465e686a41",
+      "description": "All code repositories and roles."
+    },
+    {
+      "id": "domains",
+      "path": "./manifests/domains.manifest.json",
+      "checksum": "166d30de6f44c085ffb8d32997cf19925fd3be167efd1e0ad9b03425acc13ea9",
+      "description": "Business domains and ownership."
+    },
+    {
+      "id": "communication",
+      "path": "./manifests/communication.manifest.json",
+      "checksum": "f59d78caff66ff854be58e6390526d987ab3509e47908acb94e7daedf59f863e",
+      "description": "Key communication logs and transcripts."
+    },
+    {
+      "id": "docs",
+      "path": "./manifests/docs.manifest.json",
+      "checksum": "50be4104beced40e75ae90400121fb372a62b98bd74eba6c93c9afe5f68a0737",
+      "description": "Critical documents and research."
+    },
+    {
+      "id": "repo-structure",
+      "path": "./manifests/repo-structure.manifest.json",
+      "checksum": "32cb6d5473a1daaeb57a172aaaabf7f60e4f051c956d9f9906aa973511e7b834",
+      "description": "Folder map for agent navigation."
+    },
+    {
+      "id": "workflow",
+      "path": "./manifests/workflow.manifest.json",
+      "checksum": "9373d23b0a09aafd4a23de7cba372b257f8ccf0a4c02b775ab987b21d94e5368",
+      "description": "Operational workflow, tools, servers, and policies."
+    }
+  ]
+}
+
+```
+
+`manifests/repo-structure.manifest.json`:
+
+```json
+{
+  "id": "repo-structure",
+  "description": "Map of the project repository for agent navigation.",
+  "structure": {
+    "manifests/": {
+      "description": "This directory. Contains all project manifest files. The SSOT for project structure.",
+      "role": "TRUNK"
+    },
+    "memory-bank/": {
+      "description": "The project's 'data lake'. Contains all raw and processed information.",
+      "role": "DATA"
+    },
+    "memory-bank/context/current-context/communication-log/": {
+      "description": "Raw transcripts and chat logs. Primary source for understanding project history and stakeholder intent.",
+      "role": "RAW_DATA"
+    },
+    "memory-bank/Scrum/": {
+      "description": "Agent-specific work folders from previous experiments. Good source for architectural patterns and reusable prompts.",
+      "role": "AGENT_WORKSPACE"
+    },
+    "repositories/customer-gitlab/docs-cfa-rwa/": {
+      "description": "The official documentation repository. Contains the canonical architecture, legal, and security documents.",
+      "role": "BRANCH_DOCS"
+    },
+    "scripts/": {
+      "description": "Utility scripts for project automation (e.g., manifest validation, ETL).",
+      "role": "TOOLS"
+    }
+  },
+  "meta": {
+    "version": "1.1.0",
+    "updated": "2025-11-10T19:04:00+03:00",
+    "edited_by": [
+      "co-76ca"
+    ]
+  }
+}
+
+```
+
+`manifests/repositories.manifest.json`:
+
+```json
+{
+  "id": "repositories",
+  "description": "Code repositories relevant to the project.",
+  "meta": {
+    "version": "1.2.1",
+    "updated": "2025-11-17T15:12:00+03:00",
+    "edited_by": [
+      "co-76ca",
+      "co-3c63"
+    ]
+  },
+  "repositories": [
+    {
+      "id": "main-docs",
+      "path": "./repositories/customer-gitlab/docs-cfa-rwa",
+      "remotes": {
+        "origin": "git@git.telex.global:cfa/docs-cfa.git"
+      },
+      "role": "Primary SSOT for documentation, specs, and architecture (The 'Trunk').",
+      "notes": "This is where all SDD artifacts live. Agents should read from here.",
+      "default_branch": "main",
+      "submodule": true
+    },
+    {
+      "id": "ois-cfa",
+      "path": "./repositories/customer-gitlab/ois-cfa",
+      "remotes": {
+        "origin": "git@git.telex.global:npk/ois-cfa.git",
+        "github-mirror": "git@github.com:developerisnow/cfa-ois-cfa.git"
+      },
+      "role": "Core application repository (ОИС ЦФА).",
+      "notes": "Primary GitLab repo; mirrored to GitHub under developerisnow/cfa-ois-cfa via local pushurl config.",
+      "default_branch": "main",
+      "submodule": true
+    },
+    {
+      "id": "velvet",
+      "path": "./repositories/customer-gitlab/velvet",
+      "remotes": {
+        "origin": "git@git.telex.global:npk/velvet.git",
+        "github-mirror": "git@github.com:developerisnow/cfa-velvet.git"
+      },
+      "role": "Node.js Exchange (Velvet)",
+      "notes": "Legacy 2017–2018 codebase; serves as reference for Node.js exchange functionality.",
+      "default_branch": "main",
+      "submodule": true
+    },
+    {
+      "id": "sdd-shotgun-pro",
+      "path": "./repositories/ai/SDD-shotgun-pro",
+      "remotes": {
+        "origin": "git@github.com:developerisnow/SDD-shotgun-pro.git"
+      },
+      "role": "AI tooling for structured reposcan and C4/SDD extraction.",
+      "notes": "Used to generate C4 and repository structure reports for ois-cfa (see 20251111 C4 reposcan artifacts).",
+      "default_branch": "main",
+      "submodule": true
+    }
+  ]
+}
+
+```
+
+`manifests/workflow.manifest.json`:
+
+```json
+{
+  "id": "workflow",
+  "description": "Workplace, orchestration, tools, and operational workflow for AI-assisted development and research.",
+  "meta": {
+    "version": "1.1.1",
+    "updated": "2025-11-17T15:12:00+03:00",
+    "edited_by": ["co-76ca", "co-3c63"]
+  },
+  "workplaces": {
+    "servers": [
+      {
+        "id": "eywa1",
+        "aliases": ["AVA1"],
+        "os": "Ubuntu",
+        "role": ["primary-workhorse", "agent-orchestration"],
+        "auth": ["password-protected Web GUI", "SSH"],
+        "notes": "Main remote machine. Hosts Vibe‑Kanban; used predominantly over TUI/Web GUI. Codex and Claude Code authorizations installed."
+      },
+      {
+        "id": "CFA1",
+        "aliases": [],
+        "os": "Ubuntu",
+        "role": ["demo-hosting"],
+        "notes": "Used for spinning demos (Velvet Node.js exchange, .NET services)."
+      },
+      {
+        "id": "macOS-local",
+        "aliases": ["macbook-pro"],
+        "os": "macOS",
+        "role": ["initial-sessions"],
+        "notes": "Early work with CLI agents and web UIs. ~8–15 sessions."
+      }
+    ],
+    "orchestrator": {
+      "name": "Vibe-Kanban",
+      "aka": ["Vibe Diffuse Kanban"],
+      "type": "TUI",
+      "interfaces": ["TUI", "Web GUI"],
+      "access": "password-protected",
+      "behavior": {
+        "session_model": "each step = new session",
+        "session_volume": "tens to hundreds per task",
+        "persistence": "do not mirror all raw sessions into repo; index only high-signal artefacts"
+      },
+      "agents": ["Claude Code", "Codex", "Gemini", "Opencode", "Qwen_Code", "AMP", "COPILOT", "Cursor_Agent"],
+      "notes": "Primary interface for coding agents; accessed even from mobile."
+    }
+  },
+  "tools": {
+    "providers": ["OpenAI", "Google", "Anthropic", "Perplexity"],
+    "wrappers": [
+      { "name": "Claude Code", "kind": "coding-agent", "aliases": ["Cline"] },
+      { "name": "Codex CLI", "kind": "coding-agent" },
+      { "name": "Gemini CLI", "kind": "coding-agent", "status": "testing", "aliases": ["GeminiCli"] },
+      { "name": "Droid", "kind": "coding-agent", "status": "testing" },
+      { "name": "Opencode", "kind": "coding-agent", "status": "testing" },
+      { "name": "Crush", "kind": "coding-agent", "status": "testing" },
+      { "name": "JustCode", "kind": "coding-agent", "status": "testing" }
+    ],
+    "deep_research": [
+      { "name": "chatgpt.com", "use": "deepresearch" },
+      { "name": "claude.ai", "use": "deepresearch" },
+      { "name": "gemini.google.com", "use": "deepresearch" },
+      { "name": "perplexity.ai", "use": "deepresearch" },
+      { "name": "parallel.ai", "use": "deepresearch" }
+    ],
+    "cli": [
+      { "name": "Claude CLI", "use": "coding + analysis" },
+      { "name": "Codex CLI", "use": "coding + analysis" },
+      { "name": "Gemini CLI", "use": "coding + analysis" }
+    ],
+    "assistants": [
+      { "name": "AI Studio", "role": "evaluator/teacher/buddy", "context_window": "~1M tokens", "use": "large-context analysis" }
+    ]
+  },
+  "dev_practices": {
+    "tmux": {
+      "policy": "Create dedicated tmux session per project; organize by tabs for tools and tasks",
+      "naming": {
+        "session": "p-<project>-<optional-session-name>",
+        "windows": ["code", "agents", "logs", "services"],
+        "example": "p-cfa",
+        "legacy_pattern": "<project>-<env>-<date>",
+        "legacy_example": "cfa-main-20251110"
+      }
+    },
+    "session_storage": {
+      "raw": "kept in orchestrator/runtime; not all checked-in",
+      "indexing": "link only essential artefacts into memory-bank with YYYYMMDD-HHMM prefix",
+      "retention": {
+        "orchestrator_sessions": "rotate by age/volume; keep high-signal references",
+        "memory_bank": "immutable timestamps; edits append-only with version bump"
+      }
+    },
+    "manifests": {
+      "role": "SSOT for agents; indices drive navigation",
+      "update_cadence": "incremental, checksum-updated"
+    }
+  },
+  "git_flow": {
+    "branches": {
+      "main": {
+        "role": "release",
+        "notes": "Stable branch for demos and tagged releases."
+      },
+      "develop": {
+        "role": "integration",
+        "deploys_to": ["dev", "pre-prod"],
+        "notes": "Target branch for feature merges; auto-deployed to dev/pre-prod environments."
+      },
+      "tasks": {
+        "role": "backlog-md",
+        "notes": "Markdown tasks with full context and DoD for agents; feature branches are cut from here or from develop depending on task."
+      }
+    },
+    "practices": [
+      "Each task is described in a .md file (with context, DoD, and links) under the tasks branch or directory.",
+      "For each task, create a dedicated feature branch derived from develop (or from the indicated base branch).",
+      "Feature branches must be covered by tests and basic linting before opening a merge request.",
+      "Merge to develop only via Merge Request with review and passing CI.",
+      "Develop is the only branch auto-deployed to dev/pre-prod; main is updated from develop after release review."
+    ],
+    "agent_integration": {
+      "roles": [
+        "Claude Code / Codex CLI / Gemini CLI act as coding agents working inside feature branches.",
+        "Agents must respect AGENTS.md: no direct pushes to main/develop, only MR-based changes.",
+        "Agent-produced work is always reviewed and, when needed, edited by a human owner before merge."
+      ]
+    }
+  },
+  "git_policy": {
+    "structure": ["monorepo", "submodules"],
+    "zones": [
+      { "id": "most-private", "audience": "owner-only" },
+      { "id": "pet-projects-teammates", "audience": "teammates" },
+      { "id": "customer-devs", "audience": "customer-engineering" },
+      { "id": "customer", "audience": "customer" }
+    ],
+    "remotes": {
+      "origin": "Customer GitLab (authoritative for customer)",
+      "monorepo": "DeveloperIsNow monorepo mirror (owner’s SSOT)",
+      "webfree-stealth": "Third-party service access; limited, purpose-bound"
+    },
+    "notes": "Repositories may have multiple remotes configured; origin points to customer GitLab, additional mirrors used for owner workflows and third-party service integrations."
+  }
+}
+
+```
