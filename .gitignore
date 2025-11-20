@@ -27,4 +27,4 @@ repositories/customer-gitlab/**
 data/
 
 .specstory/
-.env
+.env*
