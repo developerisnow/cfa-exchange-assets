@@ -14,6 +14,17 @@ Command used to gather raw content:
     --full-directory-tree --tokens format \
     --output-file ../../../memory-bank/.../context.raw.txt .
 
+Additional notes (2025-11-20 15:10 UTC):
+- Анализируйте свежие сессии `eywa1-p-cfa-w12.p1-20251120-1445.session.txt` (кодинг NX05‑08 + fix NX03) и `eywa1-p-cfa-w11.p1-20251120-1446.session.txt` (подготовка docker-compose rollout на cfa1/fin2 через tmux + Cloudflare CLI). Эти логи лежат в memory-bank (eywa1 sessions) и дополняют context.txt.
+- Используйте `20251119-20-gem3-aistudio-thread-code-session-NX05-08.oracle.session.json` как журнал предыдущих Evaluator’ов (Gemini/GPT). Нужно подтвердить, что их выводы полные.
+- Сравните стенды: UK1 (`*.cfa.llmneighbors.com`) рабочий, но на `cfa1` (`*.cfa1.llmneighbors.com`) авторизация ломается — выяснить причины (env, OAuth, DNS, secrets) перед переносом на новый домен.
+- Новый Cloudflare аккаунт/зона `*.cfa{n}.telex.global` описан в `/home/user/__Repositories/cloudflare__developerisnow/.env`:
+  - CLOUDFLARE_CFA_EMAIL=aa@multipass.org
+  - CLOUDFLARE_CFA_PASS=@$g...D
+  - CLOUDFLARE_CFA_API_GLOBAL=e918...f610
+  - CLOUDFLARE_CFA_API_TOKEN=_I2ne...QD6
+  - CLOUDFLARE_CFA_ACCOUNT_ID=c41ad...867
+
 Contents below = raw code2prompt output (2.3 MB) covering docs, services, apps, ops, tasks NX-03..NX-08, zip workflow.
 ===============================================================================
 Project Path: ois-cfa
