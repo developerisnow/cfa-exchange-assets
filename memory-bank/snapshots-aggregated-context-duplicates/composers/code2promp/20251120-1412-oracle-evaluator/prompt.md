@@ -23,4 +23,3 @@ Please return Markdown with four sections:
 3. **NX-07 Readiness** — что готово, что блокирует, предложенные действия.
 4. **Open Questions** — что нужно уточнить у инженеров перед rollout.
 
-Keep it concise (<= 600 tokens). Если проблем нет, явно напиши “No blockers found” в соответствующем разделе.
