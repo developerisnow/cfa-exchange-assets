@@ -1,0 +1,115 @@
+Oracle Evaluator Context Package
+Generated: 2025-11-20 14:40 UTC
+Prepared by: Codex CLI (co-c02b)
+Target model: GPT-5 Pro / Gemini (no FS access)
+
+============================================================
+1. Repository Snapshot
+============================================================
+Repo: repositories/customer-gitlab/ois-cfa (branch infra.defis.deploy)
+HEAD: 01f89379e3e0cbef29324e7b735d9dc820974833 (docs(git): add branch zip workflow and helper script)
+Zip tags present:
+  zip/agents-md
+  zip/deploy
+  zip/feature/NX-06-payout-schedule
+  zip/feature/NX-08-backoffice-audit
+  zip/fix/NX-03-issuance-500
+  zip/tasks/NX-01-spec-validate-and-matrix
+  zip/tasks/NX-05-issuer-dashboard-and-reports
+All branches merged into infra.defis.deploy have been archived through tags above using scripts/git/zip_branches.sh.
+Active worktrees remain only for docs/enrich-nx-tasks, feature/NX-07-backoffice-kyc (still in progress), infra, and main.
+
+============================================================
+2. Zip Workflow Summary (artifacts/git/branch-zip-workflow.md)
+============================================================
+Purpose: avoid “branch cemetery” by replacing merged branches with tags (`zip/<branch>`). Steps:
+1. Verify branch is merged (git merge-base --is-ancestor <branch> infra.defis.deploy).
+2. Ensure worktree is clean and remove it if present (git worktree remove <path>).
+3. Create archive tag `zip/<branch>` referencing branch tip and push the tag.
+4. Delete branch locally and on origin.
+Guiding rules:
+- Archive immediately post-merge.
+- Never zip partially merged or active branches.
+- Zip tags are immutable; do not delete without incident review.
+Recovery: git checkout -b <branch> zip/<branch>.
+
+============================================================
+3. Automation Script (scripts/git/zip_branches.sh)
+============================================================
+Usage:
+  ./scripts/git/zip_branches.sh <branches-file> [base-branch]
+Key behavior:
+- Reads branch names (one per line, ignores # comments).
+- Fetches refs, checks branch exists locally or on origin.
+- Verifies merge ancestor with base (default infra.defis.deploy).
+- Removes attached clean worktree automatically.
+- Creates tag zip/<branch>, pushes tag, deletes remote branch, deletes local branch.
+- Skips unmerged branches or dirty worktrees.
+Dependency: requires git >= 2.30 (worktree list --porcelain). Branch list example stored at artifacts/git/branch-zip-20251120.txt.
+
+============================================================
+4. Deployment Control Plane Runbook (docs/deploy/docker-compose-at-vps/10-eywa1-control-plane-runbook.md)
+============================================================
+Mission: Eywa1 acts as control plane to bootstrap multiple VPS nodes (cfa1, fin2, germ1, ...). Summary:
+- **Scope**: Worktree wt__ois-cfa__NX01, branch infra.defis.deploy; DNS via Cloudflare for *.cfa*.llmneighbors.com.*
+- **Phases**:
+  0. Rules & Safety (UK1 untouched, only user `user`, /srv/cfa path, tmux session `p-cfa`).
+  1. Prepare Eywa1 (SSH keys, Cloudflare credentials, repo sync).
+  2. Provision Node (run ops/scripts/deploy/provision-node.sh <host>).
+  3. Deploy Stack (ops/scripts/deploy/deploy-node.sh <host> [--branch infra.defis.deploy]).
+  4. Verify & Handover (health checks, smoke E2E, log summary in memory-bank).
+- Architecture: Control Plane -> nodes via SSH; each node runs tmux session `p-cfa`, Docker + PM2 stack.
+- DNS/SSL: Cloudflare automation (see scripts/cloudflare-dns-upsert.sh) for wildcard certs per environment.
+- Usage example provided for cfa1/fin2.
+
+============================================================
+5. Provision and Deploy Scripts
+============================================================
+ops/scripts/deploy/provision-node.sh summary:
+- Ensures sudo user `user` exists; copies root authorized_keys to user.
+- Installs packages: curl, git, tmux, jq, ufw, nginx, postfix, Docker Engine + compose plugin.
+- Adds user to docker group, creates /srv/cfa, installs Node.js 20 via nvm.
+- Configures tmux history-limit (1,000,000) and creates session `p-cfa`.
+- Usage: `./ops/scripts/deploy/provision-node.sh <host>` with optional SSH_USER/REMOTE_USER/REMOTE_PROJECT_ROOT.
+
+ops/scripts/deploy/deploy-node.sh essentials (see file for full detail):
+- SSHes into target host, clones/pulls `ois-cfa` repo into /srv/cfa, installs npm deps.
+- Runs `docker compose -f docker-compose.apps.yml -f docker-compose.services.yml up -d --remove-orphans`.
+- Builds frontends via `npm install && npm run build` (portal issuer/investor/backoffice) using PM2 for SSR.
+- Copies `.env` templates from repo to `/srv/cfa/.env.*`, ensures secrets can be injected via files or environment overrides.
+- Provides `--branch`, `--pm2`, `--no-frontend` flags.
+
+ops/scripts/cloudflare-dns-upsert.sh quick view:
+- Reads `.env.cloudflare` containing `CLOUDFLARE_API_TOKEN`, `CF_ZONE_ID`, target `RECORD_NAME`, `RECORD_TYPE`, `RECORD_CONTENT`.
+- Uses `curl` to call Cloudflare API v4 (upsert semantics) to manage A/CNAME records for new VPS domains.*
+
+============================================================
+6. NX Task Status
+============================================================
+Delivered into infra.defis.deploy (and now zipped):
+- NX-01 Spec validate & matrix fixes.
+- NX-03 Issuance publish 404 fix + InMemory toggle for tests.
+- NX-05 Issuer dashboard & reports (backend + portal updates).
+- NX-06 Payout schedule spec diff + read-only UI (portal issuer).
+- NX-08 Backoffice audit log UI + API.
+Pending / Next Sprint:
+- NX-07 Backoffice KYC/User registry: branch `feature/NX-07-backoffice-kyc` still active (worktree wt__ois-cfa__NX07). Needs compliance API integration & deployment readiness.
+
+============================================================
+7. Evaluator To-Do Highlights
+============================================================
+Topics requiring review/confirmation by Oracle Evaluator:
+- Zip policy enforcement (are we missing tags for older branches?).
+- Readiness of provision/deploy scripts for *new* VPS with different Cloudflare zone (need new `.env.cloudflare`).
+- Validation that NX-07 plan includes dependency list (compliance API stubs exist in apps/backoffice/src/lib/api/compliance.ts but UI not wired to backend yet).
+- Check `memory-bank/Scrum/20251120/20251120-1412-ask-codex-cli-to-prepare-context...` for DoDs before generating final recommendations.
+
+============================================================
+8. Composer References
+============================================================
+Base skills: `.claude/skills/context-composer-repomix-code2prompt.md`, `.claude/skills/oracle-evaluator-context-packaging.md`.
+Additional context examples: `memory-bank/Scrum/20251120/20251119-old-session-part-about-composer-task.md`.
+Existing composer snapshots (not attached here):
+- `memory-bank/snapshots-aggregated-context-duplicates/composers/ois-cfa.architecture-context.repomix.txt`
+- `.../ois-cfa.domain-and-contracts.repomix.txt`
+Use them as needed when deep-diving.
