@@ -1,0 +1,77 @@
+# Git changes reporter categories/config
+# Repo root default is relative to this repo; override with --repo flag.
+
+defaults:
+  repo_root: ../../../../repositories/customer-gitlab/ois-cfa
+  include_by_default:
+    - dotnet
+    - front
+    - contracts
+    - architecture-trunk
+    - architecture-branches
+    - architecture-leaves
+
+categories:
+  dotnet:
+    description: .NET source and project files
+    include_by_default: true
+    globs:
+      - "**/*.cs"
+      - "**/*.csproj"
+      - "**/*.sln"
+      - "**/*.props"
+      - "**/*.targets"
+
+  front:
+    description: Frontend TS/JS/Next.js apps and shared packages
+    include_by_default: true
+    globs:
+      - "apps/**/*.ts"
+      - "apps/**/*.tsx"
+      - "apps/**/*.js"
+      - "apps/**/*.jsx"
+      - "apps/**/*.json"
+      - "apps/**/*.css"
+      - "packages/**/*.ts"
+      - "packages/**/*.tsx"
+      - "packages/**/*.js"
+      - "packages/**/*.jsx"
+      - "packages/**/*.json"
+      - "packages/**/*.css"
+
+  contracts:
+    description: OpenAPI/AsyncAPI/contracts and related configs
+    include_by_default: true
+    globs:
+      - "packages/contracts/**/*.yaml"
+      - "packages/contracts/**/*.yml"
+      - "packages/contracts/**/*.json"
+
+  docs:
+    description: Markdown docs (disabled by default)
+    include_by_default: false
+    globs:
+      - "**/*.md"
+
+  architecture-trunk:
+    description: Architecture trunk index/guards
+    include_by_default: true
+    globs:
+      - "memory-bank/Scrum/20251111-tbl-setup/20251111-1430-co-3a68/trunk-index.md"
+
+  architecture-branches:
+    description: Domain branch artifacts
+    include_by_default: true
+    globs:
+      - "memory-bank/Scrum/20251111-tbl-setup/20251111-1430-co-3a68/branches/**/*.md"
+
+  architecture-leaves:
+    description: Leaf artifacts/checklists
+    include_by_default: true
+    globs:
+      - "memory-bank/Scrum/20251111-tbl-setup/20251111-1430-co-3a68/leaves/**/*.md"
+
+  other:
+    description: Catch-all bucket for uncategorized files
+    include_by_default: false
+    globs: []
