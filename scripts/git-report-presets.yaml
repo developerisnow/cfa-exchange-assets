@@ -1,0 +1,34 @@
+# Presets for git-changes-reporter categories
+presets:
+  default:
+    - dotnet
+    - front
+    - contracts
+    - ops
+    - ci-manifests
+    - architecture-trunk
+    - architecture-branches
+    - architecture-leaves
+  backend:
+    - dotnet
+    - contracts
+  frontend:
+    - front
+  architecture:
+    - architecture-trunk
+    - architecture-branches
+    - architecture-leaves
+  ops:
+    - ops
+    - ci-manifests
+  runs-with-docs:
+    - dotnet
+    - front
+    - contracts
+    - ops
+    - ci-manifests
+    - docs
+  docs:
+    - docs
+  everything:
+    - all

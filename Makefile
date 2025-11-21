@@ -60,3 +60,21 @@ manifests/check:
 
 manifests/regen:
 	./scripts/regen-repositories-manifest.sh && ./scripts/update-checksums.sh
+
+# --- Git change reports ---
+since?=
+until?=$(shell date +%F)
+preset?=default
+include_uncat?=0
+fail_uncat?=0
+folders?=
+repo?=
+
+.PHONY: git/report
+git/report:
+	@test -n "$(since)" || (echo "since required (YYYY-MM-DD)" && exit 1)
+	python3 scripts/git-changes-reporter.py --since $(since) --until $(until) --preset $(preset) \
+		$(if $(folders),--folders $(folders),) \
+		$(if $(repo),--repo $(repo),) \
+		$(if $(filter 1 yes true,$(include_uncat)),--include-uncategorized,) \
+		$(if $(filter 1 yes true,$(fail_uncat)),--fail-on-uncategorized,)

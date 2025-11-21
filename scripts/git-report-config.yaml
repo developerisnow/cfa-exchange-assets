@@ -1,0 +1,104 @@
+# Git changes reporter categories/config
+# Repo root default is relative to this repo; override with --repo flag.
+
+defaults:
+  repo_root: ../repositories/customer-gitlab/ois-cfa
+  architecture_guardians: ../repositories/customer-gitlab/ois-cfa/packages/architecture-guarduials.yaml
+  output_base: ../memory-bank/Scrum/20251121/gitlab-discovery
+  include_by_default:
+    - dotnet
+    - front
+    - contracts
+    - ops
+    - ci-manifests
+    - architecture-trunk
+    - architecture-branches
+    - architecture-leaves
+
+categories:
+  dotnet:
+    description: .NET source and project files
+    include_by_default: true
+    globs:
+      - "**/*.cs"
+      - "**/*.csproj"
+      - "**/*.sln"
+      - "**/*.props"
+      - "**/*.targets"
+
+  front:
+    description: Frontend TS/JS/Next.js apps and shared packages
+    include_by_default: true
+    globs:
+      - "apps/**/*.ts"
+      - "apps/**/*.tsx"
+      - "apps/**/*.js"
+      - "apps/**/*.jsx"
+      - "apps/**/*.json"
+      - "apps/**/*.css"
+      - "packages/**/*.ts"
+      - "packages/**/*.tsx"
+      - "packages/**/*.js"
+      - "packages/**/*.jsx"
+      - "packages/**/*.json"
+      - "packages/**/*.css"
+
+  contracts:
+    description: OpenAPI/AsyncAPI/contracts and related configs
+    include_by_default: true
+    globs:
+      - "packages/contracts/**/*.yaml"
+      - "packages/contracts/**/*.yml"
+      - "packages/contracts/**/*.json"
+
+  ops:
+    description: Ops/scripts/tooling (.sh/.py and ops/scripts/tools folders)
+    include_by_default: true
+    globs:
+      - "ops/**/*.sh"
+      - "ops/**/*.bash"
+      - "ops/**/*.py"
+      - "scripts/**/*.sh"
+      - "scripts/**/*.py"
+      - "tools/**/*.sh"
+      - "*.sh"
+
+  ci-manifests:
+    description: CI pipelines and manifests
+    include_by_default: true
+    globs:
+      - ".gitlab-ci.yml"
+      - ".github/**/*.yml"
+      - ".github/**/*.yaml"
+      - "manifests/**/*.json"
+      - "*.manifest.json"
+      - "project.manifest.json"
+
+  docs:
+    description: Markdown docs (disabled by default)
+    include_by_default: false
+    globs:
+      - "**/*.md"
+
+  architecture-trunk:
+    description: Architecture trunk index/guards
+    include_by_default: true
+    globs:
+      - "memory-bank/Scrum/20251111-tbl-setup/20251111-1430-co-3a68/trunk-index.md"
+
+  architecture-branches:
+    description: Domain branch artifacts
+    include_by_default: true
+    globs:
+      - "memory-bank/Scrum/20251111-tbl-setup/20251111-1430-co-3a68/branches/**/*.md"
+
+  architecture-leaves:
+    description: Leaf artifacts/checklists
+    include_by_default: true
+    globs:
+      - "memory-bank/Scrum/20251111-tbl-setup/20251111-1430-co-3a68/leaves/**/*.md"
+
+  other:
+    description: Catch-all bucket for uncategorized files
+    include_by_default: false
+    globs: []
