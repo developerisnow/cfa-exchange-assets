@@ -8,6 +8,7 @@ Sources: 20251120-1553-gpt5p-p1.oracle.md, 20251120-1529-gpt5p-p2.oracle.md, 202
 - [ ] Auth on cfa1 is fixed or a migration plan to `*.cfa{n}.telex.global` is ready with secrets/env.
 - [ ] Deployment playbook for new VPS/domains is consolidated (Cloudflare creds, env matrices, scripts).
 - [ ] Zip/tags/branches stay clean after changes.
+- [ ] Ante / Job (from oracle-output) captured in task specs: Ante = нужен полный анализ + приведение контракта/деплоя к готовности; Job = довести NX05/06/08 до проверяемого состояния, закрыть NX07 блокеры, подготовить новый домен.
 
 ## Phase 0 — Oracle Package Re-run (baseline validation)
 ### Kickoff
