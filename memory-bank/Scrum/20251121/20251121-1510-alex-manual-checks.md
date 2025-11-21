@@ -1,5 +1,64 @@
 # Bash
 ```bash
+[11:04] user@eywa-ubuntu-8gb-hel1-2 ois-cfa (infra.defis.deploy+) $ git log -1
+commit 24a00d602d17ff7f75417eb1ec38212480d3ff71 (HEAD -> infra.defis.deploy, origin/infra.defis.deploy, origin/develop)
+Author: Your Name <you@example.com>
+Date:   Fri Nov 21 09:58:33 2025 +0000
+
+    docs(nx): [co-c02b] - add status blocks and cfa1 verification notes
+
+    • Status 2025-11-21 for NX03/05/06/07/08 plus cfa1 404 findings
+
+    agentID=co-c02b-eywa1
+[11:04] user@eywa-ubuntu-8gb-hel1-2 ois-cfa (infra.defis.deploy+) $ git status
+On branch infra.defis.deploy
+Your branch is up to date with 'origin/infra.defis.deploy'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   apps/api-gateway/appsettings.json
+        modified:   docker-compose.apps.yml
+        modified:   docker-compose.services.yml
+        modified:   docker-compose.yml
+        modified:   services/settlement/Program.cs
+        modified:   tasks/NX-05-issuer-dashboard-and-reports.md
+        modified:   tasks/NX-06-issuer-payout-schedule-spec-and-ui.md
+        modified:   tasks/NX-07-backoffice-kyc-and-user-registry.md
+        modified:   tasks/NX-08-backoffice-audit-log-ui.md
+
+no changes added to commit (use "git add" and/or "git commit -a")
+[11:45] user@eywa-ubuntu-8gb-hel1-2 ois-cfa (infra.defis.deploy+) $ git add tasks/ && git commit -m "docs(tasks)" && git push
+[infra.defis.deploy fd2cbb6] docs(tasks)
+ 4 files changed, 15 insertions(+), 15 deletions(-)
+Enumerating objects: 13, done.
+Counting objects: 100% (13/13), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (7/7), done.
+Writing objects: 100% (7/7), 1.35 KiB | 1.35 MiB/s, done.
+Total 7 (delta 6), reused 0 (delta 0), pack-reused 0
+remote:
+remote: View merge request for infra.defis.deploy:
+remote:   https://git.telex.global/npk/ois-cfa/-/merge_requests/5
+remote:
+To git.telex.global:npk/ois-cfa.git
+   24a00d6..fd2cbb6  infra.defis.deploy -> infra.defis.deploy
+[11:45] user@eywa-ubuntu-8gb-hel1-2 ois-cfa (infra.defis.deploy+) $ git add . && git commit -m "deploy(cfa1) deploy and test on cfa1 WIP" && git push
+[infra.defis.deploy d5dd53c] deploy(cfa1) deploy and test on cfa1 WIP
+ 5 files changed, 59 insertions(+), 30 deletions(-)
+Enumerating objects: 21, done.
+Counting objects: 100% (21/21), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (11/11), done.
+Writing objects: 100% (11/11), 1.49 KiB | 1.49 MiB/s, done.
+Total 11 (delta 10), reused 0 (delta 0), pack-reused 0
+remote:
+remote: View merge request for infra.defis.deploy:
+remote:   https://git.telex.global/npk/ois-cfa/-/merge_requests/5
+remote:
+To git.telex.global:npk/ois-cfa.git
+   fd2cbb6..d5dd53c  infra.defis.deploy -> infra.defis.deploy
+
 [11:46] user@eywa-ubuntu-8gb-hel1-2 ois-cfa (infra.defis.deploy) $ ssh user@cfa1 'PM2_HOME=/home/user/.pm2 pm2 list --no-color'
 ┌────┬────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
 │ id │ name               │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
