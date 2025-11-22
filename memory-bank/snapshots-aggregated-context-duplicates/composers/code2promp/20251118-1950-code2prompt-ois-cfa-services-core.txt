@@ -1,0 +1,2997 @@
+Project Path: ois-cfa
+
+Source Tree:
+
+```txt
+ois-cfa
+├── apps
+│   └── api-gateway
+│       ├── Program.cs
+│       ├── api-gateway.csproj
+│       └── appsettings.json
+└── services
+    ├── compliance
+    │   ├── Program.cs
+    │   ├── appsettings.json
+    │   ├── compliance.Tests
+    │   │   └── compliance.Tests.csproj
+    │   └── compliance.csproj
+    ├── fabric-gateway
+    │   └── Program.cs
+    ├── identity
+    │   ├── Program.cs
+    │   ├── appsettings.json
+    │   └── identity.csproj
+    ├── integrations
+    │   └── bank-nominal
+    │       ├── Program.cs
+    │       ├── appsettings.json
+    │       └── bank-nominal.csproj
+    ├── issuance
+    │   ├── Program.cs
+    │   ├── appsettings.json
+    │   ├── issuance.Tests.csproj
+    │   └── issuance.csproj
+    ├── registry
+    │   ├── Program.cs
+    │   ├── appsettings.json
+    │   ├── registry.Tests
+    │   │   └── registry.Tests.csproj
+    │   └── registry.csproj
+    └── settlement
+        ├── Program.cs
+        ├── appsettings.json
+        ├── settlement.Tests
+        │   └── settlement.Tests.csproj
+        └── settlement.csproj
+
+```
+
+`ois-cfa/apps/api-gateway/Program.cs`:
+
+```cs
+using Serilog;
+using Yarp.ReverseProxy.Configuration;
+using System.Threading.RateLimiting;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Serilog
+builder.Host.UseSerilog((ctx, lc) => lc
+    .WriteTo.Console(new Serilog.Formatting.Json.JsonFormatter())
+    .ReadFrom.Configuration(ctx.Configuration));
+
+// Services
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks();
+builder.Services.AddCors();
+
+// Rate Limiting (Token Bucket)
+builder.Services.AddRateLimiter(options =>
+{
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+        RateLimitPartition.GetTokenBucketLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new TokenBucketRateLimiterOptions
+            {
+                TokenLimit = 100,
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 10,
+                ReplenishmentPeriod = TimeSpan.FromSeconds(1),
+                TokensPerPeriod = 10,
+                AutoReplenishment = true
+            }));
+    
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = 429;
+        await context.HttpContext.Response.WriteAsync("Rate limit exceeded. Please retry later.", cancellationToken);
+    };
+});
+
+// Request Size Limits
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 10485760; // 10 MB
+    options.ValueLengthLimit = 10485760;
+});
+
+// YARP Reverse Proxy
+builder.Services.AddReverseProxy()
+    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+
+var app = builder.Build();
+
+// Configure pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+// Security Headers Middleware
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("X-Frame-Options", "DENY");
+    context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+    context.Response.Headers.Append("Content-Security-Policy", "default-src 'self'");
+    await next();
+});
+
+// CORS
+app.UseCors(policy =>
+{
+    var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() 
+        ?? new[] { "http://localhost:3001", "http://localhost:3002", "http://localhost:3003" };
+    
+    policy.WithOrigins(allowedOrigins)
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials();
+});
+
+// Request Size Limit
+app.Use(async (context, next) =>
+{
+    context.Features.Get<Microsoft.AspNetCore.Http.Features.IHttpMaxRequestBodySizeFeature>()!
+        .MaxRequestBodySize = 10485760; // 10 MB
+    await next();
+});
+
+app.UseHttpsRedirection();
+app.UseRouting();
+
+// Rate Limiting
+app.UseRateLimiter();
+
+// Health checks
+app.MapHealthChecks("/health");
+app.MapGet("/", () => Results.Redirect("/swagger"));
+
+// API endpoints (proxied)
+app.MapReverseProxy();
+
+app.Run();
+
+
+```
+
+`ois-cfa/apps/api-gateway/api-gateway.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.9.0" />
+    <PackageReference Include="Yarp.ReverseProxy" Version="2.2.0" />
+    <!-- Rate limiting available in shared framework; explicit package not required for net9.0 -->
+  </ItemGroup>
+
+</Project>
+
+```
+
+`ois-cfa/apps/api-gateway/appsettings.json`:
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "Cors": {
+    "AllowedOrigins": [
+      "http://87.249.49.56:3001",
+      "http://87.249.49.56:3002",
+      "http://87.249.49.56:3003",
+      "http://87.249.49.56:53001",
+      "http://87.249.49.56:53002",
+      "http://87.249.49.56:53003",
+      "http://localhost:155101",
+      "http://localhost:155102",
+      "http://localhost:155103"
+    ]
+  },
+  "ReverseProxy": {
+    "Routes": {
+      "identity": {
+        "ClusterId": "identity",
+        "Match": {
+          "Path": "/identity/{**catch-all}"
+        }
+      },
+      "identity-v1": {
+        "ClusterId": "identity",
+        "Match": {
+          "Path": "/v1/identity/{**catch-all}"
+        },
+        "Transforms": [
+          {
+            "PathPattern": "/v1/identity/{**catch-all}"
+          }
+        ]
+      },
+      "issuances": {
+        "ClusterId": "issuance",
+        "Match": {
+          "Path": "/issuances/{**catch-all}"
+        },
+        "Transforms": [
+          {
+            "PathPattern": "/v1/issuances/{**catch-all}"
+          }
+        ]
+      },
+      "orders": {
+        "ClusterId": "registry",
+        "Match": {
+          "Path": "/v1/orders/{**catch-all}"
+        },
+        "Transforms": [
+          {
+            "PathPattern": "/v1/orders/{**catch-all}"
+          }
+        ]
+      },
+      "wallets": {
+        "ClusterId": "registry",
+        "Match": {
+          "Path": "/v1/wallets/{**catch-all}"
+        },
+        "Transforms": [
+          {
+            "PathPattern": "/v1/wallets/{**catch-all}"
+          }
+        ]
+      },
+      "settlement": {
+        "ClusterId": "settlement",
+        "Match": {
+          "Path": "/v1/settlement/{**catch-all}"
+        },
+        "Transforms": [
+          {
+            "PathPattern": "/v1/settlement/{**catch-all}"
+          }
+        ]
+      },
+      "compliance": {
+        "ClusterId": "compliance",
+        "Match": {
+          "Path": "/v1/compliance/{**catch-all}"
+        },
+        "Transforms": [
+          {
+            "PathPattern": "/v1/compliance/{**catch-all}"
+          }
+        ]
+      },
+      "kyc-tasks": {
+        "ClusterId": "compliance",
+        "Match": {
+          "Path": "/v1/kyc/tasks/{**catch-all}"
+        },
+        "Transforms": [
+          {
+            "PathPattern": "/v1/kyc/tasks/{**catch-all}"
+          }
+        ]
+      },
+      "audit": {
+        "ClusterId": "compliance",
+        "Match": {
+          "Path": "/v1/audit/{**catch-all}"
+        },
+        "Transforms": [
+          {
+            "PathPattern": "/v1/audit/{**catch-all}"
+          }
+        ]
+      },
+      "complaints": {
+        "ClusterId": "compliance",
+        "Match": {
+          "Path": "/v1/complaints/{**catch-all}"
+        },
+        "Transforms": [
+          {
+            "PathPattern": "/v1/complaints/{**catch-all}"
+          }
+        ]
+      },
+      "reports-issuances": {
+        "ClusterId": "issuance",
+        "Match": {
+          "Path": "/v1/reports/issuances"
+        },
+        "Transforms": [
+          {
+            "PathSet": "/v1/reports/issuances"
+          }
+        ]
+      },
+      "reports": {
+        "ClusterId": "settlement",
+        "Match": {
+          "Path": "/v1/reports/{**catch-all}"
+        },
+        "Transforms": [
+          {
+            "PathPattern": "/v1/reports/{**catch-all}"
+          }
+        ]
+      }
+    },
+    "Clusters": {
+      "identity": {
+        "Destinations": {
+          "default": {
+            "Address": "http://identity-service:8080"
+          }
+        }
+      },
+      "issuance": {
+        "Destinations": {
+          "default": {
+            "Address": "http://issuance-service:8080"
+          }
+        }
+      },
+      "registry": {
+        "Destinations": {
+          "default": {
+            "Address": "http://registry-service:8080"
+          }
+        }
+      },
+      "settlement": {
+        "Destinations": {
+          "default": {
+            "Address": "http://settlement-service:8080"
+          }
+        }
+      },
+      "compliance": {
+        "Destinations": {
+          "default": {
+            "Address": "http://compliance-service:8080"
+          }
+        }
+      }
+    }
+  }
+}
+
+```
+
+`ois-cfa/services/compliance/Program.cs`:
+
+```cs
+using Microsoft.EntityFrameworkCore;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using OIS.Compliance;
+using OIS.Compliance.DTOs;
+using OIS.Compliance.Services;
+using OIS.Compliance.Infrastructure;
+using MassTransit;
+using OIS.Contracts.Events;
+using Serilog;
+using System.Text;
+using System.Text.Json;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Serilog
+builder.Host.UseSerilog((ctx, lc) => lc
+    .ReadFrom.Configuration(ctx.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(new Serilog.Formatting.Json.JsonFormatter()));
+
+// OpenTelemetry
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService("compliance-service"))
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddConsoleExporter())
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddConsoleExporter()
+        .AddPrometheusExporter()
+        .AddMeter(Metrics.MeterName));
+
+// Database
+var complianceMigrationsAssembly = typeof(ComplianceDbContext).Assembly.GetName().Name;
+builder.Services.AddDbContext<ComplianceDbContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        npgsqlOptions => npgsqlOptions.MigrationsAssembly(complianceMigrationsAssembly)));
+
+// Services
+builder.Services.AddScoped<IWatchlistsService, WatchlistsServiceStub>();
+builder.Services.AddScoped<IQualificationPolicyService, QualificationPolicyService>();
+builder.Services.AddScoped<IOutboxService, OutboxService>();
+builder.Services.AddScoped<IComplianceService, ComplianceService>();
+
+// API
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<ComplianceDbContext>();
+
+// Rate limiting
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("sensitive", httpContext =>
+    {
+        var key = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (!string.IsNullOrEmpty(key)) key = $"user:{key}"; else key = $"ip:{httpContext.Connection.RemoteIpAddress}";
+        return RateLimitPartition.GetTokenBucketLimiter(key!, _ => new TokenBucketRateLimiterOptions
+        {
+            TokenLimit = 10,
+            TokensPerPeriod = 10,
+            ReplenishmentPeriod = TimeSpan.FromSeconds(1),
+            AutoReplenishment = true,
+            QueueLimit = 0,
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+        });
+    });
+});
+
+// AuthN/Z
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var authority = builder.Configuration["Keycloak:Authority"];
+        if (!string.IsNullOrEmpty(authority)) options.Authority = authority;
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            RoleClaimType = ClaimTypes.Role
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = ctx => { MapKeycloakRoles(ctx); return Task.CompletedTask; }
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("role:investor", p => p.RequireRole("investor"));
+    options.AddPolicy("role:backoffice", p => p.RequireRole("backoffice"));
+    options.AddPolicy("role:investor-or-backoffice", p =>
+        p.RequireAssertion(ctx => ctx.User.IsInRole("investor") || ctx.User.IsInRole("backoffice")));
+});
+
+// MassTransit + Kafka for publishing
+if (builder.Configuration.GetValue<bool>("Kafka:Enabled", true))
+{
+    builder.Services.AddMassTransit(x =>
+    {
+        x.AddRider(rider =>
+        {
+            rider.UsingKafka((context, cfg) =>
+            {
+                cfg.Host(builder.Configuration["Kafka:BootstrapServers"] ?? "localhost:9092");
+            });
+        });
+    });
+
+    builder.Services.AddHostedService<OIS.Compliance.Background.OutboxPublisher>();
+}
+
+var app = builder.Build();
+
+// Apply migrations (optional, via MIGRATE_ON_STARTUP=true)
+var migrateOnStartup = Environment.GetEnvironmentVariable("MIGRATE_ON_STARTUP");
+if (string.Equals(migrateOnStartup, "true", StringComparison.OrdinalIgnoreCase))
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<ComplianceDbContext>();
+    db.Database.Migrate();
+}
+
+// Configure pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapHealthChecks("/health");
+app.MapPrometheusScrapingEndpoint("/metrics");
+app.UseRateLimiter();
+
+// Correlation + request metrics
+app.Use(async (ctx, next) =>
+{
+    var sw = System.Diagnostics.Stopwatch.StartNew();
+    if (!ctx.Request.Headers.TryGetValue("X-Request-ID", out var reqId) || string.IsNullOrWhiteSpace(reqId))
+    {
+        reqId = Guid.NewGuid().ToString();
+        ctx.Request.Headers["X-Request-ID"] = reqId;
+    }
+    ctx.Response.Headers["X-Request-ID"] = reqId.ToString();
+    try
+    {
+        await next();
+    }
+    finally
+    {
+        sw.Stop();
+        var status = ctx.Response.StatusCode;
+        var route = ctx.GetEndpoint()?.DisplayName ?? "unknown";
+        var tags = new System.Collections.Generic.KeyValuePair<string, object?>[]
+        {
+            new("route", route),
+            new("method", ctx.Request.Method),
+            new("status", status.ToString())
+        };
+        Metrics.RequestDurationMs.Record(sw.Elapsed.TotalMilliseconds, tags);
+        if (status >= 500)
+        {
+            var errTags = new System.Collections.Generic.KeyValuePair<string, object?>[]
+            {
+                new("route", route),
+                new("method", ctx.Request.Method)
+            };
+            Metrics.RequestErrors.Add(1, errTags);
+        }
+    }
+});
+
+// (Kafka rider configured above)
+
+// API Endpoints
+var api = app.MapGroup("/v1").WithTags("Compliance").RequireAuthorization();
+
+api.MapPost("/compliance/kyc/check", async (
+    KycCheckRequest request,
+    IComplianceService service,
+    CancellationToken ct) =>
+{
+    var result = await service.CheckKycAsync(request, ct);
+    return Results.Ok(result);
+})
+.WithName("CheckKyc")
+.RequireAuthorization("role:investor-or-backoffice")
+.WithOpenApi();
+
+api.MapPost("/compliance/qualification/evaluate", async (
+    QualificationEvaluateRequest request,
+    IComplianceService service,
+    CancellationToken ct) =>
+{
+    var result = await service.EvaluateQualificationAsync(request, ct);
+    return Results.Ok(result);
+})
+.WithName("EvaluateQualification")
+.RequireAuthorization("role:investor-or-backoffice")
+.WithOpenApi();
+
+api.MapGet("/compliance/investors/{id:guid}/status", async (
+    Guid id,
+    IComplianceService service,
+    CancellationToken ct) =>
+{
+    var result = await service.GetInvestorStatusAsync(id, ct);
+    return result != null ? Results.Ok(result) : Results.NotFound();
+})
+.WithName("GetInvestorStatus")
+.RequireAuthorization("role:investor-or-backoffice")
+.WithOpenApi();
+
+var complaintsApi = app.MapGroup("/v1/complaints").WithTags("Complaints").RequireAuthorization();
+
+complaintsApi.MapPost("", async (
+    CreateComplaintRequest request,
+    HttpContext httpContext,
+    IComplianceService service,
+    CancellationToken ct) =>
+{
+    string? idemKey = null;
+    if (httpContext.Request.Headers.TryGetValue("Idempotency-Key", out var idemKeyValues))
+    {
+        idemKey = idemKeyValues.FirstOrDefault();
+    }
+
+    var result = await service.CreateComplaintAsync(request, idemKey, ct);
+    return Results.Created($"/v1/complaints/{result.Id}", result);
+})
+.WithName("CreateComplaint")
+.RequireAuthorization("role:investor")
+.RequireRateLimiting("sensitive")
+.WithOpenApi();
+
+complaintsApi.MapGet("/{id:guid}", async (
+    Guid id,
+    IComplianceService service,
+    CancellationToken ct) =>
+{
+    var result = await service.GetComplaintAsync(id, ct);
+    return result != null ? Results.Ok(result) : Results.NotFound();
+})
+.WithName("GetComplaint")
+.RequireAuthorization("role:investor-or-backoffice")
+.WithOpenApi();
+
+// KYC admin endpoints
+var kycApi = app.MapGroup("/v1/compliance/kyc").WithTags("KYC").RequireAuthorization("role:backoffice");
+
+kycApi.MapPost("/investors/{id:guid}/approve", async (
+    Guid id,
+    HttpContext http,
+    IComplianceService service,
+    CancellationToken ct) =>
+{
+    Guid? actor = http.User.Identity?.IsAuthenticated == true ?
+        http.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value is string s && Guid.TryParse(s, out var g) ? g : null
+        : null;
+
+    var result = await service.UpdateKycStatusAsync(id, "pass", actor, null, ct);
+    return Results.Ok(result);
+})
+.WithName("ApproveKyc")
+.RequireRateLimiting("sensitive")
+.WithOpenApi();
+
+kycApi.MapPost("/investors/{id:guid}/reject", async (
+    Guid id,
+    HttpContext http,
+    IComplianceService service,
+    CancellationToken ct) =>
+{
+    Guid? actor = http.User.Identity?.IsAuthenticated == true ?
+        http.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value is string s && Guid.TryParse(s, out var g) ? g : null
+        : null;
+
+    var result = await service.UpdateKycStatusAsync(id, "fail", actor, null, ct);
+    return Results.Ok(result);
+})
+.WithName("RejectKyc")
+.RequireRateLimiting("sensitive")
+.WithOpenApi();
+
+// Backoffice KYC list + decision (UI expects /v1/compliance/kyc and /v1/compliance/kyc/{id}/decision)
+kycApi.MapGet("", async (
+    string? status,
+    IComplianceService service,
+    CancellationToken ct) =>
+{
+    var tasks = await service.ListKycTasksAsync(status switch
+    {
+        "pending" => "open",
+        "approved" => "approved",
+        "rejected" => "rejected",
+        _ => null
+    }, ct);
+
+    static string NormalizeStatus(string s) => s switch
+    {
+        "open" => "pending",
+        "approved" => "approved",
+        "rejected" => "rejected",
+        _ => "pending"
+    };
+
+    var mapped = tasks.Select(t => new KycRequestDto
+    {
+        Id = t.Id,
+        InvestorId = t.InvestorId,
+        Status = NormalizeStatus(t.Status),
+        Reason = t.Reason,
+        CreatedAt = t.CreatedAt,
+        ResolvedAt = t.ResolvedAt
+    }).ToArray();
+
+    return Results.Ok(mapped);
+})
+.WithName("ListKycRequests")
+.WithOpenApi();
+
+kycApi.MapPost("/{id:guid}/decision", async (
+    Guid id,
+    KycDecisionRequest body,
+    HttpContext http,
+    IComplianceService service,
+    CancellationToken ct) =>
+{
+    var action = body.Decision?.ToLowerInvariant() == "approved" ? "approve" : "reject";
+    Guid? actor = http.User.Identity?.IsAuthenticated == true
+        ? http.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value is string s && Guid.TryParse(s, out var g) ? g : null
+        : null;
+
+    var task = await service.ResolveKycTaskAsync(id, action, actor, body.Comment, ct);
+    if (task == null) return Results.NotFound();
+
+    static string NormalizeStatus(string s) => s switch
+    {
+        "open" => "pending",
+        "approved" => "approved",
+        "rejected" => "rejected",
+        _ => "pending"
+    };
+
+    var dto = new KycRequestDto
+    {
+        Id = task.Id,
+        InvestorId = task.InvestorId,
+        Status = NormalizeStatus(task.Status),
+        Reason = task.Reason,
+        CreatedAt = task.CreatedAt,
+        ResolvedAt = task.ResolvedAt
+    };
+    return Results.Ok(dto);
+})
+.WithName("ResolveKycRequest")
+.RequireRateLimiting("sensitive")
+.WithOpenApi();
+
+// KYC tasks queue
+var kycTasks = app.MapGroup("/v1/kyc/tasks").WithTags("KYC Tasks").RequireAuthorization("role:backoffice");
+
+kycTasks.MapPost("", async (
+    CreateKycTaskRequest req,
+    IComplianceService service,
+    CancellationToken ct) =>
+{
+    var task = await service.CreateKycTaskAsync(req.InvestorId, req.Reason, ct);
+    return Results.Created($"/v1/kyc/tasks/{task.Id}", task);
+})
+.WithName("CreateKycTask")
+.RequireRateLimiting("sensitive")
+.WithOpenApi();
+
+kycTasks.MapGet("", async (
+    string? status,
+    IComplianceService service,
+    CancellationToken ct) =>
+{
+    var list = await service.ListKycTasksAsync(status, ct);
+    return Results.Ok(list);
+})
+.WithName("ListKycTasks")
+.WithOpenApi();
+
+kycTasks.MapPost("/{id:guid}/approve", async (
+    Guid id,
+    HttpContext http,
+    IComplianceService service,
+    CancellationToken ct) =>
+{
+    Guid? actor = http.User.Identity?.IsAuthenticated == true ?
+        http.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value is string s && Guid.TryParse(s, out var g) ? g : null
+        : null;
+
+    var task = await service.ResolveKycTaskAsync(id, "approve", actor, null, ct);
+    return task != null ? Results.Ok(task) : Results.NotFound();
+})
+.WithName("ApproveKycTask")
+.RequireRateLimiting("sensitive")
+.WithOpenApi();
+
+kycTasks.MapPost("/{id:guid}/reject", async (
+    Guid id,
+    HttpContext http,
+    IComplianceService service,
+    CancellationToken ct) =>
+{
+    Guid? actor = http.User.Identity?.IsAuthenticated == true ?
+        http.User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value is string s && Guid.TryParse(s, out var g) ? g : null
+        : null;
+
+    var task = await service.ResolveKycTaskAsync(id, "reject", actor, null, ct);
+    return task != null ? Results.Ok(task) : Results.NotFound();
+})
+.WithName("RejectKycTask")
+.RequireRateLimiting("sensitive")
+.WithOpenApi();
+
+// Audit reporting (immutable, from outbox write-ahead log)
+var auditApi = app.MapGroup("/v1/audit").WithTags("Audit").RequireAuthorization("role:backoffice");
+
+auditApi.MapGet("", async (
+    Guid? actor,
+    string? action,
+    string? entity,
+    DateTime? from,
+    DateTime? to,
+    int? limit,
+    int? offset,
+    ComplianceDbContext db,
+    CancellationToken ct) =>
+{
+    var q = db.OutboxMessages
+        .Where(m => m.Topic == "ois.audit.logged")
+        .OrderByDescending(m => m.CreatedAt)
+        .AsEnumerable();
+
+    IEnumerable<OutboxMessage> filtered = q;
+
+    filtered = filtered.Where(m =>
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(m.Payload);
+            var root = doc.RootElement;
+            if (actor.HasValue)
+            {
+                var actorVal = root.TryGetProperty("actor", out var el) ? el.GetString() : null;
+                if (!Guid.TryParse(actorVal, out var a) || a != actor.Value) return false;
+            }
+            if (!string.IsNullOrEmpty(action))
+            {
+                var act = root.TryGetProperty("action", out var el) ? el.GetString() : null;
+                if (!string.Equals(act, action, StringComparison.OrdinalIgnoreCase)) return false;
+            }
+            if (!string.IsNullOrEmpty(entity))
+            {
+                var ent = root.TryGetProperty("entity", out var el) ? el.GetString() : null;
+                if (!string.Equals(ent, entity, StringComparison.OrdinalIgnoreCase)) return false;
+            }
+            var ts = root.TryGetProperty("timestamp", out var tsEl) && tsEl.ValueKind == JsonValueKind.String
+                ? DateTime.Parse(tsEl.GetString()!)
+                : m.CreatedAt;
+            if (from.HasValue && ts < from.Value) return false;
+            if (to.HasValue && ts > to.Value) return false;
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    });
+
+    var take = Math.Clamp(limit ?? 20, 1, 100);
+    var skip = Math.Max(offset ?? 0, 0);
+    var page = filtered.Skip(skip).Take(take).Select(m => MapAudit(m)).ToList();
+
+    return Results.Ok(new { items = page });
+})
+.WithName("GetAuditEvents")
+.WithOpenApi();
+
+auditApi.MapGet("/{id:guid}", async (
+    Guid id,
+    ComplianceDbContext db,
+    CancellationToken ct) =>
+{
+    var msg = await db.OutboxMessages
+        .Where(m => m.Topic == "ois.audit.logged")
+        .OrderByDescending(m => m.CreatedAt)
+        .ToListAsync(ct);
+
+    foreach (var m in msg)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(m.Payload);
+            if (doc.RootElement.TryGetProperty("id", out var idEl) && idEl.ValueKind == JsonValueKind.String)
+            {
+                if (Guid.TryParse(idEl.GetString(), out var aid) && aid == id)
+                    return Results.Ok(MapAudit(m));
+            }
+        }
+        catch { }
+    }
+    return Results.NotFound();
+})
+.WithName("GetAuditEvent")
+.WithOpenApi();
+
+auditApi.MapGet("/export.csv", async (
+    Guid? actor,
+    string? action,
+    string? entity,
+    DateTime? from,
+    DateTime? to,
+    ComplianceDbContext db,
+    CancellationToken ct) =>
+{
+    var sb = new StringBuilder();
+    // Stable header
+    sb.AppendLine("id,actor,actorName,action,entity,entityId,result,timestamp,ip,userAgent");
+
+    var rows = db.OutboxMessages
+        .Where(m => m.Topic == "ois.audit.logged")
+        .OrderBy(m => m.CreatedAt) // chronological for exports
+        .AsEnumerable();
+
+    foreach (var m in rows)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(m.Payload);
+            var r = doc.RootElement;
+            var idStr = r.TryGetProperty("id", out var idEl) ? idEl.GetString() : null;
+            var actorStr = r.TryGetProperty("actor", out var actEl) ? actEl.GetString() : null;
+            var actorName = r.TryGetProperty("actorName", out var anEl) ? anEl.GetString() : null;
+            var actionStr = r.TryGetProperty("action", out var acEl) ? acEl.GetString() : null;
+            var entityStr = r.TryGetProperty("entity", out var enEl) ? enEl.GetString() : null;
+            var entityId = r.TryGetProperty("entityId", out var eiEl) ? eiEl.GetString() : null;
+            var result = r.TryGetProperty("result", out var resEl) ? resEl.GetString() : null;
+            var ts = r.TryGetProperty("timestamp", out var tsEl) ? tsEl.GetString() : m.CreatedAt.ToString("O");
+            var ip = r.TryGetProperty("ip", out var ipEl) ? ipEl.GetString() : null;
+            var ua = r.TryGetProperty("userAgent", out var uaEl) ? uaEl.GetString() : null;
+
+            // Filter checks
+            if (actor.HasValue && (!Guid.TryParse(actorStr, out var a) || a != actor.Value)) continue;
+            if (!string.IsNullOrEmpty(action) && !string.Equals(actionStr, action, StringComparison.OrdinalIgnoreCase)) continue;
+            if (!string.IsNullOrEmpty(entity) && !string.Equals(entityStr, entity, StringComparison.OrdinalIgnoreCase)) continue;
+            if (from.HasValue && DateTime.Parse(ts) < from.Value) continue;
+            if (to.HasValue && DateTime.Parse(ts) > to.Value) continue;
+
+            sb.AppendLine(string.Join(',', new[]
+            {
+                Csv(idStr), Csv(actorStr), Csv(actorName), Csv(actionStr), Csv(entityStr), Csv(entityId), Csv(result), Csv(ts), Csv(ip), Csv(ua)
+            }));
+        }
+        catch { }
+    }
+
+    return Results.Text(sb.ToString(), "text/csv", Encoding.UTF8);
+})
+.WithName("ExportAuditCsv")
+.WithOpenApi();
+
+static string Csv(string? s)
+{
+    if (s is null) return "";
+    var needsQuotes = s.Contains(',') || s.Contains('"') || s.Contains('\n') || s.Contains('\r');
+    var escaped = s.Replace("\"", "\"\"");
+    return needsQuotes ? $"\"{escaped}\"" : escaped;
+}
+
+static object MapAudit(OutboxMessage m)
+{
+    try
+    {
+        using var doc = JsonDocument.Parse(m.Payload);
+        var r = doc.RootElement;
+        return new
+        {
+            id = Guid.TryParse(r.TryGetProperty("id", out var idEl) ? idEl.GetString() : null, out var aid) ? aid : m.Id,
+            actor = r.TryGetProperty("actor", out var actEl) ? actEl.GetString() : null,
+            actorName = r.TryGetProperty("actorName", out var anEl) ? anEl.GetString() : null,
+            action = r.TryGetProperty("action", out var acEl) ? acEl.GetString() : null,
+            entity = r.TryGetProperty("entity", out var enEl) ? enEl.GetString() : null,
+            entityId = r.TryGetProperty("entityId", out var eiEl) ? eiEl.GetString() : null,
+            payload = r.TryGetProperty("payload", out var pEl) ? pEl : default(JsonElement?),
+            ip = r.TryGetProperty("ip", out var ipEl) ? ipEl.GetString() : null,
+            userAgent = r.TryGetProperty("userAgent", out var uaEl) ? uaEl.GetString() : null,
+            timestamp = r.TryGetProperty("timestamp", out var tsEl) ? tsEl.GetString() : m.CreatedAt.ToString("O"),
+            result = r.TryGetProperty("result", out var resEl) ? resEl.GetString() : null
+        };
+    }
+    catch
+    {
+        return new { id = m.Id, timestamp = m.CreatedAt.ToString("O") };
+    }
+}
+
+app.Run();
+
+static void MapKeycloakRoles(TokenValidatedContext ctx)
+{
+    try
+    {
+        if (ctx.Principal?.Identity is not ClaimsIdentity identity) return;
+        var realmAccessJson = identity.FindFirst("realm_access")?.Value;
+        if (!string.IsNullOrEmpty(realmAccessJson))
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(realmAccessJson);
+            if (doc.RootElement.TryGetProperty("roles", out var rolesEl) && rolesEl.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                foreach (var r in rolesEl.EnumerateArray())
+                {
+                    var role = r.GetString();
+                    if (!string.IsNullOrEmpty(role))
+                        identity.AddClaim(new Claim(ClaimTypes.Role, role));
+                }
+            }
+        }
+    }
+    catch { }
+}
+
+public partial class Program { }
+
+```
+
+`ois-cfa/services/compliance/appsettings.json`:
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "Microsoft.EntityFrameworkCore": "Warning"
+    }
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=ois;Username=ois;Password=ois_dev_password"
+  },
+  "Qualification": {
+    "Limits": {
+      "unqualified": null,
+      "qualified": 60000,
+      "professional": null
+    }
+  },
+  "Serilog": {
+    "Using": ["Serilog.Sinks.Console"],
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft": "Warning",
+        "System": "Warning"
+      }
+    },
+    "WriteTo": [
+      {
+        "Name": "Console",
+        "Args": {
+          "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+        }
+      }
+    ]
+  }
+}
+
+
+```
+
+`ois-cfa/services/compliance/compliance.Tests/compliance.Tests.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.0" />
+    <PackageReference Include="xunit" Version="2.9.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="coverlet.collector" Version="6.0.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Moq" Version="4.20.70" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
+    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\compliance.csproj" />
+  </ItemGroup>
+
+</Project>
+
+
+```
+
+`ois-cfa/services/compliance/compliance.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DefaultItemExcludes>$(DefaultItemExcludes);compliance.Tests/**</DefaultItemExcludes>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="compliance.Tests/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.9.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.9.0-beta.1" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Polly" Version="8.4.1" />
+    <PackageReference Include="System.Text.Json" Version="9.0.0" />
+    <PackageReference Include="MassTransit" Version="8.2.0" />
+    <PackageReference Include="MassTransit.Kafka" Version="8.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\packages\domain\domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="compliance.Tests/**/*.cs" />
+  </ItemGroup>
+
+</Project>
+
+```
+
+`ois-cfa/services/fabric-gateway/Program.cs`:
+
+```cs
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using OIS.FabricGateway.Services;
+using Polly;
+using Polly.Extensions.Http;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Configure HttpClient with retry policy for Fabric Gateway
+builder.Services.AddHttpClient<FabricGatewayService>()
+    .AddPolicyHandler(GetRetryPolicy())
+    .AddPolicyHandler(GetCircuitBreakerPolicy());
+
+builder.Services.AddSingleton<FabricGatewayService>();
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();
+
+static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+{
+    return HttpPolicyExtensions
+        .HandleTransientHttpError()
+        .WaitAndRetryAsync(
+            retryCount: 3,
+            sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+}
+
+static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
+{
+    return HttpPolicyExtensions
+        .HandleTransientHttpError()
+        .CircuitBreakerAsync(
+            handledEventsAllowedBeforeBreaking: 5,
+            durationOfBreak: TimeSpan.FromSeconds(30));
+}
+
+
+```
+
+`ois-cfa/services/identity/Program.cs`:
+
+```cs
+using Microsoft.EntityFrameworkCore;
+using Serilog;
+using System.Collections.Generic;
+using System.Linq;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((ctx, lc) => lc
+    .WriteTo.Console()
+    .ReadFrom.Configuration(ctx.Configuration));
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks();
+builder.Services.AddDbContext<IdentityDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+app.MapHealthChecks("/health");
+
+app.MapGet("/.well-known/openid-configuration", () => Results.Ok(new
+{
+    issuer = builder.Configuration["Keycloak:Authority"],
+    authorization_endpoint = $"{builder.Configuration["Keycloak:Authority"]}/protocol/openid-connect/auth",
+    token_endpoint = $"{builder.Configuration["Keycloak:Authority"]}/protocol/openid-connect/token",
+    userinfo_endpoint = "/userinfo",
+    response_types_supported = new[] { "code" },
+    scopes_supported = new[] { "openid", "profile", "email" }
+}));
+
+app.MapGet("/userinfo", () => Results.Ok(new
+{
+    sub = Guid.NewGuid().ToString(),
+    email = "test@example.com",
+    email_verified = true,
+    name = "Test User"
+}));
+
+// Simple in-memory registry for backoffice UI until real Keycloak/registry integration is ready
+var seededUsers = new List<User>
+{
+    new() { Id = Guid.Parse("11111111-1111-1111-1111-111111111111"), Email = "issuer@example.com", Role = "issuer", Status = "active", CreatedAt = DateTime.UtcNow.AddDays(-5) },
+    new() { Id = Guid.Parse("22222222-2222-2222-2222-222222222222"), Email = "backoffice@example.com", Role = "backoffice", Status = "active", CreatedAt = DateTime.UtcNow.AddDays(-10) },
+    new() { Id = Guid.Parse("33333333-3333-3333-3333-333333333333"), Email = "investor@example.com", Role = "investor", Status = "active", CreatedAt = DateTime.UtcNow.AddDays(-15) }
+};
+
+app.MapGet("/users", () => Results.Ok(seededUsers.Select(MapUser)));
+app.MapGet("/users/{id:guid}", (Guid id) =>
+{
+    var user = seededUsers.FirstOrDefault(u => u.Id == id);
+    return user is null ? Results.NotFound() : Results.Ok(MapUser(user));
+});
+
+app.MapGet("/v1/identity/users", (string? query) =>
+{
+    var filtered = string.IsNullOrWhiteSpace(query)
+        ? seededUsers
+        : seededUsers.Where(u => u.Email.Contains(query, StringComparison.OrdinalIgnoreCase) || u.Role.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
+    return Results.Ok(filtered.Select(MapUser));
+});
+
+app.Run();
+
+static object MapUser(User u) => new
+{
+    id = u.Id,
+    email = u.Email,
+    roles = new[] { u.Role },
+    status = u.Status,
+    createdAt = u.CreatedAt
+};
+
+// Minimal DbContext for now
+public class IdentityDbContext : DbContext
+{
+    public IdentityDbContext(DbContextOptions<IdentityDbContext> options) : base(options) { }
+    public DbSet<User> Users => Set<User>();
+}
+
+public class User
+{
+    public Guid Id { get; set; }
+    public string Email { get; set; } = string.Empty;
+    public string Role { get; set; } = string.Empty;
+    public string Status { get; set; } = "active";
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}
+
+```
+
+`ois-cfa/services/identity/appsettings.json`:
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information"
+    }
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=ois;Username=ois;Password=ois_dev_password"
+  },
+  "Keycloak": {
+    "Authority": "http://localhost:8080/realms/ois"
+  }
+}
+
+
+```
+
+`ois-cfa/services/identity/identity.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="identity.Tests/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
+  </ItemGroup>
+
+</Project>
+
+```
+
+`ois-cfa/services/integrations/bank-nominal/Program.cs`:
+
+```cs
+using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks();
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+app.MapHealthChecks("/health");
+
+// Mock idempotency storage (in-memory for dev)
+var idempotencyStore = new Dictionary<string, ReserveResponse>();
+
+app.MapPost("/nominal/reserve", async ([FromBody] ReserveRequest request, HttpContext ctx) =>
+{
+    var idemKey = ctx.Request.Headers["Idempotency-Key"].FirstOrDefault();
+    
+    if (string.IsNullOrEmpty(idemKey))
+    {
+        return Results.BadRequest(new { error = "Idempotency-Key header required" });
+    }
+
+    // Check idempotency
+    if (idempotencyStore.TryGetValue(idemKey, out var existing))
+    {
+        return Results.Ok(existing);
+    }
+
+    // Mock reserve
+    await Task.Delay(30); // Simulate latency
+
+    var response = new ReserveResponse
+    {
+        TransferId = Guid.NewGuid().ToString(),
+        Status = "reserved"
+    };
+
+    idempotencyStore[idemKey] = response;
+
+    return Results.Ok(response);
+})
+.WithName("ReserveFunds")
+.WithOpenApi();
+
+var batchStore = new Dictionary<string, BatchPayoutResponse>();
+
+app.MapPost("/nominal/payouts/batch", async ([FromBody] BatchPayoutRequest request, HttpContext ctx) =>
+{
+    var idemKey = ctx.Request.Headers["Idempotency-Key"].FirstOrDefault();
+    
+    if (string.IsNullOrEmpty(idemKey))
+    {
+        return Results.BadRequest(new { error = "Idempotency-Key header required" });
+    }
+
+    // Check idempotency
+    if (batchStore.TryGetValue(idemKey, out var existing))
+    {
+        return Results.Ok(existing);
+    }
+
+    // Mock batch payout
+    await Task.Delay(50); // Simulate latency
+
+    var batchRef = $"BATCH-{request.BatchId:N}";
+    var items = request.Items.Select(item => new ItemPayoutResponse
+    {
+        ItemId = item.ItemId,
+        BankRef = $"PAY-{item.ItemId:N}",
+        Status = "completed",
+        FailureReason = null
+    }).ToList();
+
+    var response = new BatchPayoutResponse
+    {
+        BatchRef = batchRef,
+        Items = items
+    };
+
+    batchStore[idemKey] = response;
+
+    return Results.Ok(response);
+})
+.WithName("BatchPayout")
+.WithOpenApi();
+
+app.Run();
+
+record ReserveRequest
+{
+    public string? InvestorId { get; init; }
+    public decimal Amount { get; init; }
+    public string? IdempotencyKey { get; init; }
+}
+
+record ReserveResponse
+{
+    public string TransferId { get; init; } = string.Empty;
+    public string Status { get; init; } = string.Empty;
+}
+
+record BatchPayoutRequest
+{
+    public Guid BatchId { get; init; }
+    public DateOnly RunDate { get; init; }
+    public IReadOnlyList<PayoutItemRequest> Items { get; init; } = Array.Empty<PayoutItemRequest>();
+}
+
+record PayoutItemRequest
+{
+    public Guid ItemId { get; init; }
+    public Guid InvestorId { get; init; }
+    public decimal Amount { get; init; }
+}
+
+record BatchPayoutResponse
+{
+    public string BatchRef { get; init; } = string.Empty;
+    public IReadOnlyList<ItemPayoutResponse> Items { get; init; } = Array.Empty<ItemPayoutResponse>();
+}
+
+record ItemPayoutResponse
+{
+    public Guid ItemId { get; init; }
+    public string? BankRef { get; init; }
+    public string Status { get; init; } = string.Empty;
+    public string? FailureReason { get; init; }
+}
+
+
+```
+
+`ois-cfa/services/integrations/bank-nominal/appsettings.json`:
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information"
+    }
+  }
+}
+
+
+```
+
+`ois-cfa/services/integrations/bank-nominal/bank-nominal.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="bank-nominal.Tests/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+
+</Project>
+
+```
+
+`ois-cfa/services/issuance/Program.cs`:
+
+```cs
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using OIS.Issuance;
+using OIS.Issuance.DTOs;
+using OIS.Issuance.Services;
+using OIS.Issuance.Validators;
+using Serilog;
+using MassTransit;
+using OIS.Contracts.Events;
+using OIS.Issuance.Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.Diagnostics;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Serilog
+builder.Host.UseSerilog((ctx, lc) => lc
+    .ReadFrom.Configuration(ctx.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(new Serilog.Formatting.Json.JsonFormatter()));
+
+// OpenTelemetry
+var otlpEndpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] ?? "http://otel-collector:4317";
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService("issuance-service")
+        .AddAttributes(new Dictionary<string, object> { ["environment"] = builder.Environment.EnvironmentName }))
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddOtlpExporter(options => options.Endpoint = new Uri(otlpEndpoint)))
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddPrometheusExporter()
+        .AddMeter(Metrics.MeterName));
+
+// Prometheus metrics endpoint is added via OpenTelemetry above
+
+// Database
+var useInMemoryDb = builder.Configuration.GetValue<bool>("UseInMemoryDatabase", false);
+var issuanceMigrationsAssembly = typeof(IssuanceDbContext).Assembly.GetName().Name;
+
+builder.Services.AddDbContext<IssuanceDbContext>(options =>
+{
+    if (useInMemoryDb)
+    {
+        var dbName = builder.Configuration.GetValue<string>("InMemoryDatabaseName") ?? "IssuanceTestsDb";
+        options.UseInMemoryDatabase(dbName);
+    }
+    else
+    {
+        options.UseNpgsql(
+            builder.Configuration.GetConnectionString("DefaultConnection"),
+            npgsqlOptions => npgsqlOptions.MigrationsAssembly(issuanceMigrationsAssembly));
+    }
+});
+
+// HTTP Client for Ledger Adapter
+builder.Services.AddHttpClient<LedgerIssuanceAdapter>()
+    .SetHandlerLifetime(TimeSpan.FromMinutes(5));
+
+// Services
+builder.Services.AddScoped<ILedgerIssuance, LedgerIssuanceAdapter>();
+builder.Services.AddScoped<IOutboxService, OutboxService>();
+builder.Services.AddScoped<IIssuanceService, IssuanceService>();
+
+// MassTransit + Kafka publish
+if (builder.Configuration.GetValue<bool>("Kafka:Enabled", true))
+{
+    builder.Services.AddMassTransit(x =>
+    {
+        x.AddRider(rider =>
+        {
+            rider.UsingKafka((context, cfg) =>
+            {
+                cfg.Host(builder.Configuration["Kafka:BootstrapServers"] ?? "localhost:9092");
+            });
+        });
+    });
+
+    builder.Services.AddHostedService<OIS.Issuance.Background.OutboxPublisher>();
+}
+
+// Validation
+builder.Services.AddValidatorsFromAssemblyContaining<CreateIssuanceRequestValidator>();
+builder.Services.AddFluentValidationAutoValidation();
+
+// AuthN/Z
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var authority = builder.Configuration["Keycloak:Authority"];
+        if (!string.IsNullOrEmpty(authority)) options.Authority = authority;
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            RoleClaimType = ClaimTypes.Role
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = ctx => { MapKeycloakRoles(ctx); return Task.CompletedTask; }
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("role:issuer", p => p.RequireRole("issuer"));
+    options.AddPolicy("role:any-auth", p => p.RequireAuthenticatedUser());
+    options.AddPolicy("role:issuer-or-backoffice", p =>
+        p.RequireAssertion(ctx => ctx.User.IsInRole("issuer") || ctx.User.IsInRole("backoffice")));
+});
+
+// API
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<IssuanceDbContext>();
+
+var app = builder.Build();
+
+// Apply migrations (env MIGRATE_ON_STARTUP overrides RunMigrations flag)
+var runMigrations = builder.Configuration.GetValue<bool>("RunMigrations", true);
+var migrateOnStartup = Environment.GetEnvironmentVariable("MIGRATE_ON_STARTUP");
+if (string.Equals(migrateOnStartup, "true", StringComparison.OrdinalIgnoreCase))
+{
+    runMigrations = true;
+}
+else if (string.Equals(migrateOnStartup, "false", StringComparison.OrdinalIgnoreCase))
+{
+    runMigrations = false;
+}
+
+if (runMigrations)
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<IssuanceDbContext>();
+    db.Database.Migrate();
+}
+
+// Configure pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+var disableHttpsRedirect = builder.Configuration.GetValue<bool>("DisableHttpsRedirection", false);
+if (!disableHttpsRedirect)
+{
+    app.UseHttpsRedirection();
+}
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapHealthChecks("/health");
+app.MapPrometheusScrapingEndpoint("/metrics");
+
+// Correlation + request metrics
+app.Use(async (ctx, next) =>
+{
+    var sw = System.Diagnostics.Stopwatch.StartNew();
+    // Correlate X-Request-ID
+    if (!ctx.Request.Headers.TryGetValue("X-Request-ID", out var reqId) || string.IsNullOrWhiteSpace(reqId))
+    {
+        reqId = Guid.NewGuid().ToString();
+        ctx.Request.Headers["X-Request-ID"] = reqId;
+    }
+    ctx.Response.Headers["X-Request-ID"] = reqId.ToString();
+
+    try
+    {
+        await next();
+    }
+    finally
+    {
+        sw.Stop();
+        var status = ctx.Response.StatusCode;
+        var route = ctx.GetEndpoint()?.DisplayName ?? "unknown";
+        var tags = new System.Collections.Generic.KeyValuePair<string, object?>[]
+        {
+            new("route", route),
+            new("method", ctx.Request.Method),
+            new("status", status.ToString())
+        };
+        Metrics.RequestDurationMs.Record(sw.Elapsed.TotalMilliseconds, tags);
+        if (status >= 500)
+        {
+            var errTags = new System.Collections.Generic.KeyValuePair<string, object?>[]
+            {
+                new("route", route),
+                new("method", ctx.Request.Method)
+            };
+            Metrics.RequestErrors.Add(1, errTags);
+        }
+    }
+});
+
+// API Endpoints
+var api = app.MapGroup("/v1").WithTags("Issuances").RequireAuthorization();
+
+api.MapPost("/issuances", async (
+    CreateIssuanceRequest request,
+    IIssuanceService service,
+    ILoggerFactory loggerFactory,
+    CancellationToken ct) =>
+{
+    try
+    {
+        var result = await service.CreateAsync(request, ct);
+        return Results.Created($"/v1/issuances/{result.Id}", result);
+    }
+    catch (FluentValidation.ValidationException vex)
+    {
+        var logger = loggerFactory.CreateLogger("CreateIssuance");
+        logger.LogWarning(vex, "Validation failed for CreateIssuance");
+        var errors = vex.Errors
+            .GroupBy(e => e.PropertyName)
+            .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
+        return Results.ValidationProblem(errors, statusCode: 400, title: "Validation Failed");
+    }
+    catch (Exception ex)
+    {
+        var logger = loggerFactory.CreateLogger("CreateIssuance");
+        logger.LogError(ex, "CreateIssuance failed");
+        return Results.Problem(detail: ex.Message, statusCode: 500, title: "Internal Server Error");
+    }
+})
+.WithName("CreateIssuance")
+.RequireAuthorization("role:issuer")
+.WithOpenApi();
+
+api.MapGet("/issuances/{id:guid}", async (
+    Guid id,
+    IIssuanceService service,
+    CancellationToken ct) =>
+{
+    var result = await service.GetByIdAsync(id, ct);
+    return result != null ? Results.Ok(result) : Results.NotFound();
+})
+.WithName("GetIssuance")
+.RequireAuthorization("role:any-auth")
+.WithOpenApi();
+
+api.MapPost("/issuances/{id:guid}/publish", async (
+    Guid id,
+    IIssuanceService service,
+    CancellationToken ct) =>
+{
+    try
+    {
+        var result = await service.PublishAsync(id, ct);
+        return result is not null ? Results.Ok(result) : Results.NotFound();
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.Problem(
+            detail: ex.Message,
+            statusCode: 400,
+            title: "Bad Request");
+    }
+})
+.WithName("PublishIssuance")
+.RequireAuthorization("role:issuer")
+.WithOpenApi();
+
+api.MapPost("/issuances/{id:guid}/close", async (
+    Guid id,
+    IIssuanceService service,
+    CancellationToken ct) =>
+{
+    try
+    {
+        var result = await service.CloseAsync(id, ct);
+        return result is not null ? Results.Ok(result) : Results.NotFound();
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.Problem(
+            detail: ex.Message,
+            statusCode: 400,
+            title: "Bad Request");
+    }
+})
+.WithName("CloseIssuance")
+.RequireAuthorization("role:issuer")
+.WithOpenApi();
+
+api.MapGet("/reports/issuances", async (
+    Guid issuerId,
+    DateOnly? from,
+    DateOnly? to,
+    IIssuanceService service,
+    CancellationToken ct) =>
+{
+    var report = await service.GetIssuerIssuancesReportAsync(issuerId, from, to, ct);
+    return Results.Ok(report);
+})
+.WithName("GetIssuerIssuancesReport")
+.RequireAuthorization("role:issuer-or-backoffice")
+.WithOpenApi();
+
+app.Run();
+
+static void MapKeycloakRoles(TokenValidatedContext ctx)
+{
+    try
+    {
+        if (ctx.Principal?.Identity is not ClaimsIdentity identity) return;
+        var realmAccessJson = identity.FindFirst("realm_access")?.Value;
+        if (!string.IsNullOrEmpty(realmAccessJson))
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(realmAccessJson);
+            if (doc.RootElement.TryGetProperty("roles", out var rolesEl) && rolesEl.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                foreach (var r in rolesEl.EnumerateArray())
+                {
+                    var role = r.GetString();
+                    if (!string.IsNullOrEmpty(role))
+                        identity.AddClaim(new Claim(ClaimTypes.Role, role));
+                }
+            }
+        }
+    }
+    catch { }
+}
+
+public partial class Program { }
+
+```
+
+`ois-cfa/services/issuance/appsettings.json`:
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "Microsoft.EntityFrameworkCore": "Warning"
+    }
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=ois;Username=ois;Password=ois_dev_password"
+  },
+  "Kafka": {
+    "BootstrapServers": "localhost:9092"
+  },
+  "Ledger": {
+    "UseMock": false,
+    "ChaincodeEndpoint": "http://localhost:8080"
+  },
+  "Fabric": {
+    "PeerEndpoint": "http://localhost:7051",
+    "ChannelName": "cfa-main",
+    "MspId": "OisDevMSP",
+    "TlsCertPath": "../../ops/fabric/crypto-config/peerOrganizations/ois-dev.example.com/peers/peer0.ois-dev.example.com/tls/server.crt",
+    "TlsKeyPath": "../../ops/fabric/crypto-config/peerOrganizations/ois-dev.example.com/peers/peer0.ois-dev.example.com/tls/server.key",
+    "TlsRootCertPath": "../../ops/fabric/crypto-config/peerOrganizations/ois-dev.example.com/peers/peer0.ois-dev.example.com/tls/ca.crt"
+  },
+  "Serilog": {
+    "Using": ["Serilog.Sinks.Console"],
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft": "Warning",
+        "System": "Warning"
+      }
+    },
+    "WriteTo": [
+      {
+        "Name": "Console",
+        "Args": {
+          "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+        }
+      }
+    ]
+  }
+}
+
+
+```
+
+`ois-cfa/services/issuance/issuance.Tests.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.0" />
+    <PackageReference Include="Microsoft.TestPlatform.TestHost" Version="17.11.0" />
+    <PackageReference Include="xunit" Version="2.9.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="FluentAssertions" Version="6.12.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
+    <PackageReference Include="Moq" Version="4.20.70" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="issuance.csproj" />
+    <ProjectReference Include="..\..\packages\domain\domain.csproj" />
+  </ItemGroup>
+
+  <!-- Limit compile scope to test files only -->
+  <ItemGroup>
+    <Compile Include="issuance.Tests/**/*.cs" />
+  </ItemGroup>
+
+</Project>
+
+```
+
+`ois-cfa/services/issuance/issuance.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DefaultItemExcludes>$(DefaultItemExcludes);issuance.Tests/**</DefaultItemExcludes>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="issuance.Tests/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.9.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.9.0-beta.1" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
+    <PackageReference Include="Confluent.Kafka" Version="2.5.3" />
+    <PackageReference Include="System.Text.Json" Version="9.0.0" />
+    <PackageReference Include="Polly" Version="8.4.1" />
+    <PackageReference Include="MassTransit" Version="8.2.0" />
+    <PackageReference Include="MassTransit.Kafka" Version="8.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\packages\domain\domain.csproj" />
+  </ItemGroup>
+</Project>
+
+```
+
+`ois-cfa/services/registry/Program.cs`:
+
+```cs
+using Microsoft.EntityFrameworkCore;
+using FluentValidation;
+using OIS.Registry.Validators;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using OIS.Registry;
+using OIS.Registry.DTOs;
+using OIS.Registry.Services;
+using Serilog;
+using System.Diagnostics;
+using MassTransit;
+using OIS.Contracts.Events;
+using OIS.Registry.Infrastructure;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Serilog
+builder.Host.UseSerilog((ctx, lc) => lc
+    .ReadFrom.Configuration(ctx.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(new Serilog.Formatting.Json.JsonFormatter()));
+
+// OpenTelemetry
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService("registry-service"))
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddConsoleExporter())
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddConsoleExporter()
+        .AddPrometheusExporter()
+        .AddMeter(Metrics.MeterName));
+
+// Database
+var registryMigrationsAssembly = typeof(RegistryDbContext).Assembly.GetName().Name;
+builder.Services.AddDbContext<RegistryDbContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        npgsqlOptions => npgsqlOptions.MigrationsAssembly(registryMigrationsAssembly)));
+
+// HTTP Clients
+builder.Services.AddHttpClient<IBankNominalService, BankNominalServiceClient>();
+builder.Services.AddHttpClient<IComplianceService, ComplianceServiceClient>();
+builder.Services.AddHttpClient<LedgerRegistryAdapter>()
+    .SetHandlerLifetime(TimeSpan.FromMinutes(5));
+
+// Services
+builder.Services.AddScoped<ILedgerRegistry, LedgerRegistryAdapter>();
+builder.Services.AddScoped<IOutboxService, OutboxService>();
+builder.Services.AddScoped<IRegistryService, RegistryService>();
+
+// Validation
+builder.Services.AddValidatorsFromAssemblyContaining<CreateOrderRequestValidator>();
+builder.Services.AddFluentValidationAutoValidation();
+
+// AuthN/Z
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var authority = builder.Configuration["Keycloak:Authority"];
+        if (!string.IsNullOrEmpty(authority))
+        {
+            options.Authority = authority;
+        }
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            RoleClaimType = ClaimTypes.Role
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = ctx =>
+            {
+                MapKeycloakRoles(ctx);
+                return Task.CompletedTask;
+            }
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("role:investor", p => p.RequireRole("investor"));
+    options.AddPolicy("role:issuer", p => p.RequireRole("issuer"));
+    options.AddPolicy("role:broker", p => p.RequireRole("broker"));
+    options.AddPolicy("role:backoffice", p => p.RequireRole("backoffice"));
+    options.AddPolicy("role:investor-or-backoffice", p =>
+        p.RequireAssertion(ctx => ctx.User.IsInRole("investor") || ctx.User.IsInRole("backoffice")));
+    options.AddPolicy("scope:orders.write", p => p.RequireAssertion(HasScope("orders.write")));
+    options.AddPolicy("scope:orders.read", p => p.RequireAssertion(HasScope("orders.read")));
+});
+
+// MassTransit + Kafka for publishing
+if (builder.Configuration.GetValue<bool>("Kafka:Enabled", true))
+{
+    builder.Services.AddMassTransit(x =>
+    {
+        x.AddRider(rider =>
+        {
+            rider.UsingKafka((context, cfg) =>
+            {
+                cfg.Host(builder.Configuration["Kafka:BootstrapServers"] ?? "localhost:9092");
+            });
+        });
+    });
+
+    builder.Services.AddHostedService<OIS.Registry.Background.OutboxPublisher>();
+}
+
+// API
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<RegistryDbContext>();
+
+// Rate limiting
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("sensitive", httpContext =>
+    {
+        var key = GetPartitionKey(httpContext);
+        return RateLimitPartition.GetTokenBucketLimiter(key, _ => new TokenBucketRateLimiterOptions
+        {
+            TokenLimit = 20,
+            TokensPerPeriod = 20,
+            ReplenishmentPeriod = TimeSpan.FromSeconds(1),
+            AutoReplenishment = true,
+            QueueLimit = 0,
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+        });
+    });
+});
+
+var app = builder.Build();
+
+// Apply migrations (optional, via MIGRATE_ON_STARTUP=true)
+var migrateOnStartup = Environment.GetEnvironmentVariable("MIGRATE_ON_STARTUP");
+if (string.Equals(migrateOnStartup, "true", StringComparison.OrdinalIgnoreCase))
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<RegistryDbContext>();
+    db.Database.Migrate();
+}
+
+// Configure pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseRateLimiter();
+app.MapHealthChecks("/health");
+app.MapPrometheusScrapingEndpoint("/metrics");
+
+// Correlation + request metrics
+app.Use(async (ctx, next) =>
+{
+    var sw = System.Diagnostics.Stopwatch.StartNew();
+    if (!ctx.Request.Headers.TryGetValue("X-Request-ID", out var reqId) || string.IsNullOrWhiteSpace(reqId))
+    {
+        reqId = Guid.NewGuid().ToString();
+        ctx.Request.Headers["X-Request-ID"] = reqId;
+    }
+    ctx.Response.Headers["X-Request-ID"] = reqId.ToString();
+
+    try
+    {
+        await next();
+    }
+    finally
+    {
+        sw.Stop();
+        var status = ctx.Response.StatusCode;
+        var route = ctx.GetEndpoint()?.DisplayName ?? "unknown";
+        var tags = new System.Collections.Generic.KeyValuePair<string, object?>[]
+        {
+            new("route", route),
+            new("method", ctx.Request.Method),
+            new("status", status.ToString())
+        };
+        Metrics.RequestDurationMs.Record(sw.Elapsed.TotalMilliseconds, tags);
+        if (status >= 500)
+        {
+            var errTags = new System.Collections.Generic.KeyValuePair<string, object?>[]
+            {
+                new("route", route),
+                new("method", ctx.Request.Method)
+            };
+            Metrics.RequestErrors.Add(1, errTags);
+        }
+    }
+});
+
+// API Endpoints
+var api = app.MapGroup("/v1").WithTags("Registry").RequireAuthorization();
+
+api.MapPost("/orders", async (
+    CreateOrderRequest request,
+    HttpContext httpContext,
+    IRegistryService service,
+    CancellationToken ct) =>
+{
+    // Get idempotency key from header
+    if (!httpContext.Request.Headers.TryGetValue("Idempotency-Key", out var idemKeyValues) ||
+        !Guid.TryParse(idemKeyValues.FirstOrDefault(), out var idemKeyGuid))
+    {
+        return Results.Problem(
+            detail: "Idempotency-Key header is required and must be a valid UUID",
+            statusCode: 400,
+            title: "Bad Request");
+    }
+
+    var idemKey = idemKeyGuid.ToString();
+    var result = await service.PlaceOrderAsync(request, idemKey, ct);
+    return Results.Accepted($"/v1/orders/{result.Id}", result);
+})
+.WithName("PlaceOrder")
+.RequireAuthorization("role:investor")
+.RequireRateLimiting("sensitive")
+.WithOpenApi();
+
+api.MapGet("/orders/{id:guid}", async (
+    Guid id,
+    IRegistryService service,
+    CancellationToken ct) =>
+{
+    var result = await service.GetOrderAsync(id, ct);
+    return result != null ? Results.Ok(result) : Results.NotFound();
+})
+.WithName("GetOrder")
+.RequireAuthorization("role:investor-or-backoffice")
+.WithOpenApi();
+
+api.MapGet("/wallets/{investorId:guid}", async (
+    Guid investorId,
+    IRegistryService service,
+    CancellationToken ct) =>
+{
+    var result = await service.GetWalletAsync(investorId, ct);
+    return result != null ? Results.Ok(result) : Results.NotFound();
+})
+.WithName("GetWallet")
+.RequireAuthorization("role:investor-or-backoffice")
+.WithOpenApi();
+
+api.MapPost("/issuances/{id:guid}/redeem", async (
+    Guid id,
+    RedeemRequest request,
+    IRegistryService service,
+    CancellationToken ct) =>
+{
+    try
+    {
+        var result = await service.RedeemAsync(id, request, ct);
+        return Results.Ok(result);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.Problem(
+            detail: ex.Message,
+            statusCode: 400,
+            title: "Bad Request");
+    }
+})
+.WithName("RedeemIssuance")
+.RequireAuthorization("role:investor")
+.RequireRateLimiting("sensitive")
+.WithOpenApi();
+
+api.MapPost("/orders/{id:guid}/cancel", async (
+    Guid id,
+    IRegistryService service,
+    CancellationToken ct) =>
+{
+    try
+    {
+        var result = await service.CancelOrderAsync(id, ct);
+        return Results.Ok(result);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.Problem(
+            detail: ex.Message,
+            statusCode: ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase) ? 404 : 400,
+            title: ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase) ? "Not Found" : "Bad Request");
+    }
+})
+.WithName("CancelOrder")
+.RequireAuthorization("role:investor-or-backoffice")
+.RequireRateLimiting("sensitive")
+.WithOpenApi();
+
+api.MapPost("/orders/{id:guid}/mark-paid", async (
+    Guid id,
+    IRegistryService service,
+    CancellationToken ct) =>
+{
+    try
+    {
+        var result = await service.MarkPaidAsync(id, null, ct);
+        return Results.Ok(result);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.Problem(
+            detail: ex.Message,
+            statusCode: ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase) ? 404 : 400,
+            title: ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase) ? "Not Found" : "Bad Request");
+    }
+})
+.WithName("MarkOrderPaid")
+.RequireAuthorization("role:investor-or-backoffice")
+.RequireRateLimiting("sensitive")
+.WithOpenApi();
+
+app.Run();
+static Func<Microsoft.AspNetCore.Authorization.AuthorizationHandlerContext, bool> HasScope(string scope) => ctx =>
+{
+    var scp = ctx.User.FindFirst("scope")?.Value ?? ctx.User.FindFirst("scp")?.Value;
+    if (string.IsNullOrWhiteSpace(scp)) return false;
+    return scp.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+        .Any(s => string.Equals(s, scope, StringComparison.OrdinalIgnoreCase));
+};
+
+static void MapKeycloakRoles(TokenValidatedContext ctx)
+{
+    try
+    {
+        if (ctx.Principal?.Identity is not ClaimsIdentity identity) return;
+        var realmAccessJson = identity.FindFirst("realm_access")?.Value;
+        if (!string.IsNullOrEmpty(realmAccessJson))
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(realmAccessJson);
+            if (doc.RootElement.TryGetProperty("roles", out var rolesEl) && rolesEl.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                foreach (var r in rolesEl.EnumerateArray())
+                {
+                    var role = r.GetString();
+                    if (!string.IsNullOrEmpty(role))
+                        identity.AddClaim(new Claim(ClaimTypes.Role, role));
+                }
+            }
+        }
+    }
+    catch { /* ignore parsing errors */ }
+}
+
+static string GetPartitionKey(HttpContext ctx)
+{
+    var sub = ctx.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    if (!string.IsNullOrEmpty(sub)) return $"user:{sub}";
+    return $"ip:{ctx.Connection.RemoteIpAddress}";
+}
+
+```
+
+`ois-cfa/services/registry/appsettings.json`:
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "Microsoft.EntityFrameworkCore": "Warning"
+    }
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=ois;Username=ois;Password=ois_dev_password"
+  },
+  "BankNominal": {
+    "BaseUrl": "http://bank-nominal:8080"
+  },
+  "Compliance": {
+    "BaseUrl": "http://compliance-service:8080"
+  },
+  "Ledger": {
+    "UseMock": false,
+    "ChaincodeEndpoint": "http://localhost:8080"
+  },
+  "Fabric": {
+    "PeerEndpoint": "http://localhost:7051",
+    "ChannelName": "cfa-main",
+    "MspId": "OisDevMSP",
+    "TlsCertPath": "../../ops/fabric/crypto-config/peerOrganizations/ois-dev.example.com/peers/peer0.ois-dev.example.com/tls/server.crt",
+    "TlsKeyPath": "../../ops/fabric/crypto-config/peerOrganizations/ois-dev.example.com/peers/peer0.ois-dev.example.com/tls/server.key",
+    "TlsRootCertPath": "../../ops/fabric/crypto-config/peerOrganizations/ois-dev.example.com/peers/peer0.ois-dev.example.com/tls/ca.crt"
+  },
+  "Serilog": {
+    "Using": ["Serilog.Sinks.Console"],
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft": "Warning",
+        "System": "Warning"
+      }
+    },
+    "WriteTo": [
+      {
+        "Name": "Console",
+        "Args": {
+          "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+        }
+      }
+    ]
+  }
+}
+
+
+```
+
+`ois-cfa/services/registry/registry.Tests/registry.Tests.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.0" />
+    <PackageReference Include="xunit" Version="2.9.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="coverlet.collector" Version="6.0.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Moq" Version="4.20.70" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
+    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\registry.csproj" />
+  </ItemGroup>
+
+</Project>
+
+
+```
+
+`ois-cfa/services/registry/registry.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DefaultItemExcludes>$(DefaultItemExcludes);registry.Tests/**</DefaultItemExcludes>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="registry.Tests/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.9.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.9.0-beta.1" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
+    <PackageReference Include="Polly" Version="8.4.1" />
+    <PackageReference Include="System.Net.Http.Json" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="MassTransit" Version="8.2.0" />
+    <PackageReference Include="MassTransit.Kafka" Version="8.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\packages\domain\domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="registry.Tests/**/*.cs" />
+  </ItemGroup>
+
+</Project>
+
+```
+
+`ois-cfa/services/settlement/Program.cs`:
+
+```cs
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using OIS.Settlement;
+using OIS.Settlement.DTOs;
+using OIS.Settlement.Services;
+using Serilog;
+using OIS.Settlement.Background;
+using OIS.Settlement.Infrastructure;
+using MassTransit;
+using OIS.Contracts.Events;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Serilog
+builder.Host.UseSerilog((ctx, lc) => lc
+    .ReadFrom.Configuration(ctx.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console(new Serilog.Formatting.Json.JsonFormatter()));
+
+// OpenTelemetry
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService("settlement-service"))
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddConsoleExporter())
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddConsoleExporter()
+        .AddPrometheusExporter()
+        .AddMeter(Metrics.MeterName));
+
+// Database
+var settlementMigrationsAssembly = typeof(SettlementDbContext).Assembly.GetName().Name;
+builder.Services.AddDbContext<SettlementDbContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        npgsqlOptions => npgsqlOptions.MigrationsAssembly(settlementMigrationsAssembly)));
+
+// HTTP Clients
+builder.Services.AddHttpClient<IRegistryClient, RegistryClient>();
+builder.Services.AddHttpClient<IIssuanceClient, IssuanceClient>();
+builder.Services.AddHttpClient<IBankNominalClient, BankNominalClient>();
+
+// Services
+builder.Services.AddScoped<IOutboxService, OutboxService>();
+builder.Services.AddScoped<ISettlementService, SettlementService>();
+
+// MassTransit + Kafka
+var kafkaEnabled = builder.Configuration.GetValue<bool>("Kafka:Enabled", true);
+if (kafkaEnabled)
+{
+    builder.Services.AddMassTransit(x =>
+    {
+        x.AddRider(rider =>
+        {
+            rider.AddConsumer<OIS.Settlement.Consumers.OrderPaidEventConsumer>();
+
+            rider.UsingKafka((context, cfg) =>
+            {
+                cfg.Host(builder.Configuration["Kafka:BootstrapServers"] ?? "localhost:9092");
+
+                cfg.TopicEndpoint<OrderPaid>("ois.order.paid", "settlement-orderpaid", e =>
+                {
+                    e.ConfigureConsumer<OIS.Settlement.Consumers.OrderPaidEventConsumer>(context);
+                    e.ConcurrentMessageLimit = 4;
+                });
+            });
+        });
+    });
+
+    builder.Services.AddHostedService<OutboxPublisher>();
+}
+
+// AuthN/Z
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var authority = builder.Configuration["Keycloak:Authority"];
+        if (!string.IsNullOrEmpty(authority))
+        {
+            options.Authority = authority;
+        }
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            RoleClaimType = ClaimTypes.Role
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = ctx => { MapKeycloakRoles(ctx); return Task.CompletedTask; }
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("role:issuer", p => p.RequireRole("issuer"));
+    options.AddPolicy("role:backoffice", p => p.RequireRole("backoffice"));
+    options.AddPolicy("role:issuer-or-backoffice", p =>
+        p.RequireAssertion(ctx => ctx.User.IsInRole("issuer") || ctx.User.IsInRole("backoffice")));
+});
+
+// API
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<SettlementDbContext>();
+
+// Rate limiting
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("sensitive", httpContext =>
+    {
+        var key = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!string.IsNullOrEmpty(key))
+            key = $"user:{key}";
+        else
+            key = $"ip:{httpContext.Connection.RemoteIpAddress}";
+
+        return RateLimitPartition.GetTokenBucketLimiter(key!, _ => new TokenBucketRateLimiterOptions
+        {
+            TokenLimit = 20,
+            TokensPerPeriod = 20,
+            ReplenishmentPeriod = TimeSpan.FromSeconds(1),
+            AutoReplenishment = true,
+            QueueLimit = 0,
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+        });
+    });
+});
+
+var app = builder.Build();
+
+// Apply migrations (optional, via MIGRATE_ON_STARTUP=true)
+var migrateOnStartup = Environment.GetEnvironmentVariable("MIGRATE_ON_STARTUP");
+if (string.Equals(migrateOnStartup, "true", StringComparison.OrdinalIgnoreCase))
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<SettlementDbContext>();
+    db.Database.Migrate();
+}
+
+// Configure pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapHealthChecks("/health");
+app.MapPrometheusScrapingEndpoint("/metrics");
+app.UseRateLimiter();
+
+// Correlation + request metrics
+app.Use(async (ctx, next) =>
+{
+    var sw = System.Diagnostics.Stopwatch.StartNew();
+    if (!ctx.Request.Headers.TryGetValue("X-Request-ID", out var reqId) || string.IsNullOrWhiteSpace(reqId))
+    {
+        reqId = Guid.NewGuid().ToString();
+        ctx.Request.Headers["X-Request-ID"] = reqId;
+    }
+    ctx.Response.Headers["X-Request-ID"] = reqId.ToString();
+
+    try
+    {
+        await next();
+    }
+    finally
+    {
+        sw.Stop();
+        var status = ctx.Response.StatusCode;
+        var route = ctx.GetEndpoint()?.DisplayName ?? "unknown";
+        var tags = new System.Collections.Generic.KeyValuePair<string, object?>[]
+        {
+            new("route", route),
+            new("method", ctx.Request.Method),
+            new("status", status.ToString())
+        };
+        Metrics.RequestDurationMs.Record(sw.Elapsed.TotalMilliseconds, tags);
+        if (status >= 500)
+        {
+            var errTags = new System.Collections.Generic.KeyValuePair<string, object?>[]
+            {
+                new("route", route),
+                new("method", ctx.Request.Method)
+            };
+            Metrics.RequestErrors.Add(1, errTags);
+        }
+    }
+});
+
+// API Endpoints
+var api = app.MapGroup("/v1").WithTags("Settlement").RequireAuthorization();
+
+api.MapPost("/settlement/run", async (
+    DateOnly? date,
+    ISettlementService service,
+    CancellationToken ct) =>
+{
+    try
+    {
+        var result = await service.RunSettlementAsync(date, ct);
+        return Results.Accepted($"/v1/settlement/batches/{result.BatchId}", result);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.Problem(
+            detail: ex.Message,
+            statusCode: 400,
+            title: "Bad Request");
+    }
+})
+.WithName("RunSettlement")
+.RequireAuthorization("role:backoffice")
+.RequireRateLimiting("sensitive")
+.WithOpenApi();
+
+api.MapGet("/reports/payouts", async (
+    DateOnly? from,
+    DateOnly? to,
+    ISettlementService service,
+    CancellationToken ct) =>
+{
+    var fromDate = from ?? DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-30));
+    var toDate = to ?? DateOnly.FromDateTime(DateTime.UtcNow);
+
+    if (fromDate > toDate)
+    {
+        return Results.Problem(
+            detail: "from date must be less than or equal to to date",
+            statusCode: 400,
+            title: "Bad Request");
+    }
+
+    var result = await service.GetPayoutsReportAsync(fromDate, toDate, ct);
+    return Results.Ok(result);
+})
+.WithName("GetPayoutsReport")
+.RequireAuthorization("role:issuer-or-backoffice")
+.WithOpenApi();
+
+app.Run();
+
+static void MapKeycloakRoles(TokenValidatedContext ctx)
+{
+    try
+    {
+        if (ctx.Principal?.Identity is not ClaimsIdentity identity) return;
+        var realmAccessJson = identity.FindFirst("realm_access")?.Value;
+        if (!string.IsNullOrEmpty(realmAccessJson))
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(realmAccessJson);
+            if (doc.RootElement.TryGetProperty("roles", out var rolesEl) && rolesEl.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                foreach (var r in rolesEl.EnumerateArray())
+                {
+                    var role = r.GetString();
+                    if (!string.IsNullOrEmpty(role))
+                        identity.AddClaim(new Claim(ClaimTypes.Role, role));
+                }
+            }
+        }
+    }
+    catch { }
+}
+
+```
+
+`ois-cfa/services/settlement/appsettings.json`:
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "Microsoft.EntityFrameworkCore": "Warning"
+    }
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=ois;Username=ois;Password=ois_dev_password"
+  },
+  "Registry": {
+    "BaseUrl": "http://registry-service:8080"
+  },
+  "Issuance": {
+    "BaseUrl": "http://issuance-service:8080"
+  },
+  "BankNominal": {
+    "BaseUrl": "http://bank-nominal:8080"
+  },
+  "Serilog": {
+    "Using": ["Serilog.Sinks.Console"],
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft": "Warning",
+        "System": "Warning"
+      }
+    },
+    "WriteTo": [
+      {
+        "Name": "Console",
+        "Args": {
+          "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+        }
+      }
+    ]
+  }
+}
+
+
+```
+
+`ois-cfa/services/settlement/settlement.Tests/settlement.Tests.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.0" />
+    <PackageReference Include="xunit" Version="2.9.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="coverlet.collector" Version="6.0.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Moq" Version="4.20.70" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
+    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\settlement.csproj" />
+  </ItemGroup>
+
+</Project>
+
+
+```
+
+`ois-cfa/services/settlement/settlement.csproj`:
+
+```csproj
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DefaultItemExcludes>$(DefaultItemExcludes);settlement.Tests/**</DefaultItemExcludes>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="settlement.Tests/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.9.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.9.0-beta.1" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
+    <PackageReference Include="Polly" Version="8.4.1" />
+    <PackageReference Include="System.Net.Http.Json" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Confluent.Kafka" Version="2.5.3" />
+    <PackageReference Include="MassTransit" Version="8.2.0" />
+    <PackageReference Include="MassTransit.Kafka" Version="8.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\packages\domain\domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="settlement.Tests/**/*.cs" />
+  </ItemGroup>
+
+</Project>
+
+```
