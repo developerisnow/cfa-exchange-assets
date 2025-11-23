@@ -1,3 +1,9 @@
+# Workflow
+1. Prompt [[oracle.prompt]]
+2. Src/Docs Context. aggregation .txt snapshots (code2promp,repomix)
+3. Git Diff. aggregation for eval by Oracle `git-changes-reporter.py`
+4. Automation. mcp oracle_gpt5
+5. 
 # Git
 
 ## Analyse 
