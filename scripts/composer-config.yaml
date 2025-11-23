@@ -1,0 +1,53 @@
+# Composer config for code2prompt/repomix/yek
+defaults:
+  exclude:
+    - "**/bin/**"
+    - "**/obj/**"
+    - "**/node_modules/**"
+    - "**/packages/dotnet-clients/**"
+    - "**/packages/sdks/**"
+    - "**/packages/types/**"
+    - "**/artifacts/**"
+    - "**/memory-bank/**"
+  tree:
+    maxdepth: 4
+    prune:
+      - "./.git"
+      - "./bin"
+      - "./obj"
+      - "./node_modules"
+      - "./packages/dotnet-clients"
+      - "./packages/sdks"
+      - "./packages/types"
+      - "./artifacts"
+      - "./memory-bank"
+
+include_sets:
+  core:
+    - services/issuance/**
+    - services/registry/**
+    - services/compliance/**
+    - services/identity/**
+    - apps/backoffice/src/**
+    - apps/portal-issuer/src/**
+    - apps/portal-investor/src/**
+    - apps/api-gateway/Program.cs
+    - apps/api-gateway/appsettings*.json
+    - packages/contracts/**
+    - docs/deploy/**
+    - ops/scripts/**
+    - scripts/git/*.sh
+  services_core:
+    - services/**/Program.cs
+    - services/**/*.csproj
+    - services/**/appsettings*.json
+  front_core:
+    - apps/backoffice/src/**
+    - apps/portal-issuer/src/**
+    - apps/portal-investor/src/**
+  contracts:
+    - packages/contracts/**
+  deploy_ops:
+    - docs/deploy/**
+    - ops/scripts/**
+    - scripts/git/*.sh
