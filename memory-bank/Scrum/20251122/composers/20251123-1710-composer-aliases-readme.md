@@ -47,7 +47,7 @@ tags: [context, oracle, code2prompt, repomix, yek, aliases]
 - Пример свежего ранa: `memory-bank/Scrum/20251121/gitlab-discovery/git-20251121-1614/` (17–21 Nov).
 - Новые контексты (<1 MB, 2025-11-23):
   - repomix: `memory-bank/snapshots-aggregated-context-duplicates/composers/repomix/20251123-1021-repomix-curated.xml` (~0.7 MB, 172k токенов)
-  - code2prompt (hbs): `memory-bank/snapshots-aggregated-context-duplicates/composers/code2prompt/20251123-1022-code2prompt-curated.txt` (~0.7 MB)
+  - code2prompt (hbs, с Source Tree): `memory-bank/snapshots-aggregated-context-duplicates/composers/code2prompt/20251123-1033-code2prompt-curated.txt` (~0.74 MB)
   - yek (fallback concat): `memory-bank/snapshots-aggregated-context-duplicates/composers/yek/20251123-1025-yek-curated.txt` (~0.22 MB)
 
 ## 🧭 Шаблонный workflow (Oracle)
@@ -58,5 +58,5 @@ tags: [context, oracle, code2prompt, repomix, yek, aliases]
 
 ## 🧪 Evaluation (новые прогоны 2025-11-23)
 - repomix_curated (XML, stdin find, фильтр bin/obj/node_modules, +deploy/ops/apps/services/contracts) — 172,708 токенов, ~698k chars (<1 MB), лучший баланс для Oracle (структура + компактность).
-- code2prompt-curated (custom hbs) — ~736k bytes, plain text, гибко для LLM с кастом промптами; без сжатия, но управляемый объём.
-- yek_curated_fallback — ~220k bytes, plain concat ключевых файлов; мы используем fallback, т.к. `yek` не читает submodule .git, но контент пригоден как лёгкий plain-срез.
+- code2prompt-curated (custom hbs c Source Tree) — ~745k bytes, plain text, включает дерево и файлы; чуть тяжелее, но удобнее навигация.
+- yek_curated_fallback — ~220k bytes, plain concat ключевых файлов; используем fallback, т.к. `yek` не читает submodule .git, но контент пригоден как лёгкий plain-срез.
