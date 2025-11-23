@@ -11,3 +11,16 @@
 | 20251120-1557-gpt5p-p3.oracle |      |          | 9                        |           |                                                                                                                                                        | 0) Issuance tests: двойной DB‑провайдер                                                                                                                                              | 22m      |
 |                               |      |          |                          |           |                                                                                                                                                        |                                                                                                                                                                                      |          |
 |                               |      |          |                          |           |                                                                                                                                                        |                                                                                                                                                                                      |          |
+
+# Improove prompt
+
+|                                                                        | Comment          | Size | Status | AlexScore | LLM-Score | Understanding | Insights | thinking |
+| ---------------------------------------------------------------------- | ---------------- | ---- | ------ | --------- | --------- | ------------- | -------- | -------- |
+| [[20251123-1111-brainstorm.gem3d.oracle-improove-prompt-and-workflow]] | bad prompt $part |      |        |           |           |               |          |          |
+| [[20251123-1111-brainstorm.gpt5h.oracle-improove-prompt-and-workflow]] | bad prompt $part |      |        |           |           |               |          |          |
+| [[20251123-1111-brainstorm.gpt5p.oracle-improove-prompt-and-workflow]] | bad prompt $part |      |        |           |           |               |          |          |
+| [[20251123-1155-brainstorm.gem3d.oracle-improove-prompt-and-workflow]] |                  |      |        |           |           |               |          |          |
+| [[20251123-1155-brainstorm.gpt5p.oracle-improove-prompt-and-workflow]] |                  |      |        |           |           |               |          |          |
+|                                                                        |                  |      |        |           |           |               |          |          |
+|                                                                        |                  |      |        |           |           |               |          |          |
+|                                                                        |                  |      |        |           |           |               |          |          |
