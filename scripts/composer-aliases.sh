@@ -97,14 +97,29 @@ list_composer_aliases() {
 c2p_core_arch_hbs() {
   _ensure_ctx_dir
   local ts=$(_ts)
+  local outf="${CONTEXT_DIR}/composers/code2prompt/${ts}-code2prompt-curated.txt"
   code2prompt "${CFA_REPO}" \
-    -O "${CONTEXT_DIR}/composers/code2prompt/${ts}-code2prompt-curated.txt" \
+    -O "${outf}" \
     -t "${CFA_MONO_ROOT}/scripts/code2prompt-curated.hbs" \
     -i 'services/issuance/**' -i 'services/registry/**' -i 'services/compliance/**' -i 'services/identity/**' \
     -i 'apps/backoffice/src/**' -i 'apps/portal-issuer/src/**' -i 'apps/portal-investor/src/**' \
     -i 'apps/api-gateway/Program.cs' -i 'apps/api-gateway/appsettings*.json' \
     -i 'packages/contracts/**' -i 'docs/deploy/**' -i 'ops/scripts/**' -i 'scripts/git/*.sh' \
     -e '**/bin/**' -e '**/obj/**' -e '**/node_modules/**'
+  # prepend pruned repo tree (maxdepth 4) to aid navigation without bloat
+  local tree
+  tree=$(cd "${CFA_REPO}" && find . -maxdepth 4 \
+    \( -path './.git' -o -path './bin' -o -path './obj' -o -path './node_modules' \
+       -o -path './packages/dotnet-clients' -o -path './packages/sdks' -o -path './packages/types' \
+       -o -path './artifacts' -o -path './memory-bank' \) -prune -o -type d -print | sed 's#^\./##')
+  {
+    echo "Repo Tree (pruned, maxdepth=4)"
+    echo '```txt'
+    printf '%s\n' "$tree"
+    echo '```'
+    echo
+    cat "$outf"
+  } > "${outf}.tmp" && mv "${outf}.tmp" "$outf"
 }
 
 repomix_curated() {
