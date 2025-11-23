@@ -92,3 +92,69 @@ yek_budget() {
 list_composer_aliases() {
   declare -F | awk '{print $3}' | grep -E '^(c2p_|repomix_|yek_)'
 }
+
+# ---- curated variants for <1MB contexts ----
+c2p_core_arch_hbs() {
+  _ensure_ctx_dir
+  local ts=$(_ts)
+  code2prompt "${CFA_REPO}" \
+    -O "${CONTEXT_DIR}/composers/code2prompt/${ts}-code2prompt-curated.txt" \
+    -t "${CFA_MONO_ROOT}/scripts/code2prompt-curated.hbs" \
+    -i 'services/issuance/**' -i 'services/registry/**' -i 'services/compliance/**' -i 'services/identity/**' \
+    -i 'apps/backoffice/src/**' -i 'apps/portal-issuer/src/**' -i 'apps/portal-investor/src/**' \
+    -i 'apps/api-gateway/Program.cs' -i 'apps/api-gateway/appsettings*.json' \
+    -i 'packages/contracts/**' -i 'docs/deploy/**' -i 'ops/scripts/**' -i 'scripts/git/*.sh' \
+    -e '**/bin/**' -e '**/obj/**' -e '**/node_modules/**'
+}
+
+repomix_curated() {
+  _ensure_ctx_dir
+  local ts=$(_ts)
+  mkdir -p "${CONTEXT_DIR}/composers/repomix"
+  (cd "${CFA_REPO}" && \
+    find services/issuance services/registry services/compliance services/identity \
+         apps/backoffice apps/portal-issuer apps/portal-investor apps/api-gateway \
+         packages/contracts docs/deploy ops/scripts scripts \
+         -type f \( -name '*.cs' -o -name '*.csproj' -o -name 'appsettings*.json' -o -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.json' -o -name '*.yaml' -o -name '*.yml' -o -name '*.md' -o -name '*.sh' \) \
+         ! -path '*/bin/*' ! -path '*/obj/*' ! -path '*/node_modules/*' \
+    | repomix --stdin --style xml --output "${CONTEXT_DIR}/composers/repomix/${ts}-repomix-curated.xml")
+}
+
+yek_curated_fallback() {
+  _ensure_ctx_dir
+  local ts=$(_ts)
+  mkdir -p "${CONTEXT_DIR}/composers/yek"
+  local outfile="${CONTEXT_DIR}/composers/yek/${ts}-yek-curated.txt"
+  (cd "${CFA_REPO}" && \
+    for f in \
+      services/issuance/Program.cs \
+      services/issuance/Services/IssuanceService.cs \
+      services/issuance/DTOs/IssuerIssuancesReportResponse.cs \
+      services/registry/Program.cs \
+      services/registry/Services/RegistryService.cs \
+      services/compliance/Program.cs \
+      services/compliance/DTOs/KycRequestDto.cs \
+      services/identity/Program.cs \
+      apps/backoffice/src/app/audit/page.tsx \
+      apps/backoffice/src/app/audit/[id]/page.tsx \
+      apps/backoffice/src/app/kyc/page.tsx \
+      apps/backoffice/src/app/payouts/page.tsx \
+      apps/backoffice/src/app/users/page.tsx \
+      apps/portal-issuer/src/app/dashboard/page.tsx \
+      apps/portal-issuer/src/app/issuances/page.tsx \
+      apps/portal-issuer/src/app/issuances/[id]/page.tsx \
+      apps/portal-issuer/src/app/reports/page.tsx \
+      packages/contracts/openapi-gateway.yaml \
+      docs/deploy/docker-compose-at-vps/02-env-and-compose.md \
+      docs/deploy/docker-compose-at-vps/05-gateway.md \
+      docs/deploy/docker-compose-at-vps/10-eywa1-control-plane-runbook.md \
+      ops/scripts/deploy/deploy-node.sh \
+      ops/scripts/deploy/provision-node.sh \
+      ops/scripts/auth/fix-redirects.sh \
+      ops/scripts/cloudflare-dns-upsert.sh \
+      scripts/git/zip_branches.sh; do \
+        [ -f \"$f\" ] || continue; \
+        echo '>>>>' \"$f\"; cat \"$f\"; echo; \
+      done \
+  ) > \"${outfile}\"
+}
