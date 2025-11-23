@@ -6,9 +6,29 @@ CFA_MONO_ROOT="${CFA_MONO_ROOT:-/home/user/__Repositories/yury-customer/prj_Cifr
 CFA_REPO="${CFA_REPO:-${CFA_MONO_ROOT}/repositories/customer-gitlab/ois-cfa}"
 CONTEXT_DIR="${CONTEXT_DIR:-${CFA_MONO_ROOT}/memory-bank/snapshots-aggregated-context-duplicates}"
 C2P_TEMPLATES_DIR="${C2P_TEMPLATES_DIR:-${HOME}/.config/code2prompt/templates}"
+COMPOSER_CFG="${COMPOSER_CFG:-${CFA_MONO_ROOT}/scripts/composer-config.yaml}"
 
 _ts() { date +"%Y%m%d-%H%M"; }
 _ensure_ctx_dir() { mkdir -p "${CONTEXT_DIR}"; }
+_load_yaml_list() {
+  local key=$1
+  python3 - <<'PY' "$COMPOSER_CFG" "$key"
+import sys, yaml
+cfg_path = sys.argv[1]
+key = sys.argv[2]
+with open(cfg_path, 'r', encoding='utf-8') as fh:
+    data = yaml.safe_load(fh) or {}
+parts = key.split('.')
+ref = data
+for p in parts:
+    ref = ref.get(p, {})
+if isinstance(ref, list):
+    print('\n'.join(ref))
+elif isinstance(ref, dict):
+    for k,v in ref.items():
+        print(f"{k}={v}")
+PY
+}
 
 # ---- code2prompt contexts (baseline patterns from 20251118 runbook) ----
 c2p_core_arch() {
@@ -120,6 +140,52 @@ c2p_core_arch_hbs() {
     echo
     cat "$outf"
   } > "${outf}.tmp" && mv "${outf}.tmp" "$outf"
+}
+
+# ---- config-driven aliases (non-breaking: add only) ----
+c2p_core_config() {
+  _ensure_ctx_dir
+  local ts=$(_ts)
+  local outf="${CONTEXT_DIR}/composers/code2prompt/${ts}-c2p-core-config.txt"
+  local includes excludes
+  includes=$(_load_yaml_list "include_sets.core")
+  excludes=$(_load_yaml_list "defaults.exclude")
+  code2prompt "${CFA_REPO}" \
+    -O "${outf}" \
+    -t "${CFA_MONO_ROOT}/scripts/code2prompt-curated.hbs" \
+    $(printf " -i '%s'" $includes) \
+    $(printf " -e '%s'" $excludes)
+}
+
+repomix_core_config() {
+  _ensure_ctx_dir
+  local ts=$(_ts)
+  mkdir -p "${CONTEXT_DIR}/composers/repomix"
+  local includes excludes
+  includes=$(_load_yaml_list "include_sets.core")
+  excludes=$(_load_yaml_list "defaults.exclude")
+  (cd "${CFA_REPO}" && \
+    { printf "%s\n" $includes; } | while read p; do find $p -type f; done | \
+    while read f; do skip=0; for ex in $excludes; do [[ $f == $ex ]] && skip=1; done; [[ $skip -eq 0 ]] && echo "$f"; done | \
+    repomix --stdin --style xml --output "${CONTEXT_DIR}/composers/repomix/${ts}-repomix-core-config.xml")
+}
+
+yek_core_config() {
+  _ensure_ctx_dir
+  local ts=$(_ts)
+  mkdir -p "${CONTEXT_DIR}/composers/yek"
+  local outfile="${CONTEXT_DIR}/composers/yek/${ts}-yek-core-config.txt"
+  local includes excludes
+  includes=$(_load_yaml_list "include_sets.core")
+  excludes=$(_load_yaml_list "defaults.exclude")
+  (cd "${CFA_REPO}" && \
+    for pat in $includes; do
+      for f in $(find $pat -type f); do
+        skip=0
+        for ex in $excludes; do [[ $f == $ex ]] && { skip=1; break; }; done
+        [[ $skip -eq 0 ]] && { echo '>>>>' "$f"; cat "$f"; echo; }
+      done
+    done) > "$outfile"
 }
 
 repomix_curated() {
