@@ -80,6 +80,22 @@ tree tests
 
 14 directories, 37 files
 ```
+
+
+# 2025-11-24 15:44 Call Notes Ilya-Alex
+1. Epics
+	1. Epics-Ilya
+		1. Verification
+		2. Issuance (Issuer)
+		3. Investor Products 
+			1. Get Products, Deposit, Buy Products, Profit withdrawal
+		4. Issuance Product Blockchain
+	2. User Path
+		1. Investor get Value (Register -> Kyc -> Discovery -> Deposit -> Buy -> Wait -> Profit withdraw)
+		2. Issuer get Value
+		3. Backoffice 
+			1. Investor Management pipeline/workdlows Epics
+			2. Issuer Management pipeline/workdlows Epics
 ````
 ## Aftercall Ilya mentions
 - [ ] Ilya 20251124: help with Fabric
