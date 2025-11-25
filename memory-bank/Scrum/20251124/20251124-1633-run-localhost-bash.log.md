@@ -39,3 +39,15 @@
 - K1 (J1): `docker-compose up -d` (base services) → `docker ps` проверить `api-gateway`/core → `curl -i -w "\nHTTP:%{http_code}\n" http://localhost:5000/health` → открыть локальные `/swagger` (gateway/core).
 - K2 (J2): Открыть `packages/contracts/openapi-gateway.yaml`, удалить дубли `/v1/complaints*`, добавить схемы `KycTask`, `ComplaintReplyRequest`, `ComplaintResolveRequest` → `make validate-specs` → `make generate-sdks`.
 - K3 (J3): Проверить `make e2e` вывод (указать BASE_URL/creds) → при необходимости `npm ci` в `tests/e2e-playwright` и установить Playwright browsers → зафиксировать pass/fail и причины.
+
+# K1 progress (2025-11-25)
+- Выполнено: base infra уже была запущена (kafka/zookeeper/postgres/keycloak/minio/redis).  
+- Попытка `docker compose -f docker-compose.yml -f docker-compose.services.yml up -d ...` (с и без `--no-deps`) завершилась ошибкой сборки .NET образов:  
+  - global.json требует SDK `9.0.109`, а базовый образ `mcr.microsoft.com/dotnet/sdk:9.0` содержит `9.0.308` → сборка `api-gateway` и `bank-nominal` падает `SDK not found` (exit 145).  
+  - `bank-nominal` тянется как depends_on для compliance; даже при `--no-deps` сборка gateway упала на той же проблеме с SDK.  
+- Итог: сервисы (`api-gateway`, `identity`, `issuance`, `registry`, `settlement`, `compliance`) не собраны/не подняты, health/Swagger проверить нельзя до решения SDK версии.
+
+### K1 unblock plan
+- Обновить образ SDK в Dockerfile-ах на тег с 9.0.1xx/9.0.109 (или установить нужный SDK через dotnet-install).  
+- Альтернатива: добавить `DOTNET_ROLL_FORWARD=Major` (или `latestMajor`) в build-env, если допустимо, чтобы 9.0.308 удовлетворил global.json.  
+- Временный обход: исключить `bank-nominal` из depends_on для локального запуска и использовать образ SDK с нужной версией для gateway/services.
