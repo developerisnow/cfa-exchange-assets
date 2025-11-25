@@ -1,3 +1,18 @@
+---
+project_type: customer
+status: ✅ ACTIVE
+---
+# Info
+- polymarket-AIR.project
+# Sessions
+
+| partAgentID | Location | Imprtance | Title                   | Status      | Description | Last task | lines | Context left | AgentID                              | Start     | End |
+| ----------- | -------- | --------- | ----------------------- | ----------- | ----------- | --------- | ----- | ------------ | ------------------------------------ | --------- | --- |
+| 5758        | eywa1    | garbage   | submodules              |             |             |           |       | 72%          | 019a87aa-5758-7e93-8f1a-8891d8ee8cda |           |     |
+| 2b00        | eywa1    |           |                         |             |             | git zip   | 17K   | 37%          | 80393ef5-2b00-49a8-921c-b450fd7345d3 |           |     |
+| 4359        | eywa1    |           | 🧠 🤖                   | PAUSE/MOVED |             |           | 20.3K | 48%          | 019a8d7c-4359-7f10-af4b-c3a292f2cbe3 | 20251121? |     |
+| 1f3d        | local    |           | help with localhost run | ACTIVE      |             |           |       | 86%          | 019ab60c-1f3d-7793-9f07-a29c81e99bf8 |           |     |
+
 # Workflow
 1. Prompt [[oracle.prompt]]
 2. Src/Docs Context. aggregation .txt snapshots (code2promp,repomix)
