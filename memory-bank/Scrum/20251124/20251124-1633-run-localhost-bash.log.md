@@ -51,3 +51,13 @@
 - Обновить образ SDK в Dockerfile-ах на тег с 9.0.1xx/9.0.109 (или установить нужный SDK через dotnet-install).  
 - Альтернатива: добавить `DOTNET_ROLL_FORWARD=Major` (или `latestMajor`) в build-env, если допустимо, чтобы 9.0.308 удовлетворил global.json.  
 - Временный обход: исключить `bank-nominal` из depends_on для локального запуска и использовать образ SDK с нужной версией для gateway/services.
+
+# K1 progress update (2025-11-25, later)
+- Сделано:  
+  - global.json скорректирован на 9.0.100; все Dockerfile .NET переведены на `mcr.microsoft.com/dotnet/sdk:9.0.100` + `DOTNET_ROLL_FORWARD=LatestMajor`.  
+  - `bank-nominal` закомментирован в compose (и убран из depends_on settlement) для ускорения локального старта.  
+  - `docker compose ... build api-gateway identity-service issuance-service registry-service settlement-service compliance-service` — успешно.  
+  - `docker compose ... up -d` для сервисов — успешно, health 200:  
+    - gateway 55000, identity 55001, issuance 55005, registry 55006, compliance 55008.  
+  - Swagger локально 404 на всех сервисах (нужен `Swagger__Enabled=true` или соответствующий конфиг/env).  
+- Что осталось по K1: включить Swagger (env или appsettings) и повторно проверить `/swagger`. Health пройдён. 
