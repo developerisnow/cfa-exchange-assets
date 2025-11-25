@@ -59,5 +59,5 @@
   - `docker compose ... build api-gateway identity-service issuance-service registry-service settlement-service compliance-service` — успешно.  
   - `docker compose ... up -d` для сервисов — успешно, health 200:  
     - gateway 55000, identity 55001, issuance 55005, registry 55006, compliance 55008.  
-  - Swagger локально 404 на всех сервисах (нужен `Swagger__Enabled=true` или соответствующий конфиг/env).  
-- Что осталось по K1: включить Swagger (env или appsettings) и повторно проверить `/swagger`. Health пройдён. 
+  - Добавлены `ASPNETCORE_ENVIRONMENT=Development` + `Swagger__Enabled=true` + `DisableHttpsRedirection=true` в compose для всех сервисов; после перезапуска `/swagger/index.html` → HTTP 200 на 55000/55001/55005/55006/55008.  
+- Что осталось по K1: на ветке main или другой compose без этих env по-прежнему 404 (см. вывод пользователя). Нужно либо перенести env/флаг в основной compose, либо включить Swagger в код (по флагу). Health локально пройден. 
