@@ -1,0 +1,86 @@
+Project Path: e2e-reports
+
+Source Tree:
+
+```txt
+e2e-reports
+├── 20251121-e2e-tests-report-results-by-agent-7b1b.md
+├── 20251123-e2e-tests-report-results-by-agent-d792.md
+├── 20251126-1336-e2e-tests-report-results-by-agent-a642.md
+└── 20251126-1337-e2e-tests-report-results-by-agent-44d5.md
+
+```
+
+`e2e-reports/20251121-e2e-tests-report-results-by-agent-7b1b.md`:
+
+```md
+# OIS‑CFA · E2E Playwright Report 
+
+| e2e-title                                       | playwright | filename                                                          | status    | Description                                                                                   | Comment                                                                                          |
+|------------------------------------------------|-----------:|-------------------------------------------------------------------|-----------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
+| keycloak admin console login works (cfa1)      |        yes | wt__ois-cfa__NX07/tests/e2e-playwright/tests/keycloak-admin-auth.spec.ts | work      | Логин admin/admin123 в `https://auth.cfa1.llmneighbors.com/admin` завершился успешно.        | Тест подтверждает, что admin‑консоль Keycloak работает без ошибок `somethingWentWrong`.         |
+| issuer portal authenticates via Keycloak (cfa1)|        yes | wt__ois-cfa__NX07/tests/e2e-playwright/tests/public-auth.spec.ts  | work      | Issuer портал (`issuer.cfa1.llmneighbors.com`) логинится через Keycloak и попадает на dashboard. | Ранее ломалось на `invalid_redirect_uri`; сейчас redirectUris/webOrigins и NEXTAUTH_URL выровнены. |
+| investor portal authenticates via Keycloak (cfa1)|      yes | wt__ois-cfa__NX07/tests/e2e-playwright/tests/public-auth.spec.ts  | work      | Investor портал (`investor.cfa1.llmneighbors.com`) логинится через Keycloak в `portfolio`.   | Аналогично issuer: проверен корректный OIDC flow и cookie‑сессия.                               |
+| backoffice admin authenticates via Keycloak (cfa1)|     yes | wt__ois-cfa__NX07/tests/e2e-playwright/tests/backoffice-auth.spec.ts | work   | Backoffice (`backoffice.cfa1.llmneighbors.com`) принимает admin@test.com/password123.        | Пришлось отключить VERIFY_PROFILE и выровнять NEXTAUTH_URL; теперь после логина нет 500/loops.  |
+| investor self-registration verifies email and logs in (cfa1)| yes | wt__ois-cfa__NX07/tests/e2e-playwright/tests/self-registration.spec.ts | work | Полный self‑registration flow на investor.cfa1 + mail.tm + повторный логин в `portfolio`.    | SMTP Keycloak через Postfix на cfa1 работает; финальный flow задокументирован скринами в artifacts. |
+| keycloak admin console login works (cfa2)      |         no | (план: копия keycloak-admin-auth.spec.ts с .env.cfa2)             | notRun    | Keycloak на cfa2 поднят и realm `ois-dev` создан, но e2e‑тест под cfa2 ещё не запускался.    | Требуется отдельный `.env.cfa2` и прогон того же сценария против `auth.cfa2.llmneighbors.com`.  |
+| issuer/investor/backoffice login via Keycloak (cfa2) |     no | (план: копия public-auth/backoffice-auth с .env.cfa2)             | notRun    | Backend/API и Keycloak для cfa2 работают, Nginx слушает `*.cfa2`, но порталы ещё не стартуют. | Нужен `npm install` + запуск Next.js порталов на fin2 (pm2/tmux) перед прогоном Playwright.     |
+| investor self-registration (cfa2)              |         no | (план: копия self-registration.spec.ts с .env.cfa2)               | notRun    | Почтовая цепочка и realm `ois-dev` на cfa2 готовы, но фронты не подняты → e2e не запускался. | После запуска порталов можно повторить cfa1‑сценарий, ожидаемый результат — полный зелёный flow. |
+
+
+```
+
+`e2e-reports/20251123-e2e-tests-report-results-by-agent-d792.md`:
+
+```md
+| e2e-title                      | playwright | filename                                                  | status  | Description                                                                               | Comment                                                                              |
+| ------------------------------ | ---------- | --------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Swagger availability (all svc) | yes        | tests/e2e-playwright/tests/swagger-all-services.spec.ts   | notWork | Проверка /swagger/index.html для gateway+identity+issuance+registry+settlement+compliance | 24 Nov: gateway/identity 200; остальные 404 на cfa1 (нужны образы с Swagger:Enabled) |
+| Swagger availability (gateway) | yes        | tests/e2e-playwright/tests/swagger-availability.spec.ts   | work    | Доступность Swagger gateway                                                               | 24 Nov: https://api.cfa1.llmneighbors.com/swagger/index.html → 200                   |
+| Backoffice KYC                 | yes        | tests/e2e-playwright/tests/backoffice-kyc.spec.ts         | notRun  | Логин backoffice, страница /kyc                                                           | Не запускалось в этой сессии (после мерджа develop)                                  |
+| Issuer dashboard/reports       | yes        | tests/e2e-playwright/tests/issuer-reports.spec.ts         | notRun  | Логин issuer, /dashboard и /reports                                                       | Не запускалось в этой сессии (после мерджа develop)                                  |
+| Issuer payout schedule stub    | yes        | tests/e2e-playwright/tests/issuer-payout-schedule.spec.ts | notRun  | Страница /payouts/schedule, добавление пункта                                             | Не запускалось в этой сессии (после мерджа develop)                                  |
+| Backoffice audit               | yes        | tests/e2e-playwright/tests/backoffice-audit.spec.ts       | notRun  | Логин backoffice, /audit таблица/фильтры                                                  | Не запускалось в этой сессии (после мерджа develop)                                  |
+
+```
+
+`e2e-reports/20251126-1336-e2e-tests-report-results-by-agent-a642.md`:
+
+```md
+
+| e2e-title | playwright | filename | status | Description | Comment |
+| --- | --- | --- | --- | --- | --- |
+| Swagger gateway availability | yes | tests/swagger-availability.spec.ts | work | Gateway swagger index reachable (HTTP 200) on CFA1 | Passed with default env; trace kept in playwright report |
+| Swagger all services | yes | tests/swagger-all-services.spec.ts | notWork | Issuance/registry/settlement/compliance swagger endpoints return 404 on CFA1 | Needs redeploy with `SWAGGER_ENABLED=true` for core services |
+| Issuer reports flow | no | tests/issuer-reports.spec.ts | notRun | Not executed in this session | Run after swagger endpoints fixed if needed |
+| Backoffice KYC | no | tests/backoffice-kyc.spec.ts | notRun | Not executed in this session | Run on demand after config changes |
+
+```
+
+`e2e-reports/20251126-1337-e2e-tests-report-results-by-agent-44d5.md`:
+
+```md
+
+
+Контекст: запуск `USE_KEYCLOAK_AUTH=true make e2e` на eywa1, локальный стек (gateway 55000, portals 3001/3002/3003, Keycloak 58080). Playwright=да везде.
+
+| e2e-title | playwright | filename | status | Description | Comment |
+|-----------|------------|----------|--------|-------------|---------|
+| swagger availability - gateway | yes | tests/swagger-availability.spec.ts | work | /swagger/index.html доступен | 200 OK |
+| swagger availability - identity | yes | tests/swagger-all-services.spec.ts | work | Identity swagger доступен | 200 OK |
+| swagger availability - issuance | yes | tests/swagger-all-services.spec.ts | work | Issuance swagger доступен | 200 OK |
+| swagger availability - registry | yes | tests/swagger-all-services.spec.ts | work | Registry swagger доступен | 200 OK |
+| swagger availability - settlement | yes | tests/swagger-all-services.spec.ts | work | Settlement swagger доступен | 200 OK |
+| swagger availability - compliance | yes | tests/swagger-all-services.spec.ts | work | Compliance swagger доступен | 200 OK |
+| investor self-registration verifies email and logs in | yes | tests/self-registration.spec.ts | work | Поток саморегистрации инвестора завершился | локальный стек |
+| backoffice admin authenticates via Keycloak | yes | tests/backoffice-auth.spec.ts | notWork | Не дождались заголовка «Дашборд» | Страница остаётся на mock-логине, KC форма не показалась |
+| backoffice audit page renders and filters | yes | tests/backoffice-audit.spec.ts | notWork | Не дождались заголовка «Дашборд» | Логин не прошёл через KC |
+| backoffice KYC page renders | yes | tests/backoffice-kyc.spec.ts | notWork | Не дождались заголовка «Дашборд» | Логин не прошёл через KC |
+| issuer payout schedule stub shows empty then adds item | yes | tests/issuer-payout-schedule.spec.ts | notWork | Не дождались «Главная/Dashboard» | Зависли на странице логина (mock) |
+| issuer dashboard renders KPIs | yes | tests/issuer-reports.spec.ts | notWork | Не дождались «Главная/Dashboard» | Зависли на странице логина (mock) |
+| issuer reports page shows table or empty state | yes | tests/issuer-reports.spec.ts | notWork | Не дождались «Главная/Dashboard» | Зависли на странице логина (mock) |
+| issuer portal authenticates via Keycloak | yes | tests/public-auth.spec.ts | notWork | Не дождались перехода на /dashboard | Кнопка KC нажата, но остались на mock-логине |
+| investor portal authenticates via Keycloak | yes | tests/public-auth.spec.ts | notWork | Strict-mode violation (2 кнопки «Войти») | Нужно выбирать KC кнопку и дожидаться KC формы |
+| swagger availability - gateway (duplicate aggregate) | yes | tests/swagger-all-services.spec.ts | work | Итог в агрегированном наборе | Входит в общий smoke |
+
+```

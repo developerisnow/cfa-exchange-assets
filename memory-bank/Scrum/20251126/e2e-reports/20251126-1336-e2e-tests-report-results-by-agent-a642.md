@@ -1,15 +1,3 @@
----
-created: 2025-11-26 13:36
-updated: 2025-11-26 13:36
-type: report
-sphere: exchange
-topic: e2e-tests-report
-author: codex
-agentID: unknown
-partAgentID: [co-76ca]
-version: 0.1.0
-tags: [playwright, swagger, cfa1]
----
 
 | e2e-title | playwright | filename | status | Description | Comment |
 | --- | --- | --- | --- | --- | --- |

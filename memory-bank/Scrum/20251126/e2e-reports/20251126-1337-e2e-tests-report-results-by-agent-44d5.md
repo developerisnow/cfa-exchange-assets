@@ -1,15 +1,4 @@
----
-created: 2025-11-26 13:37
-updated: 2025-11-26 13:37
-type: testing-report
-sphere: exchange
-topic: e2e-playwright-localhost
-author: Alex
-agentID: codex-cli-co-76ca
-partAgentID: [co-76ca]
-version: 1.0.0
-tags: [localhost, playwright, keycloak, e2e, smoke]
----
+
 
 Контекст: запуск `USE_KEYCLOAK_AUTH=true make e2e` на eywa1, локальный стек (gateway 55000, portals 3001/3002/3003, Keycloak 58080). Playwright=да везде.
 

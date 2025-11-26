@@ -1,0 +1,975 @@
+Project Path: architecture
+
+Source Tree:
+
+```txt
+architecture
+├── ois-cfa.reposcan.json
+├── project-C4.diagram.md
+└── project-reposcan.md
+
+```
+
+`architecture/ois-cfa.reposcan.json`:
+
+```json
+{
+    "meta": {
+      "repo": "repositories/customer-gitlab/ois-cfa",
+      "branch": "infra.defis.deploy",
+      "generated_at": "2025-11-18T09:05:00Z",
+      "summary": {
+        "domains": ["issuance", "registry", "settlement", "compliance", "identity"],
+        "tracks": ["spec-contracts", "backend-services", "api-gateway-frontends", "observability-security", "ci-infra"],
+        "trunk_branch_leaf_rules": {
+          "trunk": ["docs/context/**", "docs/deploy/**", "packages/contracts/**", "packages/domain/**"],
+          "branch": ["services/**", "apps/**", "ops/**", "ops/gitops/**"],
+          "leaf": ["tests/**", "ops/scripts/**", "tasks/NX-*.md", "memory-bank/**"]
+        },
+        "git_branches": {
+          "trunk": ["main", "develop (planned from infra.defis.deploy)"],
+          "branch": ["infra", "deploy", "infra.defis.deploy", "release/*"],
+          "leaf": ["feature/NX-*"]
+        }
+      }
+    },
+    "tree": {
+      "path": ".",
+      "type": "dir",
+      "children": [
+        {
+          "path": "apps",
+          "type": "dir",
+          "level": "branch",
+          "size_class": "L",
+          "tags": ["frontends", "edge"],
+          "children": [
+            {
+              "path": "apps/api-gateway",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "M",
+              "tags": ["gateway", "dotnet", "yarp"]
+            },
+            {
+              "path": "apps/portal-issuer",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "M",
+              "tags": ["frontend", "issuer", "nextjs"]
+            },
+            {
+              "path": "apps/portal-investor",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "M",
+              "tags": ["frontend", "investor", "nextjs"]
+            },
+            {
+              "path": "apps/backoffice",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "M",
+              "tags": ["frontend", "backoffice", "nextjs"]
+            },
+            {
+              "path": "apps/broker-portal",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "S",
+              "tags": ["frontend", "broker"]
+            },
+            {
+              "path": "apps/shared-ui",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "S",
+              "tags": ["frontend", "shared-ui", "design-system"]
+            }
+          ]
+        },
+        {
+          "path": "services",
+          "type": "dir",
+          "level": "branch",
+          "size_class": "L",
+          "tags": ["backend", "services"],
+          "children": [
+            {
+              "path": "services/issuance",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "M",
+              "tags": ["service", "issuance", "events-outbox"]
+            },
+            {
+              "path": "services/registry",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "M",
+              "tags": ["service", "registry", "orders", "wallets"]
+            },
+            {
+              "path": "services/settlement",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "M",
+              "tags": ["service", "settlement", "payouts"]
+            },
+            {
+              "path": "services/compliance",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "M",
+              "tags": ["service", "compliance", "kyc", "audit"]
+            },
+            {
+              "path": "services/identity",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "S",
+              "tags": ["service", "identity", "oidc"]
+            },
+            {
+              "path": "services/fabric-gateway",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "S",
+              "tags": ["service", "fabric", "dlt-adapter"]
+            },
+            {
+              "path": "services/integrations",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "S",
+              "tags": ["integrations"],
+              "children": [
+                {
+                  "path": "services/integrations/bank-nominal",
+                  "type": "dir",
+                  "level": "branch",
+                  "size_class": "S",
+                  "tags": ["integration", "bank"]
+                },
+                {
+                  "path": "services/integrations/esia-adapter",
+                  "type": "dir",
+                  "level": "branch",
+                  "size_class": "S",
+                  "tags": ["integration", "esia"]
+                },
+                {
+                  "path": "services/integrations/edo-connector",
+                  "type": "dir",
+                  "level": "branch",
+                  "size_class": "S",
+                  "tags": ["integration", "edo"]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "path": "packages",
+          "type": "dir",
+          "level": "trunk",
+          "size_class": "L",
+          "tags": ["packages"],
+          "children": [
+            {
+              "path": "packages/contracts",
+              "type": "dir",
+              "level": "trunk",
+              "size_class": "M",
+              "tags": ["contracts", "openapi", "asyncapi", "schemas"]
+            },
+            {
+              "path": "packages/domain",
+              "type": "dir",
+              "level": "trunk",
+              "size_class": "M",
+              "tags": ["domain", "value-objects"]
+            },
+            {
+              "path": "packages/sdks/typescript-gateway",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "S",
+              "tags": ["sdk", "typescript", "gateway-client"]
+            },
+            {
+              "path": "packages/sdks/ts",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "S",
+              "tags": ["sdk", "typescript", "api-client"]
+            },
+            {
+              "path": "packages/types/ts",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "S",
+              "tags": ["types", "json-schema-generated"]
+            },
+            {
+              "path": "packages/dotnet-clients/gateway",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "S",
+              "tags": ["sdk", "dotnet", "gateway-client"]
+            }
+          ]
+        },
+        {
+          "path": "docs",
+          "type": "dir",
+          "level": "trunk",
+          "size_class": "L",
+          "tags": ["docs"],
+          "children": [
+            {
+              "path": "docs/context",
+              "type": "dir",
+              "level": "trunk",
+              "size_class": "M",
+              "tags": ["context", "wbs", "rules"]
+            },
+            {
+              "path": "docs/architecture",
+              "type": "dir",
+              "level": "trunk",
+              "size_class": "M",
+              "tags": ["architecture", "c4", "api-specs"]
+            },
+            {
+              "path": "docs/frontend",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "S",
+              "tags": ["frontend-context"]
+            },
+            {
+              "path": "docs/deploy",
+              "type": "dir",
+              "level": "trunk",
+              "size_class": "M",
+              "tags": ["deploy", "uk1", "runbooks"]
+            },
+            {
+              "path": "docs/dlt",
+              "type": "dir",
+              "level": "trunk",
+              "size_class": "S",
+              "tags": ["fabric", "k8s"]
+            }
+          ]
+        },
+        {
+          "path": "ops",
+          "type": "dir",
+          "level": "branch",
+          "size_class": "L",
+          "tags": ["ops", "infra", "gitops"],
+          "children": [
+            {
+              "path": "ops/infra",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "M",
+              "tags": ["k8s", "helm", "timeweb", "otel", "prometheus"]
+            },
+            {
+              "path": "ops/gitops",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "M",
+              "tags": ["gitops", "argocd", "uk1"]
+            },
+            {
+              "path": "ops/scripts",
+              "type": "dir",
+              "level": "leaf",
+              "size_class": "S",
+              "tags": ["scripts", "healthchecks", "restore", "validate-specs"]
+            },
+            {
+              "path": "ops/fabric",
+              "type": "dir",
+              "level": "branch",
+              "size_class": "M",
+              "tags": ["fabric", "chaincode", "helm"]
+            }
+          ]
+        },
+        {
+          "path": "tests",
+          "type": "dir",
+          "level": "leaf",
+          "size_class": "L",
+          "tags": ["tests"],
+          "children": [
+            {
+              "path": "tests/issuance.Tests",
+              "type": "dir",
+              "level": "leaf",
+              "size_class": "S",
+              "tags": ["backend-tests", "issuance"]
+            },
+            {
+              "path": "tests/registry.Tests",
+              "type": "dir",
+              "level": "leaf",
+              "size_class": "S",
+              "tags": ["backend-tests", "registry"]
+            },
+            {
+              "path": "tests/settlement.Tests",
+              "type": "dir",
+              "level": "leaf",
+              "size_class": "S",
+              "tags": ["backend-tests", "settlement"]
+            },
+            {
+              "path": "tests/compliance.Tests",
+              "type": "dir",
+              "level": "leaf",
+              "size_class": "S",
+              "tags": ["backend-tests", "compliance"]
+            },
+            {
+              "path": "tests/contracts",
+              "type": "dir",
+              "level": "leaf",
+              "size_class": "S",
+              "tags": ["pact", "contracts"]
+            },
+            {
+              "path": "tests/e2e",
+              "type": "dir",
+              "level": "leaf",
+              "size_class": "S",
+              "tags": ["e2e", "smoke"]
+            },
+            {
+              "path": "tests/e2e-playwright",
+              "type": "dir",
+              "level": "leaf",
+              "size_class": "S",
+              "tags": ["playwright", "portals-journeys"]
+            }
+          ]
+        },
+        {
+          "path": "tasks",
+          "type": "dir",
+          "level": "leaf",
+          "size_class": "S",
+          "tags": ["nx-tasks", "agents"]
+        },
+        {
+          "path": "memory-bank",
+          "type": "dir",
+          "level": "leaf",
+          "size_class": "S",
+          "tags": ["decision-log", "reports"]
+        },
+        {
+          "path": "AGENTS.md",
+          "type": "file",
+          "level": "trunk",
+          "size_class": "S",
+          "tags": ["agents-rules"]
+        },
+        {
+          "path": "project.manifest.json",
+          "type": "file",
+          "level": "trunk",
+          "size_class": "S",
+          "tags": ["manifest", "monorepo-index"]
+        }
+      ]
+    },
+    "logical": {
+      "domains": {
+        "issuance": {
+          "services": ["services/issuance"],
+          "apps": ["apps/portal-issuer"],
+          "contracts": ["packages/contracts/openapi-issuance.yaml", "packages/contracts/schemas/Issuance.json"],
+          "tests": ["tests/issuance.Tests", "tests/e2e-playwright/issuer-journey.spec.ts"]
+        },
+        "registry": {
+          "services": ["services/registry"],
+          "apps": ["apps/portal-investor"],
+          "contracts": ["packages/contracts/openapi-registry.yaml", "packages/contracts/schemas/Order.json"],
+          "tests": ["tests/registry.Tests", "tests/contracts/pact-consumer", "tests/e2e-playwright/investor-journey.spec.ts"]
+        },
+        "settlement": {
+          "services": ["services/settlement"],
+          "apps": ["apps/backoffice"],
+          "contracts": ["packages/contracts/openapi-settlement.yaml", "packages/contracts/schemas/Payout.json"],
+          "tests": ["tests/settlement.Tests"]
+        },
+        "compliance": {
+          "services": ["services/compliance"],
+          "apps": ["apps/backoffice"],
+          "contracts": ["packages/contracts/openapi-compliance.yaml", "packages/contracts/schemas/AuditEvent.json"],
+          "tests": ["tests/compliance.Tests", "tests/e2e-playwright/backoffice-journey.spec.ts"]
+        },
+        "identity": {
+          "services": ["services/identity"],
+          "apps": ["apps/portal-issuer", "apps/portal-investor", "apps/backoffice"],
+          "contracts": ["packages/contracts/openapi-identity.yaml"],
+          "tests": []
+        }
+      },
+      "frontends": [
+        {
+          "name": "portal-issuer",
+          "root": "apps/portal-issuer",
+          "guards": ["role:issuer"],
+          "uses_sdk": "@ois/api-client"
+        },
+        {
+          "name": "portal-investor",
+          "root": "apps/portal-investor",
+          "guards": ["role:investor"],
+          "uses_sdk": "@ois/api-client"
+        },
+        {
+          "name": "backoffice",
+          "root": "apps/backoffice",
+          "guards": ["role:backoffice", "role:admin"],
+          "uses_sdk": "@ois/api-client"
+        }
+      ],
+      "ops": [
+        {
+          "name": "uk1",
+          "root": "docs/deploy/20251113-cloudflare-ingress.md",
+          "level": "trunk"
+        },
+        {
+          "name": "timeweb-k8s",
+          "root": "ops/infra/timeweb",
+          "level": "branch"
+        },
+        {
+          "name": "fabric-network",
+          "root": "ops/fabric",
+          "level": "branch"
+        }
+      ],
+      "tests": [
+        {
+          "name": "backend-unit",
+          "roots": [
+            "tests/issuance.Tests",
+            "tests/registry.Tests",
+            "tests/settlement.Tests",
+            "tests/compliance.Tests"
+          ]
+        },
+        {
+          "name": "e2e-portals",
+          "roots": [
+            "tests/e2e-playwright"
+          ]
+        }
+      ],
+      "nx_index": {
+        "NX-01": {
+          "title": "Spec validation + API/Event Matrix",
+          "task_doc": "tasks/NX-01-spec-validate-and-matrix.md",
+          "level": "branch",
+          "domains": ["cross-cutting"],
+          "nodes": [
+            "packages/contracts",
+            "docs/context/WBS-OIS.md",
+            "docs/architecture/api-event-matrix.md"
+          ]
+        },
+        "NX-02": {
+          "title": "API Gateway routing + health/metrics",
+          "task_doc": "tasks/NX-02-gateway-routing-and-health.md",
+          "level": "branch",
+          "domains": ["cross-cutting"],
+          "nodes": [
+            "apps/api-gateway",
+            "services/*",
+            "docs/ops/gateway-routing.md"
+          ]
+        },
+        "NX-03": {
+          "title": "Issuance endpoints alignment + tests",
+          "task_doc": "tasks/NX-03-issuance-endpoints-coverage.md",
+          "level": "branch",
+          "domains": ["issuance"],
+          "nodes": [
+            "services/issuance",
+            "tests/issuance.Tests",
+            "packages/contracts/openapi-issuance.yaml"
+          ]
+        },
+        "NX-04": {
+          "title": "Registry order flow (create→reserve→paid) + events",
+          "task_doc": "tasks/NX-04-registry-orders-flow.md",
+          "level": "branch",
+          "domains": ["registry"],
+          "nodes": [
+            "services/registry",
+            "tests/registry.Tests",
+            "packages/contracts/openapi-registry.yaml",
+            "packages/contracts/asyncapi.yaml"
+          ]
+        }
+      }
+    },
+    "anchors": [
+      {
+        "path": "docs/context/PROJECT-CONTEXT.md",
+        "role": "project-context",
+        "level": "trunk",
+        "tags": ["anchor", "context"]
+      },
+      {
+        "path": "docs/context/WBS-OIS.md",
+        "role": "wbs",
+        "level": "trunk",
+        "tags": ["anchor", "wbs", "nx"]
+      },
+      {
+        "path": "docs/frontend/context-map.md",
+        "role": "frontend-context",
+        "level": "branch",
+        "tags": ["anchor", "frontend", "contracts"]
+      },
+      {
+        "path": "AGENTS.md",
+        "role": "agents-rules",
+        "level": "trunk",
+        "tags": ["anchor", "agents", "rules"]
+      },
+      {
+        "path": "docs/deploy/20251113-cloudflare-ingress.md",
+        "role": "runbook:uk1",
+        "level": "trunk",
+        "tags": ["anchor", "ops", "uk1"]
+      },
+      {
+        "path": "docs/dlt/k8s-deploy.md",
+        "role": "runbook:fabric",
+        "level": "trunk",
+        "tags": ["anchor", "dlt", "k8s"]
+      },
+      {
+        "path": "tasks/NX-03-issuance-endpoints-coverage.md",
+        "role": "nx-task",
+        "level": "branch",
+        "tags": ["nx", "issuance"]
+      },
+      {
+        "path": "tasks/NX-04-registry-orders-flow.md",
+        "role": "nx-task",
+        "level": "branch",
+        "tags": ["nx", "registry"]
+      }
+    ]
+  }
+```
+
+`architecture/project-C4.diagram.md`:
+
+```md
+---
+created: 2025-11-11
+updated: 2025-11-18-1619
+author: AlexA
+co-authrors: gpt5
+type: diagram
+tags: c4
+previous:
+next:  [reposcan]
+related: []
+---
+
+# Project map
+
+## 1. C1–C4 диаграммы Mermaid
+
+### 1.1 C1 — System Context OIS‑CFA и внешние акторы
+
+Основано на PROJECT-CONTEXT, архитектурных openapi‑/asyncapi‑доках и описании интеграций с ESIA, банком, EDO и Fabric.
+
+```mermaid
+graph LR
+  %% People
+  subgraph Users
+    issuer[Person: Issuer]
+    investor[Person: Investor]
+    broker[Person: Broker]
+    backoffice[Person: Backoffice / Compliance]
+  end
+
+  %% Core system
+  ois[System: OIS-CFA Platform]
+
+  %% External systems
+  subgraph External_Systems
+    esia[[System: ESIA OIDC]]
+    bank[[System: Bank Nominal Core]]
+    edo[[System: EDO Provider]]
+    fabric[[System: Fabric DLT Network]]
+    regulator[[System: Regulator / CBR]]
+  end
+
+  %% People → System
+  issuer -->|Создание/управление выпусками, отчётность| ois
+  investor -->|Инвестиции, портфель, история операций| ois
+  broker -->|Брокерские операции, маркетплейс| ois
+  backoffice -->|KYC/AML, квалификация, аудит| ois
+
+  %% System → External systems
+  ois -->|OIDC login, профиль| esia
+  ois -->|Платежи, резервирование, списания| bank
+  ois -->|Юр. документы, подписание| edo
+  ois -->|Реестр активов, сделки на DLT| fabric
+  ois -->|Регуляторная отчётность, выгрузки| regulator
+```
+
+---
+
+### 1.2 C2 — Containers фронты, gateway, сервисы, инфраструктура
+
+Контейнеры взяты из дерева `apps/*`, `services/*`, `ops/infra/*`, `packages/contracts/*` и API/Event‑матрицы в PROJECT-CONTEXT.
+
+```mermaid
+graph TB
+  %% Frontend portals
+  subgraph Frontends
+    fe_issuer[Container: Portal Issuer Next.js\napps/portal-issuer]
+    fe_investor[Container: Portal Investor Next.js\napps/portal-investor]
+    fe_backoffice[Container: Backoffice Next.js\napps/backoffice]
+    fe_broker[Container: Broker Portal Next.js\napps/broker-portal]
+  end
+
+  %% Edge layer
+  subgraph Edge
+    api_gw[Container: API Gateway .NET + YARP\napps/api-gateway]
+    keycloak[Container: Keycloak IdP]
+  end
+
+  %% Domain services
+  subgraph Domain_Services
+    svc_issuance[Container: Issuance Service .NET\nservices/issuance]
+    svc_registry[Container: Registry Service .NET\nservices/registry]
+    svc_settlement[Container: Settlement Service .NET\nservices/settlement]
+    svc_compliance[Container: Compliance Service .NET\nservices/compliance]
+    svc_identity[Container: Identity Service .NET\nservices/identity]
+    svc_fabric_gw[Container: Fabric Gateway .NET\nservices/fabric-gateway]
+  end
+
+  %% Integrations
+  subgraph Integrations
+    svc_bank[Container: Bank Nominal Adapter\nservices/integrations/bank-nominal]
+    svc_esia[Container: ESIA Adapter\nservices/integrations/esia-adapter]
+    svc_edo[Container: EDO Connector\nservices/integrations/edo-connector]
+  end
+
+  %% Data & infra
+  subgraph Data_and_Infra
+    pg[Container: PostgreSQL cluster\nper service schema]
+    kafka[Container: Kafka broker\nevents from AsyncAPI]
+    minio[Container: MinIO / Object storage]
+    fabric[Container: Fabric network\norderer + peers + chaincode]
+    otel[Container: OTel Collector / Prometheus / Grafana]
+  end
+
+  %% Users → Frontends
+  issuer[Issuer] --> fe_issuer
+  investor[Investor] --> fe_investor
+  backoffice[Backoffice] --> fe_backoffice
+  broker[Broker] --> fe_broker
+
+  %% Frontends → Gateway
+  fe_issuer -->|HTTP + OIS TS SDK| api_gw
+  fe_investor --> api_gw
+  fe_backoffice --> api_gw
+  fe_broker --> api_gw
+
+  %% Gateway → Keycloak
+  api_gw -->|OIDC / JWT validation| keycloak
+
+  %% Gateway → Domain services REST
+  api_gw --> svc_issuance
+  api_gw --> svc_registry
+  api_gw --> svc_settlement
+  api_gw --> svc_compliance
+  api_gw --> svc_identity
+
+  %% Services → DB
+  svc_issuance --> pg
+  svc_registry --> pg
+  svc_settlement --> pg
+  svc_compliance --> pg
+  svc_identity --> pg
+
+  %% Services → Kafka outbox
+  svc_issuance -->|Outbox events| kafka
+  svc_registry -->|Outbox events| kafka
+  svc_settlement -->|Consume/payments| kafka
+  svc_compliance -->|Audit/kyc events| kafka
+
+  %% DLT
+  svc_issuance --> svc_fabric_gw
+  svc_registry --> svc_fabric_gw
+  svc_settlement --> svc_fabric_gw
+  svc_fabric_gw --> fabric
+
+  %% External integrations
+  svc_registry --> svc_bank
+  svc_compliance --> svc_esia
+  svc_compliance --> svc_edo
+
+  svc_bank --> bank_ext[[External: Bank Core]]
+  svc_esia --> esia_ext[[External: ESIA]]
+  svc_edo --> edo_ext[[External: EDO]]
+
+  %% Storage & observability
+  svc_compliance --> minio
+  api_gw --> otel
+  svc_issuance --> otel
+  svc_registry --> otel
+  svc_settlement --> otel
+  svc_compliance --> otel
+```
+
+---
+
+### 1.3 C3 — Components: Issuance & Registry NX‑03 / NX‑04
+
+Эти C3-диаграммы фокусируются на доменах, важнейших для NX‑03 issuance endpoints + tests и NX‑04 registry order flow.
+
+#### 1.3.1 C3 — Issuance Service `services/issuance`
+
+```mermaid
+graph TB
+  subgraph Issuance_Service["Issuance Service services/issuance"]
+    is_api[Component: HTTP API\nProgram.cs + Minimal APIs]
+    is_app[Component: IssuanceApplicationService\nIssuanceService.cs]
+    is_domain[Component: Domain Model\nIssuanceId / IssuanceStatus / ValueObjects\npackages/domain]
+    is_dbctx[Component: IssuanceDbContext\nIssuanceDbContext.cs]
+    is_outbox_svc[Component: OutboxService\nIOutboxService + impl]
+    is_outbox_bg[Component: OutboxPublisher\nBackgroundService]
+    is_ledger_port[Component: ILedgerIssuance port]
+    is_ledger_adp[Component: LedgerIssuanceAdapter\nHTTP → Fabric-Gateway]
+    is_metrics[Component: Metrics\nInfrastructure/Metrics.cs]
+  end
+
+  gw[Container: API Gateway] --> is_api
+
+  %% Inside service
+  is_api -->|Create/Get/Publish/Close issuance| is_app
+  is_app --> is_domain
+  is_app --> is_dbctx
+  is_app --> is_outbox_svc
+  is_app --> is_ledger_port
+
+  is_ledger_port --> is_ledger_adp
+  is_ledger_adp --> fabric_gw[Container: Fabric Gateway Service]
+
+  is_dbctx --> pg_is[PostgreSQL DB\nschema: issuance]
+  is_outbox_svc --> is_dbctx
+  is_outbox_bg --> is_dbctx
+  is_outbox_bg --> kafka_is[Kafka topics\nois.issuance.published / closed]
+
+  %% Cross-service consumers
+  kafka_is --> reg_svc[Container: Registry Service]
+  kafka_is --> set_svc[Container: Settlement Service]
+
+  %% Observability
+  is_api --> is_metrics
+  is_app --> is_metrics
+```
+
+Основные соответствия C3↔NX:
+
+* NX‑03 использует `is_api`, `is_app`, `is_dbctx`, `is_outbox_*`, `is_ledger_*` + их тесты `services/issuance/issuance.Tests`.
+
+---
+
+#### 1.3.2 C3 — Registry Service `services/registry`
+
+```mermaid
+graph TB
+  subgraph Registry_Service["Registry Service services/registry"]
+    reg_api[Component: HTTP API\nProgram.cs orders, wallets, redeem]
+    reg_app[Component: RegistryApplicationService\nRegistryService.cs]
+    reg_domain[Component: Domain Model\nWallet/Holding/Order/Transaction entities]
+    reg_dbctx[Component: RegistryDbContext]
+    reg_outbox_svc[Component: OutboxService]
+    reg_outbox_bg[Component: OutboxPublisher]
+    reg_bank_port[Component: IBankNominalService port]
+    reg_bank_client[Component: BankNominalClient\nHTTP → bank adapter]
+    reg_comp_port[Component: IComplianceService port]
+    reg_comp_client[Component: ComplianceClient\nHTTP → compliance]
+    reg_ledger_port[Component: ILedgerRegistry port]
+    reg_ledger_adp[Component: LedgerRegistryAdapter\nHTTP → Fabric-Gateway]
+  end
+
+  gw[Container: API Gateway] --> reg_api
+
+  %% Inside service
+  reg_api -->|/v1/orders, /v1/wallets, /v1/issuances/id/redeem| reg_app
+  reg_app --> reg_domain
+  reg_app --> reg_dbctx
+  reg_app --> reg_outbox_svc
+  reg_app --> reg_bank_port
+  reg_app --> reg_comp_port
+  reg_app --> reg_ledger_port
+
+  reg_bank_port --> reg_bank_client
+  reg_comp_port --> reg_comp_client
+  reg_ledger_port --> reg_ledger_adp
+
+  reg_bank_client --> bank_int[Container: Bank Nominal Integration]
+  reg_comp_client --> comp_svc[Container: Compliance Service]
+  reg_ledger_adp --> fabric_gw[Container: Fabric Gateway Service]
+
+  reg_dbctx --> pg_reg[PostgreSQL DB\nschema: registry]
+  reg_outbox_svc --> reg_dbctx
+  reg_outbox_bg --> reg_dbctx
+  reg_outbox_bg --> kafka_reg[Kafka topics\norders/*, registry.*]
+
+  kafka_reg --> set_svc[Container: Settlement Service]
+
+```
+
+Соответствие C3↔NX:
+
+* NX‑04 работает ровно по этому разрезу: `reg_api` маршруты /orders, /redeem, `reg_app` стейт‑машина заказа create→reserve→paid, зависимости на банк/комплаенс/Fabric и события в Kafka.
+
+---
+
+### 1.4 C4 — Code/Modules: `services/issuance`
+
+Этот C4‑уровень деталирует `services/issuance` на классы/модули и показывает, как они реализуют компоненты C3. Основано на `IssuanceDbContext`, DTO‑ах, Metrics, Dockerfile и тестах.
+
+```mermaid
+graph TB
+  %% Composition root
+  subgraph CompositionRoot["Composition Root"]
+    program["Program.cs\nDI, Minimal APIs, Auth, Metrics\nservices/issuance/Program.cs"]
+  end
+
+  %% API layer
+  subgraph ApiLayer["API Layer"]
+    dtoCreate["CreateIssuanceRequest\nDTO"]
+    dtoResponse["IssuanceResponse\nDTO"]
+    validators["FluentValidators\nCreateIssuanceRequestValidator, ... "]
+  end
+
+  %% Application layer
+  subgraph AppLayer["Application Layer"]
+    iIssuance["IIssuanceService"]
+    issuanceSvc["IssuanceService"]
+    iOutbox["IOutboxService"]
+    outboxSvc["OutboxService"]
+    iLedger["ILedgerIssuance"]
+    ledgerAdapter["LedgerIssuanceAdapter"]
+  end
+
+  %% Domain + Persistence
+  subgraph DomainAndPersistence["Domain + Persistence"]
+    domainValue["OIS.Domain\nIssuanceId, IssuanceStatus,\nSecurity, value objects"]
+    dbCtx["IssuanceDbContext"]
+    entIssuance["IssuanceEntity\ntable: issuances"]
+    entOutbox["OutboxMessage\ntable: outbox_messages"]
+  end
+
+  %% Infrastructure
+  subgraph Infrastructure["Infrastructure"]
+    metrics["Metrics\nrequest_duration_ms,\nrequest_errors_total"]
+    outboxBg["OutboxPublisher\nBackgroundService"]
+    efCore["EF Core + Npgsql provider"]
+    massTransit["MassTransit Kafka rider"]
+    docker["Dockerfile\nnet9.0 aspnet + sdk"]
+  end
+
+  %% External dependencies
+  httpFabric["HttpClient\n→ Fabric-Gateway API"]
+  postgresDb["PostgreSQL DB\nissuance schema"]
+  kafka["Kafka broker\nAsyncAPI topics"]
+
+  %% Wiring
+  program --> dtoCreate
+  program --> dtoResponse
+  program --> validators
+  program --> iIssuance
+
+  iIssuance --> issuanceSvc
+  issuanceSvc --> domainValue
+  issuanceSvc --> dbCtx
+  issuanceSvc --> iOutbox
+  issuanceSvc --> iLedger
+
+  iOutbox --> outboxSvc
+  iLedger --> ledgerAdapter
+
+  dbCtx --> entIssuance
+  dbCtx --> entOutbox
+  dbCtx --> efCore
+
+  outboxSvc --> dbCtx
+  outboxBg --> dbCtx
+  outboxBg --> massTransit
+
+  ledgerAdapter --> httpFabric
+
+  dbCtx --> postgresDb
+  massTransit --> kafka
+
+  program --> metrics
+  metrics --> outboxBg
+  docker --> program
+```
+
+Связь C3→C4:
+
+* C3‑компонент **HTTP API** = `Program.cs` + DTO/validators.
+* **IssuanceApplicationService** = `IssuanceService` + интерфейс `IIssuanceService`.
+* **Persistence** = `IssuanceDbContext` + `IssuanceEntity`/`OutboxMessage` + EF Core.
+* **Ledger adapter** = `ILedgerIssuance` + `LedgerIssuanceAdapter` + HttpClient.
+* **Outbox** = `IOutboxService` + `OutboxService` + `OutboxPublisher` + MassTransit/Kafka.
+
+
+```
+
+`architecture/project-reposcan.md`:
+
+```md
+
+## 2. RepoScan JSON map (единый артефакт)
+
+Ниже — конкретный пример `snapshots/reposcan/ois-cfa/infra.defis.deploy.reposcan.json`, совместимый с T/B/L‑моделью и NX‑схемой из aggregated‑talks, но заполненный **по текущему дереву `ois-cfa`**.
+
+### 2.1 Короткая T/B/L‑таблица для ориентира
+
+| Level  | В `ois-cfa` сейчас                                        | Примеры путей                                                                |
+| ------ | --------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Trunk  | Контракты, контекст, WBS, ключевые ops/runbook            | `docs/context/*`, `packages/contracts/*`, `packages/domain`, `docs/deploy/*` |
+| Branch | Каркас сервисов/фронтов/infra, ветка `infra.defis.deploy` | `services/*`, `apps/*`, `ops/infra/*`, `ops/gitops/*`                        |
+| Leaf   | Тесты, UI‑страницы, скрипты, NX‑таски                     | `tests/**`, `apps/*/src/**`, `ops/scripts/*`, `tasks/NX-*.md`                |
+
+(Эта таблица синхронизирована с описанием в aggregated‑talks и AGENTS/trees‑leaves‑docs.)
+
+эти C4‑диаграммы показывают **одну и ту же систему на четырёх масштабах**: от пользователей и внешних систем (C1), через контейнеры (C2), внутрь конкретных сервисов Issuance/Registry (C3) и до классов внутри `services/issuance` (C4). Они опираются на текущий snapshot `infra.defis.deploy`: реальные Program.cs, DbContext’ы, OpenAPI/AsyncAPI, фронтовый context‑map и WBS‑OIS, а не на старые диаграммы из `docs/architecture/c4` или reposcan 11‑го числа.
+
+По сравнению с прежним 2025‑11‑11 репосканом это описание **синхронно с кодом и NX‑каноном**: домены ровно те же, что в WBS (issuance/registry/settlement/compliance/identity), Edge‑слой — текущий `apps/api-gateway` с YARP‑маршрутами из API/Event‑матрицы, сервисы — фактические .NET‑микросервисы с outbox→Kafka и адаптерами к Fabric/банку/ЕСИА. Старый JSON описывал “планируемую” структуру; новый `infra.defis.deploy.reposcan.json` — это конкретная карта дерева, доменных групп, тестов и NX‑тасков, плюс явная T/B/L‑классификация по тем правилам, которые вы с Алексеем обсуждали в aggregated‑talks.
+
+Практически:
+
+* для **планирования NX‑тасков** планировщик или человек берёт `logical.nx_index[NX-*]`, смотрит связанные `nodes` и `anchors` и сразу видит, куда лезть (например, NX‑03 → `services/issuance` + `tests/issuance.Tests` + `openapi-issuance.yaml`; NX‑04 → `services/registry` + AsyncAPI и e2e‑journeys инвестора);
+* для **ревью архитектуры** можно идти “сверху вниз”: C1/C2 для внешних интеграций и границ системы, C3 для двух ключевых доменов, C4 для точечного аудита реализации (EF‑конфиг, outbox, ledger‑adapter);
+* для **онбординга разработчиков** JSON‑карта и диаграммы дают быстрый маршрут: “всё по issuance” или “всё по registry” вытаскивается из `logical.domains[*]`, а T/B/L и anchors подсказывают, какие файлы трогать можно, какие — только через NX‑таски и review. Это именно тот “map of the territory”, которого не хватало в прошлой итерации.
+
+```

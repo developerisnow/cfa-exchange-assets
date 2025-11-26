@@ -1,17 +1,4 @@
----
-created: 2025-11-24 20:10
-updated: 2025-11-24 20:10
-type: testing-report
-sphere: [devops, testing]
-topic: [ois-cfa, playwright, cfa1, cfa2]
-author: Alex (co-7b1b)
-agentID: 019a9c47-7b1b-7112-9672-694674728b0e
-partAgentID: [co-7b1b]
-version: 0.1.0
-tags: [e2e, playwright, cfa1, cfa2, auth, portals]
----
-
-# OIS‑CFA · E2E Playwright Report (Agent co‑7b1b)
+# OIS‑CFA · E2E Playwright Report 
 
 | e2e-title                                       | playwright | filename                                                          | status    | Description                                                                                   | Comment                                                                                          |
 |------------------------------------------------|-----------:|-------------------------------------------------------------------|-----------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
