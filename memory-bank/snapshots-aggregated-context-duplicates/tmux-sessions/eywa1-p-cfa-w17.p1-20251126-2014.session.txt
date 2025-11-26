@@ -12,7 +12,7 @@ bash: .: filename argument required
 bash: .: filename argument required                            
 .: usage: . filename [arguments]                               
 bash: : No such file or directory                              
-bash: : No such file or directory                              
+bash: : No such file or directory                              /Users/user/Backups/tmux/eywa1/p-cfa/eywa1-p-cfa-w19.p1-20251126-2020.session.txt 
 [08:41] user@eywa-ubuntu-8gb-hel1-2 prj_Cifra-rwa-exachange-assets (main+) $ codex --yolo                                      
 ╭───────────────────────────────────────────────────────╮      
 │ >_ OpenAI Codex (v0.63.0)                             │      
