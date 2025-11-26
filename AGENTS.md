@@ -87,6 +87,41 @@ tags: [relevant, tags]
 - **Minor (0.x.0)**: Significant additions/modifications
 - **Patch (0.0.x)**: Small fixes/updates
 
+# Frontend
+## Post-merge develop (2025-11-24)
+- В develop добавлены крупные изменения (Илья): новые страницы/навигация KYC/qualification, дизайн-система (`apps/_theme`), Vitest конфиги под каждый app, новые e2e в `e2e/` (issuer/backoffice/broker/investor), расширенные API-клиенты в backoffice/investor/issuer.
+- Работая в `codex/fix-cfa1-regressions`, не перезатирать изменения develop; конфликты решает Илья.
+
+## Tests layout
+- Разнести e2e/Vitest тесты по своим приложениям (issuer/investor/backoffice/broker) с использованием `apps/**/vitest.config.ts`.
+- Добавлять jsdoc в тест-файлы (описание сценария/ожиданий).
+
+# Backend
+## Swagger/AsyncAPI
+- Во всех сервисах (gateway, identity, issuance, registry, settlement, compliance) добавлен флаг `Swagger:Enabled` (Program.cs) и включён в appsettings для демо. В проде не полагаться на Dev env, включать `Swagger__Enabled=true` и защищать через nginx/basic auth/IP.
+- На cfa1 gateway/identity Swagger отдаёт 200; остальные сервисы требуют обновления образов с новым appsettings (старые образы без Swagger:Enabled давали 404).
+- AsyncAPI валиден (cli validate); warnings: нет id/tags/messageId. Просмотр через AsyncAPI Studio или `npx @asyncapi/cli preview docs`.
+
+## KYC/Contracts (предыдущий инкремент)
+- Чистка KYC контракта: добавлен `POST /v1/compliance/kyc`, decision body `decision`/`comment`, удалены дубли KycRequest; SPEC DIFF в `tasks/NX-07-backoffice-kyc-and-user-registry.SPEC-DIFF.md`. TS SDK перегенерирован.
+
+## Kafka
+- Использовать порты с префиксами (не дефолт 9092) из docker-compose. Для стабильности демо допускается `Kafka__Enabled=false` (MassTransit падал при Kafka=on); фиксировать явно.
+
+## NX-05..08 задачи
+- Файлы задач обновлялись до мерджа develop; после мерджа (24.11) перечитать и синхронизировать с новыми фронт-изменениями.
+
+# Ops
+## Ветки
+- Рабочая: `codex/fix-cfa1-regressions` (не ребейзить на develop, конфликты правит Илья). Develop — интеграционная, infra.defis.deploy — legacy baseline.
+
+## CFA1 Swagger текущее
+- gateway/identity: Swagger 200.
+- issuance/registry/settlement/compliance: требуется обновление образов с `Swagger__Enabled=true` (текущие старые образы дают 404 без Dev env).
+
+## CI/CD & Fabric
+- Требуется поднимать/поддерживать CI/CD и blockchain (Fabric) по докам/Makefile; после NX-05..08 — мониторинг (portainer.io) и CI/CD.
+
 ### Multi-Agent Collaboration Rules
 1. **SSOT Principle**: Update existing docs rather than creating duplicates
 2. **When updating another agent's document:**

@@ -1,0 +1,26 @@
+---
+created: 2025-11-24 20:10
+updated: 2025-11-24 20:10
+type: testing-report
+sphere: [devops, testing]
+topic: [ois-cfa, playwright, cfa1, cfa2]
+author: Alex (co-7b1b)
+agentID: 019a9c47-7b1b-7112-9672-694674728b0e
+partAgentID: [co-7b1b]
+version: 0.1.0
+tags: [e2e, playwright, cfa1, cfa2, auth, portals]
+---
+
+# OIS‑CFA · E2E Playwright Report (Agent co‑7b1b)
+
+| e2e-title                                       | playwright | filename                                                          | status    | Description                                                                                   | Comment                                                                                          |
+|------------------------------------------------|-----------:|-------------------------------------------------------------------|-----------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
+| keycloak admin console login works (cfa1)      |        yes | wt__ois-cfa__NX07/tests/e2e-playwright/tests/keycloak-admin-auth.spec.ts | work      | Логин admin/admin123 в `https://auth.cfa1.llmneighbors.com/admin` завершился успешно.        | Тест подтверждает, что admin‑консоль Keycloak работает без ошибок `somethingWentWrong`.         |
+| issuer portal authenticates via Keycloak (cfa1)|        yes | wt__ois-cfa__NX07/tests/e2e-playwright/tests/public-auth.spec.ts  | work      | Issuer портал (`issuer.cfa1.llmneighbors.com`) логинится через Keycloak и попадает на dashboard. | Ранее ломалось на `invalid_redirect_uri`; сейчас redirectUris/webOrigins и NEXTAUTH_URL выровнены. |
+| investor portal authenticates via Keycloak (cfa1)|      yes | wt__ois-cfa__NX07/tests/e2e-playwright/tests/public-auth.spec.ts  | work      | Investor портал (`investor.cfa1.llmneighbors.com`) логинится через Keycloak в `portfolio`.   | Аналогично issuer: проверен корректный OIDC flow и cookie‑сессия.                               |
+| backoffice admin authenticates via Keycloak (cfa1)|     yes | wt__ois-cfa__NX07/tests/e2e-playwright/tests/backoffice-auth.spec.ts | work   | Backoffice (`backoffice.cfa1.llmneighbors.com`) принимает admin@test.com/password123.        | Пришлось отключить VERIFY_PROFILE и выровнять NEXTAUTH_URL; теперь после логина нет 500/loops.  |
+| investor self-registration verifies email and logs in (cfa1)| yes | wt__ois-cfa__NX07/tests/e2e-playwright/tests/self-registration.spec.ts | work | Полный self‑registration flow на investor.cfa1 + mail.tm + повторный логин в `portfolio`.    | SMTP Keycloak через Postfix на cfa1 работает; финальный flow задокументирован скринами в artifacts. |
+| keycloak admin console login works (cfa2)      |         no | (план: копия keycloak-admin-auth.spec.ts с .env.cfa2)             | notRun    | Keycloak на cfa2 поднят и realm `ois-dev` создан, но e2e‑тест под cfa2 ещё не запускался.    | Требуется отдельный `.env.cfa2` и прогон того же сценария против `auth.cfa2.llmneighbors.com`.  |
+| issuer/investor/backoffice login via Keycloak (cfa2) |     no | (план: копия public-auth/backoffice-auth с .env.cfa2)             | notRun    | Backend/API и Keycloak для cfa2 работают, Nginx слушает `*.cfa2`, но порталы ещё не стартуют. | Нужен `npm install` + запуск Next.js порталов на fin2 (pm2/tmux) перед прогоном Playwright.     |
+| investor self-registration (cfa2)              |         no | (план: копия self-registration.spec.ts с .env.cfa2)               | notRun    | Почтовая цепочка и realm `ois-dev` на cfa2 готовы, но фронты не подняты → e2e не запускался. | После запуска порталов можно повторить cfa1‑сценарий, ожидаемый результат — полный зелёный flow. |
+
