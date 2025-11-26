@@ -1,0 +1,1593 @@
+Project Path: deploy
+
+Source Tree:
+
+```txt
+deploy
+├── 20251113-cloudflare-ingress.md
+├── API-DOCS-SWAGGER-ASYNCAPI.md
+├── MULTI_ACCOUNT_SETUP.md
+├── docker-compose-at-vps
+│   ├── 00-overview.md
+│   ├── 01-prereqs-and-host-prep.md
+│   ├── 02-env-and-compose.md
+│   ├── 03-infra.md
+│   ├── 04-services.md
+│   ├── 05-gateway.md
+│   ├── 06-keycloak.md
+│   ├── 07-frontends-dev-on-vps.md
+│   ├── 07-frontends.md
+│   ├── 08-smoke-tests.md
+│   ├── 09-troubleshooting.md
+│   └── 10-eywa1-control-plane-runbook.md
+└── localhost
+    ├── FRONTEND-STARTUP.md
+    ├── KEYCLOAK-SETUP.md
+    └── README.md
+
+```
+
+`deploy/20251113-cloudflare-ingress.md`:
+
+```md
+created: 2025-11-13 13:45
+updated: 2025-11-13 17:05
+type: operations-runbook
+sphere: devops
+topic: uk1 cloudflare ingress
+author: Alex (co-76ca)
+agentID: co-76ca
+partAgentID: [co-76ca]
+version: 0.2.0
+tags: [cloudflare, nginx, keycloak, demo, smtp]
+---
+
+# Goal
+Обеспечить публичный доступ к UK1-стенду (Keycloak + порталы + API) по доменам `*.cfa.llmneighbors.com`, используя Cloudflare (DNS + TLS), системный nginx и docker-compose override для Keycloak.
+
+# Scope
+- Сервера UK1 (`185.168.192.214`, Ubuntu, `/opt/ois-cfa`).
+- Cloudflare аккаунт `llmneighbors.com` (CLI/Token уже лежит в `/home/user/__Repositories/cloudflare__developerisnow/.env`).
+- Keycloak + порталы (pm2) + API gateway, без модификации .NET compose.
+
+- # Checklist
+- [x] Cloudflare DNS: A-записи `auth|issuer|investor|backoffice|api.cfa.llmneighbors.com → 185.168.192.214` (DNS only).
+- [x] Cloudflare SSL Mode = `Full`.
+- [x] Wildcard LE-сертификат `*.cfa.llmneighbors.com` выпущен в `/etc/letsencrypt/live/cfa.llmneighbors.com/`.
+- [x] `/etc/nginx/sites-available/cfa-portals.conf` развернут и nginx перезапущен.
+- [x] Docker override `ops/infra/uk1/docker-compose.keycloak-proxy.yml` активирован (`KEYCLOAK_PUBLIC_URL=https://auth.cfa.llmneighbors.com`).
+- [x] `.env.local` порталов обновлены, pm2 перезапущен.
+- [x] Keycloak clients/realm откорректированы (redirects, webOrigins, self-registration ON, verifyEmail ON).
+- [x] Playwright e2e (issuer/investor + self-registration + backoffice admin) проходит, отчёты в `tests/e2e-playwright/test-results/`.
+- [x] VPN `x-ui` выключен (порт 443 свободен).
+- [x] SMTP стек (Postfix + OpenDKIM) + SPF/DKIM/DMARC настроены; Keycloak использует локальный relay.
+- [x] Postfix слушает только `127.0.0.1` и `172.18.0.1` (docker bridge); внешний 25 порт закрыт.
+
+# Why → What → How → Result
+
+## Why
+- Демки должны открываться из браузера без SSH-туннелей.
+- Клиенты хотят использовать собственный домен (`*.cfa.llmneighbors.com`).
+- Надо иметь повторяемый чеклист для второго DevOps (Саша О.).
+
+## What
+- Cloudflare управляет DNS и выпускает wildcard сертификат (через DNS challenge).
+- Nginx на UK1 выполняет offload TLS + проксирует на локальные порты (Keycloak 8081, pm2 порталы 300x, API 5000).
+- docker-compose override поднимает Keycloak с правильным `KC_HOSTNAME_URL`.
+- `.env.local` порталов и Keycloak clients должны ссылаться на публичные URL.
+
+## How
+1. **DNS + SSL (Cloudflare CLI):**
+   ```bash
+   cd /home/user/__Repositories/cloudflare__developerisnow
+   source .env  # экспортирует CLOUDFLARE_API_TOKEN
+   CF_API_TOKEN="$CLOUDFLARE_API_TOKEN" flarectl dns create-or-update --zone llmneighbors.com --name auth.cfa --type A --content 185.168.192.214 --ttl 1
+   # повторить для issuer / investor / backoffice / api (DNS only)
+   # SSL mode
+   curl -sX PATCH "https://api.cloudflare.com/client/v4/zones/2f4591aa91796b09311095cfee03d817/settings/ssl" \
+     -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" \
+     --data '{"value":"full"}'
+   ```
+2. **Wildcard сертификат:**
+   ```bash
+   ssh -p 51821 root@185.168.192.214
+   mkdir -p /root/.secrets && chmod 700 /root/.secrets
+   cat > /root/.secrets/cloudflare.ini <<'EOF'
+   dns_cloudflare_api_token = ${CLOUDFLARE_API_TOKEN}
+   EOF
+   chmod 600 /root/.secrets/cloudflare.ini
+   certbot certonly --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/cloudflare.ini \
+     --dns-cloudflare-propagation-seconds 45 \
+     -d "*.cfa.llmneighbors.com" -d "cfa.llmneighbors.com" \
+     --agree-tos --email <ops@developerisnow.com> --non-interactive
+   ```
+3. **nginx:**
+   ```bash
+   apt-get install -y nginx
+   systemctl stop x-ui && systemctl disable x-ui   # освободить 443 (пересадим позже)
+   cd /opt/ois-cfa
+   env CFA_BASE_DOMAIN=cfa.llmneighbors.com \
+       AUTH_HOST=auth.cfa.llmneighbors.com \
+       ISSUER_HOST=issuer.cfa.llmneighbors.com \
+       INVESTOR_HOST=investor.cfa.llmneighbors.com \
+       BACKOFFICE_HOST=backoffice.cfa.llmneighbors.com \
+       API_HOST=api.cfa.llmneighbors.com \
+       envsubst < ops/infra/uk1/nginx-cfa-portals.conf > /etc/nginx/sites-available/cfa-portals.conf
+   ln -sf /etc/nginx/sites-available/cfa-portals.conf /etc/nginx/sites-enabled/cfa-portals.conf
+   rm -f /etc/nginx/sites-enabled/default
+   nginx -t && systemctl reload nginx
+   ```
+4. **docker-compose override:**
+   ```bash
+   cd /opt/ois-cfa
+   KEYCLOAK_PUBLIC_URL=https://auth.cfa.llmneighbors.com \
+   docker compose -f docker-compose.yml -f docker-compose.override.yml \
+     -f ops/infra/uk1/docker-compose.keycloak-proxy.yml up -d keycloak keycloak-proxy
+   ```
+5. **Клиенты + пользователи:**
+   ```bash
+   docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh config credentials --server http://localhost:8080 --realm master --user admin --password admin123
+   docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh update clients/<id> -r ois-dev -s "redirectUris=[\"https://issuer.cfa.llmneighbors.com/*\"]" -s "webOrigins=[\"https://issuer.cfa.llmneighbors.com\"]"
+   # повторить для investor/backoffice
+   docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh update realms/ois-dev/authentication/required-actions/VERIFY_PROFILE -s enabled=false -s defaultAction=false
+   ```
+6. **Порталы:**
+   ```bash
+   cat > /opt/ois-cfa/apps/portal-issuer/.env.local <<'EOF'
+   NEXT_PUBLIC_API_BASE_URL=https://api.cfa.llmneighbors.com
+   NEXT_PUBLIC_KEYCLOAK_URL=https://auth.cfa.llmneighbors.com
+   NEXT_PUBLIC_KEYCLOAK_REALM=ois-dev
+   NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=portal-issuer
+   NEXTAUTH_URL=https://issuer.cfa.llmneighbors.com
+   NEXTAUTH_SECRET=...
+   KEYCLOAK_CLIENT_SECRET=...
+   EOF
+   # аналогично для investor/backoffice
+   source /root/.nvm/nvm.sh && pm2 restart portal-issuer portal-investor portal-backoffice --update-env
+   ```
+7. **Проверка:**
+   ```bash
+   curl -I https://auth.cfa.llmneighbors.com
+   curl https://api.cfa.llmneighbors.com/health
+   cd tests/e2e-playwright && npm test
+   ```
+
+## Result
+- Пользовательские порталы и Keycloak доступны по HTTPS без SSH-туннелей.
+- Playwright обеспечивает «доказательство» логина (issuer/investor + self-registration).
+- SMTP цепочка (Postfix + OpenDKIM) выдаёт проверочные письма; Keycloak self-registration завершает flow без ручных действий.
+- Вся конфигурация задокументирована и может быть переиспользована для других VPS.
+
+## Email / SMTP / DKIM
+1. **Postfix + OpenDKIM**
+   ```bash
+   apt-get install -y postfix mailutils opendkim opendkim-tools
+   postconf -e 'inet_interfaces = all'
+   postconf -e 'mynetworks = 127.0.0.0/8 172.17.0.0/16 172.18.0.0/16'
+   postconf -e 'smtpd_recipient_restrictions = permit_mynetworks, reject_unauth_destination'
+   postconf -e 'smtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination'
+   systemctl enable --now opendkim postfix
+   ```
+
+   `/etc/opendkim.conf` (основное):
+   ```conf
+   UserID                  opendkim:opendkim
+   Socket                  inet:8891@127.0.0.1
+   KeyTable                refile:/etc/opendkim/KeyTable
+   SigningTable            refile:/etc/opendkim/SigningTable
+   InternalHosts           /etc/opendkim/TrustedHosts
+   ```
+   Ключ `mail._domainkey.cfa.llmneighbors.com` → TXT (см. Cloudflare ниже).
+
+2. **Cloudflare DNS для почты**
+   ```bash
+   # A-запись
+   curl -sX POST ... --data '{"type":"A","name":"mail.cfa.llmneighbors.com","content":"185.168.192.214","proxied":false}'
+   # MX
+   curl -sX POST ... --data '{"type":"MX","name":"cfa.llmneighbors.com","content":"mail.cfa.llmneighbors.com","priority":10}'
+   # SPF
+   curl -sX POST ... --data '{"type":"TXT","name":"cfa.llmneighbors.com","content":"v=spf1 ip4:185.168.192.214 ~all"}'
+   # DKIM
+   curl -sX POST ... --data '{"type":"TXT","name":"mail._domainkey.cfa.llmneighbors.com","content":"v=DKIM1; ..."}'
+   # DMARC
+   curl -sX POST ... --data '{"type":"TXT","name":"_dmarc.cfa.llmneighbors.com","content":"v=DMARC1; p=none; rua=mailto:ops@llmneighbors.com; fo=1"}'
+   ```
+
+3. **Keycloak realm SMTP**
+   ```bash
+   docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh config credentials --server http://localhost:8080 --realm master --user admin --password admin123
+   docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh update realms/ois-dev \
+     -s verifyEmail=true -s registrationAllowed=true \
+     -s "smtpServer.host=172.18.0.1" \
+     -s "smtpServer.port=25" \
+     -s "smtpServer.from=no-reply@cfa.llmneighbors.com" \
+     -s "smtpServer.replyTo=ops@llmneighbors.com" \
+     -s "smtpServer.envelopeFrom=no-reply@cfa.llmneighbors.com" \
+     -s "smtpServer.starttls=false" -s "smtpServer.ssl=false" -s "smtpServer.auth=false"
+   ```
+
+4. **Smoke**
+   ```bash
+   echo "SMTP ok" | mail -s "Test" cfa+demo@2200freefonts.com
+   tail -f /var/log/mail.log  # подтверждаем delivery
+   TOKEN=$(curl -s -X POST https://api.mail.tm/token ...)
+   curl -H "Authorization: Bearer $TOKEN" https://api.mail.tm/messages
+   ```
+   Playwright self-registration (`tests/e2e-playwright/tests/self-registration.spec.ts`) и backoffice spec (`tests/e2e-playwright/tests/backoffice-auth.spec.ts`) используют те же домены/SMTP.
+
+# Notes
+- `x-ui` (VPN) был отключён из-за конфликтов порта 443. При переносе на другой порт добавьте `sudo sed -i 's/:443/:<new_port>/' /etc/systemd/system/x-ui.service` и перезапустите nginx.
+- IaC артефакты: `ops/infra/uk1/nginx-cfa-portals.conf` и `ops/infra/uk1/docker-compose.keycloak-proxy.yml`.
+- Инструменты: `flarectl`, `wrangler`, `certbot-dns-cloudflare`, `pm2`, `playwright`, `mail.tm`.
+
+```
+
+`deploy/API-DOCS-SWAGGER-ASYNCAPI.md`:
+
+```md
+---
+created: 2025-11-23 13:30
+updated: 2025-11-24 11:20
+type: doc
+sphere: exchange
+topic: swagger-asyncapi-inventory
+author: codex-8c38
+agentID: 019aa5f8-8c38-7531-8809-841d16d27c63
+partAgentID: [co-8c38, co-76ca]
+version: 1.0.0
+tags: [swagger, asyncapi, docs, cfa1]
+---
+
+# Swagger / AsyncAPI inventory (dev vs CFA1)
+
+| Service | Swagger (dev) | Swagger (CFA1) | CFA1 HTTP (2025-11-24) | Protection / Notes |
+| --- | --- | --- | --- | --- |
+| API Gateway (`apps/api-gateway`) | http://localhost:5000/swagger/index.html | https://api.cfa1.llmneighbors.com/swagger/index.html | 200 | Public demo; add nginx basic auth / IP allowlist for prod |
+| Identity (`services/identity`) | http://localhost:55001/swagger/index.html | http://87.249.49.56:55001/swagger/index.html | 200 | Internal IP access; keep behind VPN/SSH tunnel |
+| Issuance (`services/issuance`) | http://localhost:55005/swagger/index.html | http://87.249.49.56:55005/swagger/index.html | 404 (Swagger disabled) | Enable via `Swagger__Enabled=true` + redeploy; Kafka off by default |
+| Registry (`services/registry`) | http://localhost:55006/swagger/index.html | http://87.249.49.56:55006/swagger/index.html | 404 (Swagger disabled) | Enable via `Swagger__Enabled=true` + redeploy; Kafka off by default |
+| Settlement (`services/settlement`) | http://localhost:55007/swagger/index.html | http://87.249.49.56:55007/swagger/index.html | 404 (Swagger disabled) | Enable via `Swagger__Enabled=true` + redeploy; Kafka off by default |
+| Compliance (`services/compliance`) | http://localhost:55008/swagger/index.html | http://87.249.49.56:55008/swagger/index.html | 404 (Swagger disabled) | Enable via `Swagger__Enabled=true` + redeploy; Kafka off by default |
+
+**Flags:** `Swagger__Enabled` read by all services even in Production; `docker-compose.services.yml` exports `SWAGGER_ENABLED=true`. Kafka now gated by `Kafka__Enabled` (default `false`) and `Kafka__BootstrapServers`.
+
+## Runtime modes matrix
+
+| Env | Swagger | Kafka | Mocks / notes |
+| --- | --- | --- | --- |
+| Dev/local (compose) | Enabled by default via `SWAGGER_ENABLED=true`; reachable on localhost ports from `.env` | Disabled by default (`KAFKA_ENABLED=false`); broker `kafka:9092` available if enabled | Ledger adapters use mocks; migrations off (`MIGRATE_ON_STARTUP=false`) |
+| CFA1 demo | Gateway + identity 200; core services currently 404 until redeploy with `SWAGGER_ENABLED=true` | Disabled (`Kafka__Enabled=false`); outbox collects events; enable once broker stable | Access via `api.cfa1.llmneighbors.com` and `87.249.49.56:{55001..55008}`; add basic auth/VPN for exposure |
+| UK1 reference | Read-only, no changes | Assumed disabled; do not modify | Reference only |
+
+## Kafka & events status
+
+- `Kafka:Enabled` flag added to issuance/registry/settlement/compliance; when `false` MassTransit and outbox publishers are skipped, HTTP + Swagger continue to work.
+- Topics mapped explicitly to AsyncAPI names (`ois.issuance.published/closed`, `ois.order.*`, `ois.compliance.flagged`, `ois.audit.logged`, `ois.payout.executed`).
+- Minimal flow: issuance `PublishAsync` writes `ois.issuance.published` (with `dltTxHash`) to outbox; when Kafka is enabled it publishes to the same topic.
+- AsyncAPI bumped to 1.1.0 (ledger hashes added, CFA1 server entry). Validation via `ops/scripts/validate-specs.sh` passes (only info-level notice to upgrade to AsyncAPI 3.0.0); latest run 2025-11-24.
+
+## Current checks (2025-11-24)
+
+- `PATH=$HOME/.dotnet:$PATH dotnet test services/compliance/compliance.csproj` ✓ (NU1504 warning about duplicate PackageReference).
+- Playwright `swagger-availability.spec.ts` ✓ (gateway 200).
+- Playwright `swagger-all-services.spec.ts` ❌ on CFA1 for issuance/registry/settlement/compliance (HTTP 404 — Swagger disabled there). Redeploy with `SWAGGER_ENABLED=true` expected to flip to 200.
+- `bash ops/scripts/validate-specs.sh` ✓ (AsyncAPI info: suggest upgrade to v3.0.0; latest run 2025-11-24).
+
+```
+
+`deploy/MULTI_ACCOUNT_SETUP.md`:
+
+```md
+---
+created: 2025-11-19 21:05
+updated: 2025-11-19 21:05
+type: runbook
+sphere: [devops]
+topic: [cloudflare, multi-account, domains]
+author: alex-a
+agentID: co-76ca
+partAgentID: [co-76ca, co-7b1b]
+version: 0.1.0
+tags: [cloudflare, dns, tls, zones, eywa1]
+---
+
+# Multi‑Account Cloudflare / Domains Setup (eywa1 Control Plane)
+
+Цель: позволить `eywa1` управлять несколькими Cloudflare‑аккаунтами и доменами (например, `*.cfa.llmneighbors.com` для UK1/cfa1 и отдельный домен/аккаунт для fin2/cfa2 или `*.cfa{n}.telex.global`) без жёсткого хардкода токенов и zone id.
+
+## 1. Где сейчас зашиты домены и токены
+
+- `docs/deploy/20251113-cloudflare-ingress.md`
+  - Жёстко использует зону `llmneighbors.com` и конкретный `zone_id` + `CLOUDFLARE_API_TOKEN` из `/home/user/__Repositories/cloudflare__developerisnow/.env`.
+- `docs/deploy/docker-compose-at-vps/10-eywa1-control-plane-runbook.md`
+  - Описывает DNS/TLS для `*.cfa.llmneighbors.com` и `*.cfa{1,2,3}.llmneighbors.com` как основной сценарий.
+- Скрипты `ops/scripts/deploy/provision-node.sh` и `ops/scripts/deploy/deploy-node.sh`
+  - **Не** содержат Cloudflare‑логики и доменов; работают только с SSH, Docker, tmux и git.
+- Практические команды на `eywa1`
+  - В текущих сессиях использовались одноразовые `curl`/`certbot` команды, где токен/zone id подтягивались из `.env` в репо `cloudflare__developerisnow`.
+
+Вывод: на данный момент Cloudflare‑детали находятся только в документации и ad‑hoc командах, что позволяет относительно безболезненно параметризовать их. Для новых зон (например, `telex.global`) используем отдельные `.env.*` с нужными `ACCOUNT_ID/ZONE_ID/TOKEN`.
+
+## 2. Принцип: конфигурируемость per‑node
+
+Для поддержки разных аккаунтов/доменов для разных нод (например, `cfa1.llmneighbors.com` в одном CF‑аккаунте и `cfa2.otherdomain.com` в другом) вводим явный конфиг на `eywa1`:
+
+- Отдельный `.env`/config per домен/аккаунт:
+  - Пример: `/home/user/__Repositories/cloudflare__developerisnow/.env.cfa1`
+  - Пример: `/home/user/__Repositories/cloudflare__developerisnow/.env.cfa2`
+- В них явным образом задаются:
+  - `CF_ZONE_NAME`
+  - `CF_ZONE_ID`
+  - `CF_API_TOKEN`
+  - (опционально) набор префиксов/хостов (`CF_HOST_PREFIXES=auth,issuer,investor,backoffice,api`).
+
+Эти файлы **не** коммитятся в репозиторий и живут только на `eywa1` (как и сейчас `.env` для llmneighbors).
+
+## 3. Пример: два разных домена/аккаунта (llmneighbors + telex.global)
+
+```bash
+# /home/user/__Repositories/cloudflare__developerisnow/.env.cfa1
+CF_ZONE_NAME=llmneighbors.com
+CF_ZONE_ID=<zone-id-cfa1>
+CF_API_TOKEN=<token-for-llmneighbors-account>
+CF_HOST_PREFIXES=auth,issuer,investor,backoffice,api
+CF_BASE_LABEL=cfa1
+
+# /home/user/__Repositories/cloudflare__developerisnow/.env.cfa2.telex
+CF_ZONE_NAME=telex.global
+CF_ZONE_ID=<zone-id-telex>
+CF_API_TOKEN=<token-for-telex-account>
+CF_ACCOUNT_ID=<account-id-telex>
+CF_HOST_PREFIXES=auth,issuer,investor,backoffice,api
+CF_BASE_LABEL=cfa2
+```
+
+Тогда сценарий на `eywa1` для cfa1:
+
+```bash
+cd /home/user/__Repositories/cloudflare__developerisnow
+set -a && source .env.cfa1 && set +a
+
+for host in ${CF_HOST_PREFIXES//,/ }; do
+  NAME=\"${host}.${CF_BASE_LABEL}\"
+  # auth.cfa1.llmneighbors.com, issuer.cfa1.llmneighbors.com, ...
+  # используем CF_ZONE_NAME/CF_ZONE_ID/CF_API_TOKEN для upsert
+done
+```
+
+А для fin2/cfa2:
+
+```bash
+set -a && source .env.cfa2.telex && set +a
+
+for host in ${CF_HOST_PREFIXES//,/ }; do
+  NAME=\"${host}.${CF_BASE_LABEL}\"
+  # auth.cfa2.telex.global, issuer.cfa2.telex.global, ...
+done
+```
+
+## 4. Интеграция с runbook’ами и скриптами
+
+- Runbook `20251113-cloudflare-ingress.md`
+  - Оставляем как UK1‑специализированный (llmneighbors), но добавляем ссылку на этот документ как на общий план для других зон.
+- Runbook `10-eywa1-control-plane-runbook.md`
+  - Подразумевает, что DNS/TLS можно поднять не только для `*.cfa{N}.llmneighbors.com`, но и для других доменов, если заданы соответствующие `.env.*` файлы.
+- Скрипты `provision-node.sh`/`deploy-node.sh`
+  - Осознанно **не** привязываем к Cloudflare, чтобы не шить в них секреты и zone id.
+  - DNS/TLS остаются шагами уровня runbook/оператора, а не «автоматической магией» в скриптах.
+
+### 4.1 Cloudflare helper script
+
+Для унификации работы с Cloudflare добавлен вспомогательный скрипт:
+
+- `ops/scripts/cloudflare-dns-upsert.sh`
+  - Аргументы:
+    - `$1` — путь к env‑файлу (`.env.cfa1`, `.env.cfa2`, …).
+    - `$2` — IP‑адрес целевого узла.
+  - Использует переменные из env‑файла:
+    - `CF_ZONE_NAME`, `CF_ZONE_ID`, `CF_API_TOKEN`
+    - `CF_HOST_PREFIXES` (например, `auth,issuer,investor,backoffice,api`)
+    - `CF_BASE_LABEL` (например, `cfa1` / `demo`).
+  - Для каждого префикса upsert‑ит A‑запись вида `<prefix>.<CF_BASE_LABEL>.<CF_ZONE_NAME>`.
+
+Примеры:
+
+```bash
+# cfa1 (llmneighbors)
+./ops/scripts/cloudflare-dns-upsert.sh \
+  /home/user/__Repositories/cloudflare__developerisnow/.env.cfa1 \
+  87.249.49.56
+
+# fin2 / cfa2 (telex.global)
+./ops/scripts/cloudflare-dns-upsert.sh \
+  /home/user/__Repositories/cloudflare__developerisnow/.env.cfa2.telex \
+  65.109.171.138
+```
+
+## 5. DoD для multi‑account Cloudflare
+
+- Для каждого окружения (`cfa1`, `cfa2/fin2`, будущие us1/germ1):
+  - Есть отдельный `.env.<env>` с `CF_ZONE_NAME`, `CF_ZONE_ID`, `CF_API_TOKEN`.
+  - Документация (этот файл и `10-eywa1-control-plane-runbook.md`) описывает, как выбирать нужный `.env.<env>` перед запуском DNS/TLS шагов.
+  - Нет жёстко зашитых zone id/token’ов в коде скриптов; все секреты подтягиваются из локальных `.env` на `eywa1`.
+
+```
+
+`deploy/docker-compose-at-vps/00-overview.md`:
+
+```md
+---
+created: 2025-11-11 15:20
+updated: 2025-11-11 15:20
+type: runbook
+sphere: [devops]
+topic: [deploy, docker-compose, vps]
+author: alex-a
+agentID: co-3a68
+partAgentID: [co-3a68]
+version: 1.0.0
+tags: [compose, linux, dotnet, keycloak]
+---
+
+# OIS‑CFA · Deploy на VPS (Docker Compose) — Обзор
+
+Цель: поднять полный dev‑контур на VPS с Docker Compose: инфраструктура, .NET‑сервисы, API‑шлюз, Keycloak, и (опционально) веб‑клиенты.
+
+Ключевые принципы
+- [ ] Используем non‑standard порты, чтобы не конфликтовать с окружением
+- [ ] Сборка выполняется поэтапно (низкая RAM) — «infra → services → gateway → web»
+- [ ] Миграции БД включаем флагом `MIGRATE_ON_STARTUP=true` (по умолчанию off)
+- [ ] Логи читаем через `docker logs`, готовность через `/health`
+
+Состав контура (порты по умолчанию)
+- API Gateway: `55000`
+- Identity: `55001`
+- Issuance: `55005`
+- Registry: `55006`
+- Settlement: `55007`
+- Compliance: `55008`
+- PostgreSQL: `55432`
+- Kafka: `59092`, ZooKeeper: `52181`
+- Keycloak: `58080`
+- Minio: `59000` (S3), `59001` (Console)
+
+Структура документации
+- 01 — Подготовка VPS и Docker
+- 02 — Настройка `.env` и Compose
+- 03 — Инфраструктура
+- 04 — .NET‑сервисы
+- 05 — API‑шлюз
+- 06 — Keycloak (realm/clients)
+- 07 — Веб‑клиенты (Next.js)
+- 08 — Smoke‑тесты
+- 09 — Траблшутинг
+
+
+```
+
+`deploy/docker-compose-at-vps/01-prereqs-and-host-prep.md`:
+
+```md
+---
+created: 2025-11-11 15:20
+updated: 2025-11-11 15:20
+type: runbook
+sphere: [devops]
+topic: [prereqs, host-prep]
+author: alex-a
+agentID: co-3a68
+partAgentID: [co-3a68]
+version: 1.0.0
+tags: [linux, docker, swap]
+---
+
+# 01 — Подготовка VPS (Ubuntu) и Docker
+
+Аппаратные требования (dev)
+- [ ] CPU 2 vCPU+
+- [ ] RAM 2–4 ГБ (на 2 ГБ добавить swap, см. ниже)
+- [ ] Диск 20+ ГБ
+
+Проверка ОС и ресурсов
+- [ ] `uname -a`
+- [ ] `df -hT`
+- [ ] `free -m`
+
+Установка Docker + Compose
+- [ ] ```bash
+  curl -fsSL https://get.docker.com | sh
+  ```
+- [ ] Проверка версий: `docker --version && docker compose version`
+
+Swap 2 ГБ (для стабильной сборки .NET/Node)
+- [ ] ```bash
+  sudo fallocate -l 2G /swapfile || sudo dd if=/dev/zero of=/swapfile bs=1M count=2048
+  sudo chmod 600 /swapfile
+  sudo mkswap /swapfile
+  sudo swapon /swapfile
+  echo "/swapfile none swap sw 0 0" | sudo tee -a /etc/fstab
+  free -m
+  ```
+
+Сетевые порты (если нужен внешний доступ)
+- [ ] На сервере UFW может быть выключен (ок): `sudo ufw status`
+- [ ] Часто блок на стороне провайдера: открыть TCP 55000/1/5/6/7/8, 58080, 59000/59001, 55432, 59092, 52181
+- [ ] Альтернатива — SSH‑туннели (см. раздел 07 и 09)
+
+
+```
+
+`deploy/docker-compose-at-vps/02-env-and-compose.md`:
+
+```md
+---
+created: 2025-11-11 15:21
+updated: 2025-11-11 15:21
+type: runbook
+sphere: [devops]
+topic: [env, compose]
+author: alex-a
+agentID: co-3a68
+partAgentID: [co-3a68]
+version: 1.0.0
+tags: [compose, env]
+---
+
+# 02 — Настройка `.env` и Compose файлов
+
+Репозиторий и путь
+- [ ] Код расположен в `/opt/ois-cfa`
+- [ ] Файлы Compose:
+  - `docker-compose.yml` (инфраструктура)
+  - `docker-compose.override.yml` (порты/переменные из `.env`)
+  - `docker-compose.kafka.override.yml` (Kafka образ для dev)
+  - `docker-compose.services.yml` (.NET сервисы + API gateway)
+  - `docker-compose.apps.yml` (опционально: фронтенды Next.js)
+
+Переменные окружения (`.env`)
+- [ ] Открыть `./ois-cfa/.env` и проверить:
+  - [ ] Порты сервисов: `GATEWAY_HOST_PORT=55000`, `IDENTITY_HOST_PORT=55001`, `ISSUANCE_HOST_PORT=55005`, `REGISTRY_HOST_PORT=55006`, `SETTLEMENT_HOST_PORT=55007`, `COMPLIANCE_HOST_PORT=55008`
+  - [ ] Инфра: `POSTGRES_HOST_PORT=55432`, `KAFKA_HOST_PORT=59092`, `ZOOKEEPER_HOST_PORT=52181`, `KEYCLOAK_HOST_PORT=58080`, `MINIO_HOST_PORT=59000`, `MINIO_CONSOLE_PORT=59001`
+  - [ ] Соединения: `SERVICE_DB_CONN=Host=postgres;Port=5432;Database=ois;Username=ois;Password=ois_dev_password`
+  - [ ] Kafka bootstrap: `KAFKA_BOOTSTRAP=kafka:9092`
+  - [ ] (Опционально для фронтов) `API_PUBLIC_URL`, `KEYCLOAK_PUBLIC_URL`, `KEYCLOAK_REALM`, `ISSUER_HOST_PORT`, `INVESTOR_HOST_PORT`, `BACKOFFICE_HOST_PORT`
+
+Git/синхронизация кода на VPS
+- [ ] Если нужно обновить код из локали: 
+  ```bash
+  rsync -az --delete --exclude '.git' --exclude 'node_modules' ././ois-cfa/ cfa1:/opt/ois-cfa/
+  ```
+
+
+```
+
+`deploy/docker-compose-at-vps/03-infra.md`:
+
+```md
+---
+created: 2025-11-11 15:21
+updated: 2025-11-11 15:21
+type: runbook
+sphere: [devops]
+topic: [infra, postgres, kafka, keycloak, minio]
+author: alex-a
+agentID: co-3a68
+partAgentID: [co-3a68]
+version: 1.0.0
+tags: [compose, infra]
+---
+
+# 03 — Инфраструктура (Postgres, Kafka/ZK, Keycloak, Minio)
+
+Запуск инфраструктуры
+- [ ] ```bash
+  cd /opt/ois-cfa
+  docker compose -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.kafka.override.yml up -d
+  ```
+- [ ] Проверить контейнеры: 
+  - `docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"`
+
+Health/порты (локально на сервере)
+- [ ] Postgres: `docker exec -it ois-postgres pg_isready -U ois`
+- [ ] Keycloak: порт `58080` (админ admin/admin123), URL: `http://localhost:58080`
+- [ ] Minio: `http://localhost:59001` (minioadmin/minioadmin)
+
+Примечание по Kafka
+- [ ] В dev используем образ `confluentinc/cp-kafka:7.5.0` (через override)
+
+
+```
+
+`deploy/docker-compose-at-vps/04-services.md`:
+
+```md
+---
+created: 2025-11-11 15:22
+updated: 2025-11-11 15:22
+type: runbook
+sphere: [devops]
+topic: [services, dotnet]
+author: alex-a
+agentID: co-3a68
+partAgentID: [co-3a68]
+version: 1.0.0
+tags: [dotnet, compose]
+---
+
+# 04 — .NET‑сервисы (поэтапный запуск)
+
+Общие правила
+- [ ] На малых VPS собирать по одному сервису (RAM 2 ГБ)
+- [ ] Миграции БД — через флаг `MIGRATE_ON_STARTUP=true` (по умолчанию не применяются)
+- [ ] Проверка готовности: `/health` на соответствующем порту
+
+Identity Service
+- [ ] ```bash
+  cd /opt/ois-cfa
+  C="-f docker-compose.yml -f docker-compose.override.yml -f docker-compose.kafka.override.yml -f docker-compose.services.yml"
+  docker compose $C build identity-service && docker compose $C up -d identity-service
+  curl -sS -o /dev/null -w "%{http_code}\n" http://localhost:55001/health
+  ```
+
+Registry Service
+- [ ] ```bash
+  docker compose $C build --no-cache registry-service
+  MIGRATE_ON_STARTUP=false docker compose $C up -d registry-service
+  curl -sS -o /dev/null -w "%{http_code}\n" http://localhost:55006/health
+  ```
+
+Issuance Service (dev‑правки учтены)
+- [ ] Примечание: в dev отключены Prometheus‑экспортер и scraping endpoint, авто‑валидация временно выключена
+- [ ] ```bash
+  docker compose $C build --no-cache issuance-service
+  MIGRATE_ON_STARTUP=false docker compose $C up -d issuance-service
+  curl -sS -o /dev/null -w "%{http_code}\n" http://localhost:55005/health
+  ```
+
+Settlement Service
+- [ ] ```bash
+  docker compose $C build settlement-service
+  MIGRATE_ON_STARTUP=false docker compose $C up -d settlement-service
+  curl -sS -o /dev/null -w "%{http_code}\n" http://localhost:55007/health
+  ```
+
+Compliance Service
+- [ ] ```bash
+  docker compose $C build compliance-service
+  MIGRATE_ON_STARTUP=false docker compose $C up -d compliance-service
+  curl -sS -o /dev/null -w "%{http_code}\n" http://localhost:55008/health
+  ```
+
+Логи и статус
+- [ ] `docker compose $C ps`
+- [ ] `docker logs -f <service>`
+
+
+```
+
+`deploy/docker-compose-at-vps/05-gateway.md`:
+
+```md
+---
+created: 2025-11-11 15:22
+updated: 2025-11-11 15:22
+type: runbook
+sphere: [devops]
+topic: [gateway, yarp]
+author: alex-a
+agentID: co-3a68
+partAgentID: [co-3a68]
+version: 1.0.0
+tags: [yarp, reverse-proxy]
+---
+
+# 05 — API Gateway (YARP)
+
+Сборка и запуск
+- [ ] ```bash
+  cd /opt/ois-cfa
+  C="-f docker-compose.yml -f docker-compose.override.yml -f docker-compose.kafka.override.yml -f docker-compose.services.yml"
+  docker compose $C build api-gateway && docker compose $C up -d api-gateway
+  curl -sS -o /dev/null -w "%{http_code}\n" http://localhost:55000/health
+  ```
+
+Примечания по маршрутам
+- [ ] Маршруты читаются из `apps/api-gateway/appsettings.json` (секция `ReverseProxy`)
+- [ ] Исправлено правило redeem: `"/v1/issuances/{id}/redeem"` (catch‑all в середине запрещён)
+
+Проверки
+- [ ] `/health` → 200
+- [ ] Запросы на `/v1/orders/{id}`, `/v1/wallets/{investorId}` возвращают 404 (NotFound), если нет данных — это нормальная реакция
+
+
+```
+
+`deploy/docker-compose-at-vps/06-keycloak.md`:
+
+```md
+---
+created: 2025-11-11 15:23
+updated: 2025-11-21 12:30
+type: runbook
+sphere: [devops]
+topic: [keycloak, oidc]
+author: alex-a
+agentID: co-3a68
+partAgentID: [co-3a68]
+version: 1.0.1
+tags: [keycloak, oidc]
+---
+
+# 06 — Keycloak (realm/clients)
+
+Параметры
+- [ ] URL (внутри compose сети): `http://keycloak:8080`
+- [ ] URL (на хосте): `http://localhost:58080`
+- [ ] Админ: `admin/admin123`
+- [ ] Realm: `ois`
+
+Бутстрап realm и клиентов (issuer, investor, backoffice)
+- [ ] ```bash
+  cd /opt/ois-cfa
+  chmod +x ops/keycloak/bootstrap-realm.sh
+  docker exec ois-keycloak bash -lc "bash -s" < ops/keycloak/bootstrap-realm.sh
+  ```
+- [ ] Скрипт создаёт клиентов с redirect URIs по публичным URL (редактируем переменные в начале при необходимости)
+- [ ] Демо‑пользователи: `investor/Passw0rd!`, `issuer/Passw0rd!`, `backoffice/Passw0rd!`
+
+Внешний доступ
+- [ ] Если 58080 недоступен снаружи — это, вероятно, фаервол провайдера
+- [ ] Временное решение: SSH‑туннель (см. 07 и 09)
+
+## CFA1 login recovery (2025-11-21)
+- Убедиться, что контейнер запущен: `docker ps | grep ois-keycloak`
+- Сбросить пароль тестового пользователя (realm `ois-dev`):  
+  `docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh config credentials --server http://localhost:8080 --realm master --user admin --password admin123`  
+  `docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh set-password -r ois-dev --username alexabook1 --new-password 'zdwouE$ybQ!4!hCHRtG!ML76HHuA2p' --temporary=false`
+- Принудительно включить/подтвердить почту при проблемах с логином:  
+  `docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh update users/$(docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh get users -r ois-dev -q username=alexabook1 --fields id --format csv | tr -d '\r\n') -r ois-dev -s enabled=true -s emailVerified=true`
+- Админ логин: `https://auth.cfa1.llmneighbors.com/admin` (admin/admin123 по умолчанию).
+
+```
+
+`deploy/docker-compose-at-vps/07-frontends-dev-on-vps.md`:
+
+```md
+# Frontends on VPS (Dev mode)
+
+## ✅ TL;DR
+- Запускаем фронтенды в dev-режиме на VPS (без Docker)
+- Порты: 3001 (issuer), 3002 (investor), 3003 (backoffice)
+- Для доступа с Mac используйте SSH-туннели (см. ниже)
+
+## 1) Предусловия (host)
+- [x] Docker/Compose для бэкендов уже подняты (gateway 5000, keycloak 8080)
+- [x] Node.js 20 LTS установлен
+  ```bash
+  curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+  apt-get update -y && apt-get install -y nodejs build-essential
+  node -v && npm -v
+  npm i -g pm2@latest
+  ```
+
+## 2) Keycloak (realm и клиенты)
+- [x] Убедитесь, что Keycloak запущен и доступен
+  ```bash
+  docker compose -f docker-compose.yml -f docker-compose.override.yml up -d keycloak
+  curl -I http://localhost:8080/admin   # 302
+  ```
+- [x] Бутстрап реалма и клиентов (PUBLIC)
+  ```bash
+  docker cp ops/keycloak/bootstrap-realm.sh ois-keycloak:/tmp/bootstrap.sh
+  docker exec ois-keycloak bash -lc \
+    'KC_USER=admin KC_PASS=admin123 REALM=ois-dev \
+     ISSUER_URL=http://localhost:3001 INVESTOR_URL=http://localhost:3002 BACKOFFICE_URL=http://localhost:3003 \
+     ISSUER_TUNNEL_URL=http://localhost:15301 INVESTOR_TUNNEL_URL=http://localhost:15302 BACKOFFICE_TUNNEL_URL=http://localhost:15303 \
+     bash /tmp/bootstrap.sh'
+  ```
+
+## 3) Env для фронтов
+- [x] Создайте `.env.local` в каждой из папок:
+  - `apps/portal-issuer/.env.local`
+  - `apps/portal-investor/.env.local`
+  - `apps/backoffice/.env.local`
+
+  Содержимое:
+  ```dotenv
+  NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
+  NEXT_PUBLIC_KEYCLOAK_URL=http://localhost:8080
+  NEXT_PUBLIC_KEYCLOAK_REALM=ois-dev
+  NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=<portal-issuer|portal-investor|backoffice>
+  NEXTAUTH_URL=http://localhost:<3001|3002|3003>
+  ```
+
+## 4) Установка зависимостей
+- [x] Сначала SDK и shared-ui:
+  ```bash
+  cd /opt/ois-cfa/packages/sdks/ts && npm install --no-audit --no-fund --include=dev && npm run build
+  cd /opt/ois-cfa/apps/shared-ui && npm install --no-audit --no-fund --include=dev
+  ```
+- [x] Затем каждый фронт:
+  ```bash
+  cd /opt/ois-cfa/apps/portal-issuer && npm install --no-audit --no-fund --include=dev
+  cd /opt/ois-cfa/apps/portal-investor && npm install --no-audit --no-fund --include=dev
+  cd /opt/ois-cfa/apps/backoffice && npm install --no-audit --no-fund --include=dev
+  ```
+
+## 5) Старт в dev-режиме (pm2)
+- [x] Запуск и автосохранение:
+  ```bash
+  pm2 start npm --name portal-issuer --cwd /opt/ois-cfa/apps/portal-issuer -- run dev
+  pm2 start npm --name portal-investor --cwd /opt/ois-cfa/apps/portal-investor -- run dev
+  pm2 start npm --name backoffice    --cwd /opt/ois-cfa/apps/backoffice    -- run dev
+  pm2 save
+  pm2 ls
+  ```
+
+## 6) Проверки (обязательные)
+- [x] Слушатели:
+  ```bash
+  ss -ltnp | egrep ":5000|:8080|:3001|:3002|:3003"
+  ```
+- [x] Коды ответов:
+  ```bash
+  curl -s -o /dev/null -w "GATEWAY:%{http_code}\n" http://localhost:5000/health
+  curl -s -o /dev/null -w "KC:/admin %{http_code}\n" http://localhost:8080/admin
+  for p in 3001 3002 3003; do curl -s -o /dev/null -w ":$p => %{http_code}\n" http://localhost:$p/; done
+  ```
+
+## 7) SSH‑туннели (Mac)
+```bash
+ssh -N \
+  -L 15500:localhost:5000 \
+  -L 15808:localhost:8080 \
+  -L 15301:localhost:3001 \
+  -L 15302:localhost:3002 \
+  -L 15303:localhost:3003 \
+  cfa1-mux
+```
+- Gateway: http://localhost:15500/health
+- Keycloak: http://localhost:15808/admin (admin/admin123)
+- Issuer: http://localhost:15301
+- Investor: http://localhost:15302
+- Backoffice: http://localhost:15303
+
+## 8) Примечания
+- Для временной разработки модульные зависимости `shared-ui` резолвятся через `next.config.js` (modules: `../shared-ui/node_modules`).
+- В перспективе лучше перейти на workspaces (hoist deps на корень).
+
+## CFA1 hotfix (2025-11-21) — missing deps & pm2 restart
+- Установить зависимости в Sharedui/порталах (от пользователя `user`):  
+  ```
+  cd /opt/ois-cfa/apps/shared-ui && npm install --no-audit --no-fund --include=dev
+  cd /opt/ois-cfa/apps/portal-issuer && npm install --no-audit --no-fund --include=dev
+  cd /opt/ois-cfa/apps/portal-investor && npm install --no-audit --no-fund --include=dev
+  cd /opt/ois-cfa/apps/backoffice && npm install --no-audit --no-fund --include=dev
+  ```
+- Построить, чтобы поймать типовые ошибки: `npm run build` в portal-issuer/portal-investor.
+- Перезапустить dev-серверы: `PM2_HOME=/home/user/.pm2 pm2 restart portal-issuer portal-investor backoffice`.
+
+```
+
+`deploy/docker-compose-at-vps/07-frontends.md`:
+
+```md
+---
+created: 2025-11-11 15:23
+updated: 2025-11-11 15:23
+type: runbook
+sphere: [devops]
+topic: [nextjs, web]
+author: alex-a
+agentID: co-3a68
+partAgentID: [co-3a68]
+version: 1.0.0
+tags: [nextjs, docker]
+---
+
+# 07 — Веб‑клиенты (Next.js)
+
+Сервисы
+- [ ] Portal Issuer (порт по умолчанию 53001)
+- [ ] Portal Investor (порт по умолчанию 53002)
+- [ ] Backoffice (порт по умолчанию 53003)
+
+Зависимости monorepo
+- [ ] Некоторые приложения импортируют `shared-ui` и `@ois/api-client`
+- [ ] Для корректной сборки нужен «корневой» install и сборка пакетов (или простая альтернатива ниже)
+
+Альтернатива (минимальный путь на dev)
+- [ ] Сборка Portal Issuer/Investor из своих папок (Dockerfiles добавлены)
+- [ ] Backoffice можно отложить (ошибки резолва модулей при отсутствии сборки shared‑ui/sdk)
+
+Запуск (issuer + investor)
+- [ ] ```bash
+  cd /opt/ois-cfa
+  C="-f docker-compose.yml -f docker-compose.override.yml -f docker-compose.kafka.override.yml -f docker-compose.services.yml -f docker-compose.apps.yml"
+  docker compose $C build portal-issuer portal-investor
+  docker compose $C up -d portal-issuer portal-investor
+  for p in 53001 53002; do curl -sS -o /dev/null -w "%{http_code}\n" http://localhost:${p}/; done
+  ```
+
+Переменные окружения для фронтов
+- [ ] `API_PUBLIC_URL=http://<host-ip>:55000`
+- [ ] `KEYCLOAK_PUBLIC_URL=http://<host-ip>:58080` (или локальный туннель)
+- [ ] `KEYCLOAK_REALM=ois`
+- [ ] `NEXTAUTH_URL` для каждого фронта на свой URL (см. docker-compose.apps.yml)
+
+Логин через Keycloak
+- [ ] Убедиться, что клиенты в Keycloak созданы (см. 06)
+- [ ] Проверить redirect URIs и web origins под ваши адреса
+
+- SSH‑туннели (если внешний фаервол закрыт)
+- [ ] Порты должны быть ≤ 65535. Пример корректного туннеля:
+  ```bash
+  ssh -N \
+    -L 15500:localhost:55000 \
+    -L 15501:localhost:55001 \
+    -L 15506:localhost:55006 \
+    -L 15808:localhost:58080 \
+    -L 15301:localhost:53001 \
+    -L 15302:localhost:53002 \
+    cfa1-mux
+  ```
+- [ ] Открыть в браузере: 
+  - Gateway: `http://localhost:15500/health`
+  - Issuer app: `http://localhost:15301/`
+  - Investor app: `http://localhost:15302/`
+  - Keycloak: `http://localhost:15808/`
+
+```
+
+`deploy/docker-compose-at-vps/08-smoke-tests.md`:
+
+```md
+---
+created: 2025-11-11 15:24
+updated: 2025-11-11 15:24
+type: runbook
+sphere: [devops]
+topic: [smoke, curl]
+author: alex-a
+agentID: co-3a68
+partAgentID: [co-3a68]
+version: 1.0.0
+tags: [testing]
+---
+
+# 08 — Smoke‑тесты (через Gateway)
+
+Health
+- [ ] `curl -sS -o /dev/null -w "%{http_code}\n" http://localhost:55000/health` → 200
+- [ ] `curl -sS -o /dev/null -w "%{http_code}\n" http://localhost:55001/health` → 200
+- [ ] `curl -sS -o /dev/null -w "%{http_code}\n" http://localhost:55006/health` → 200
+
+Прокси маршруты (без данных ожидаемо 404)
+- [ ] `curl -i http://localhost:55000/v1/orders/$(uuidgen)` → 404
+- [ ] `curl -i http://localhost:55000/v1/wallets/$(uuidgen)` → 404
+
+Создание выпуска (как пример, после сидирования)
+- [ ] ```bash
+  cat > /tmp/issuance.json <<JSON
+  {
+    "assetId": "$(uuidgen)",
+    "issuerId": "$(uuidgen)",
+    "totalAmount": 1000000,
+    "nominal": 1000,
+    "issueDate": "2025-01-01",
+    "maturityDate": "2026-01-01",
+    "scheduleJson": {"coupons": []}
+  }
+  JSON
+  curl -sS -H "Content-Type: application/json" -d @/tmp/issuance.json -i http://localhost:55000/v1/issuances
+  ```
+
+Примечание
+- [ ] Для полного сквозного сценария потребуется сид‑данные и/или dev‑упрощения для compliance/bank‑nominal
+
+
+```
+
+`deploy/docker-compose-at-vps/09-troubleshooting.md`:
+
+```md
+---
+created: 2025-11-11 15:24
+updated: 2025-11-11 15:24
+type: runbook
+sphere: [devops]
+topic: [troubleshooting]
+author: alex-a
+agentID: co-3a68
+partAgentID: [co-3a68]
+version: 1.0.0
+tags: [troubleshooting, logs]
+---
+
+# 09 — Траблшутинг
+
+Типовые проверки
+- [ ] `docker compose -f ... ps` — статусы
+- [ ] `docker logs -f <name>` — логи
+- [ ] `ss -ltnp` — порты слушаются на хосте
+- [ ] `curl -i http://localhost:<port>/health` — готовность
+
+Нехватка памяти при сборке
+- [ ] Добавить swap (см. 01)
+- [ ] Собирайте по одному сервису: `docker compose ... build <service>`
+
+Проблемы миграций БД при старте
+- [ ] Запускать без миграций: `MIGRATE_ON_STARTUP=false docker compose ... up -d <service>`
+- [ ] Для разового применения — на время старта: `MIGRATE_ON_STARTUP=true ...`
+
+Gateway не стартует, ошибка YARP
+- [ ] Проверить `appsettings.json` — маршрут `redeem` должен быть `"/v1/issuances/{id}/redeem"`
+
+Keycloak недоступен снаружи
+- [ ] Проверить провайдерский фаервол (58080 TCP). На самом сервере UFW может быть выключен, но у провайдера порт может быть закрыт.
+- [ ] Временно использовать SSH‑туннель (см. 07); пример: `ssh -N -L 15808:localhost:58080 cfa1-mux`
+
+Next.js фронты не собираются
+- [ ] Требуют сборки `shared-ui` и SDK: сделать корневой install и сборку пакетов (workspaces)
+- [ ] Минимальный путь — собирать issuer/investor; backoffice перенести на следующий этап
+
+Очистка образов/кэша
+- [ ] `docker system df`, `docker image prune -f`, `docker builder prune -f`
+
+```
+
+`deploy/docker-compose-at-vps/10-eywa1-control-plane-runbook.md`:
+
+```md
+---
+created: 2025-11-19 18:30
+updated: 2025-11-19 21:10
+type: runbook
+sphere: [devops]
+topic: [deploy, control-plane, vps]
+author: alex-a
+agentID: co-76ca
+partAgentID: [co-76ca, co-7b1b]
+version: 0.3.0
+tags: [eywa1, tmux, ssh, cloudflare, docker-compose]
+---
+
+# OIS‑CFA · Eywa1 Control Plane — Multi‑VPS Runbook
+
+Цель: превратить `eywa1` в управляющий узел (Control Plane) для однотипного деплоя OIS‑CFA на VPS (`cfa1`, `fin2`, `germ1`, …), не ломая рабочий UK1.
+
+## Scope
+- Workspace: `eywa1`, директория проекта `~/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets`.
+- Код: рабочий `worktree` `repositories/customer-gitlab/wt__ois-cfa__NX01` (ветка `tasks/NX-01-spec-validate-and-matrix` / `infra.defis.deploy`).
+- Целевые узлы: `cfa1`, `fin2`, `germ1`, … (UK1 — только как референс, без изменений).
+- DNS: Cloudflare для `*.cfa.llmneighbors.com`, `*.cfa{1,2,3}.llmneighbors.com`.
+
+## TL;DR
+- Eywa1 становится единым Control Plane: все операции — через SSH + `tmux` на целевых узлах, логи сохраняются в сессии `p-cfa`.
+- На каждом VPS создаётся пользователь `user` с sudo, базовый стек (Docker, Node 20, tmux, nginx, postfix) и директория `/srv/cfa`.
+- Новый деплой стандартизирован через два скрипта в `wt__ois-cfa__NX01`: `ops/scripts/deploy/provision-node.sh` (bootstrap) и `ops/scripts/deploy/deploy-node.sh` (деплой стека).
+- UK1 остаётся каноническим демо‑стендом (см. `docs/deploy/20251113-cloudflare-ingress.md` и `docker-compose-at-vps/*`); на нём ничего не меняем без отдельного плана.
+- Для NX‑05/06 рабочим окружением для кода считаем `wt__ois-cfa__NX01`, а для проверок UI/flows — новые VPS, развернутые по этому runbook’у.
+
+## Architecture (High‑Level)
+
+```mermaid
+flowchart LR
+  subgraph Eywa1["eywa1 · Control Plane"]
+    Agent[CLI agent / user]
+    Repo[prj_Cifra-rwa-exachange-assets\nwt__ois-cfa__NX01]
+    CF[Cloudflare CLI/API]
+    SSHKeys[SSH keys]
+  end
+
+  subgraph Nodes["Target VPS nodes"]
+    subgraph Node1["cfa1"]
+      User1[user sudo]
+      Tmux1[tmux session\np-cfa]
+      Stack1[OIS-CFA stack\nDocker + PM2]
+    end
+    subgraph Node2["fin2"]
+      User2[user sudo]
+      Tmux2[tmux session\np-cfa]
+      Stack2[OIS-CFA stack\nDocker + PM2]
+    end
+  end
+
+  Agent --> Repo
+  Agent --> CF
+  Agent --> SSHKeys
+
+  SSHKeys --> User1
+  SSHKeys --> User2
+
+  Agent -->|provision-node.sh| Node1
+  Agent -->|deploy-node.sh| Node1
+  Agent -->|provision-node.sh| Node2
+  Agent -->|deploy-node.sh| Node2
+```
+
+## Phases Overview
+
+1. **Phase 0 — Rules & Safety**: фиксируем запреты и инварианты UK1 не трогаем, только `user`, только `/srv/cfa`).
+2. **Phase 1 — Prepare Eywa1**: убеждаемся, что есть SSH‑ключи, Cloudflare CLI, актуальный `wt__ois-cfa__NX01`.
+3. **Phase 2 — Provision Node**: подготавливаем VPS (user, SSH, базовые пакеты, tmux, `/srv/cfa`, сессия `p-cfa`).
+4. **Phase 3 — Deploy OIS‑CFA Stack**: клонируем `ois-cfa`, включаем docker‑compose, подключаем фронты через PM2 и nginx.
+5. **Phase 4 — Verify & Handover**: health‑чеки, smoke‑тесты, фиксация итогового состояния в memory‑bank.
+
+---
+
+## Phase 0 — Rules & Safety
+
+Why  
+- Минимизировать риск сломать единственный рабочий стенд и превратить деплой в «необратимый эксперимент».
+
+What  
+- Описать инварианты, которые агент/инженер не имеет права нарушать.
+
+How  
+- Перед запуском любых скриптов проговорить/прописать ограничения.
+
+Result  
+- Любые действия по bootstrap/deploy выполняются только в рамках согласованных узлов и веток.
+
+### Invariants
+- **UK1 не трогаем** — используем только как эталон (см. `docs/deploy/20251113-cloudflare-ingress.md` и `docker-compose-at-vps/*`).
+- **Только пользователь `user`** для приложений и деплоя (никаких сервисов от `root`).
+- **Единый путь проекта**: `/srv/cfa` на всех узлах.
+- **Все длительные команды** — только внутри `tmux`‑сессии `p-cfa` на целевом VPS.
+- **Только зафиксированные ветки**: для деплоя используем `infra.defis.deploy` (или явно согласованную ветку), код для NX‑05/06 — из `wt__ois-cfa__NX01`.
+
+---
+
+## Phase 1 — Prepare Eywa1 (Control Plane)
+
+Why  
+- Без корректного состояния на `eywa1` невозможен безопасный bootstrap узлов.
+
+What  
+- Проверяем наличие SSH‑ключей, Cloudflare‑кредов, актуальной копии репо и утилит.
+
+How  
+- Ручной чеклист + точечные команды.
+
+Result  
+- `eywa1` готов отдавать команды на `cfa1`/`fin2` и управлять DNS.
+
+### Checklist
+- [ ] SSH‑ключ `~/.ssh/id_rsa` (или другой) привязан к `root`/`user` на целевых VPS (`ssh cfa1`, `ssh fin2` работает без пароля).
+- [ ] В `~/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets` актуален `git pull` для монорепо.
+- [ ] В `repositories/customer-gitlab/wt__ois-cfa__NX01` подтянуты последние изменения ветки `infra.defis.deploy` / `tasks/NX-01-spec-...`.
+- [ ] На `eywa1` установлен Cloudflare CLI или подготовлен `curl` + `.env` с `CLOUDFLARE_API_TOKEN` (см. `docs/deploy/20251113-cloudflare-ingress.md`).
+- [ ] Установлены базовые утилиты: `jq`, `tmux`, `git`, `docker` (на `eywa1` только если нужно).
+
+---
+
+## Phase 2 — Provision Node (Bootstrap VPS)
+
+Why  
+- Нужно стандартизировать базовый образ сервера, чтобы все последующие шаги не превращались в «каждый VPS по‑своему».
+
+What  
+- Скрипт `ops/scripts/deploy/provision-node.sh` выполняет bootstrap: пользователь `user`, пакеты, Docker, Node, tmux, `p-cfa`.
+
+How  
+- Запускаем скрипт с `eywa1`, который через SSH конфигурирует целевой VPS.
+
+Result  
+- На `cfa1`/`fin2` есть готовый «пустой, но правильный» хост для деплоя OIS‑CFA.
+
+### Minimal usage
+
+```bash
+cd ~/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets/repositories/customer-gitlab/wt__ois-cfa__NX01
+ops/scripts/deploy/provision-node.sh cfa1
+ops/scripts/deploy/provision-node.sh fin2
+```
+
+### What it standardizes
+- Создаёт (если нет) пользователя `user` с группой `sudo`.
+- Настраивает базовые пакеты: `curl`, `git`, `tmux`, `jq`, `ufw`, `docker`, `docker-compose-plugin`, `nginx`, `postfix`.
+- Устанавливает Node.js 20 для `user` (через `nvm` или системный пакет, зависит от окружения).
+- Создаёт `/srv/cfa`, назначает владельца `user:user`.
+- Добавляет в `~user/.tmux.conf` параметр `set-option -g history-limit 1000000`.
+- Создаёт (если нет) `tmux`‑сессию `p-cfa`, рабочий каталог `/srv/cfa`.
+
+---
+
+## Phase 3 — Deploy OIS‑CFA Stack
+
+Why  
+- Поддерживать один сценарий деплоя для всех узлов, чтобы не плодить «уникальные» стенды.
+
+What  
+- Скрипт `ops/scripts/deploy/deploy-node.sh` клонирует `ois-cfa`, подтягивает ветку и запускает docker‑compose + фронты.
+
+How  
+- Из `eywa1` вызываем скрипт для выбранного узла; скрипт отправляет команды в `tmux`‑сессию `p-cfa` на VPS.
+
+Result  
+- На целевом VPS развёрнут стек OIS‑CFA, готовый к smoke‑тестам NX‑05/06.
+
+### Minimal usage
+
+```bash
+cd ~/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets/repositories/customer-gitlab/wt__ois-cfa__NX01
+OIS_CFA_BRANCH=infra.defis.deploy ops/scripts/deploy/deploy-node.sh cfa1
+OIS_CFA_BRANCH=infra.defis.deploy ops/scripts/deploy/deploy-node.sh fin2
+```
+
+### Notes
+- По умолчанию используется репозиторий `git@git.telex.global:npk/ois-cfa.git` и ветка `infra.defis.deploy` (можно переопределить переменными окружения).
+- Скрипт **не заполняет секреты** — `.env`‑файлы должны быть подготовлены отдельно (см. `docs/deploy/docker-compose-at-vps/02-env-and-compose.md`).
+- Для фронтендов (Next.js) скрипт создаёт базовый scaffold команд в `tmux`, но конкретные `pm2`‑процессы и `env.local` лучше выровнять по UK1 (см. сессии `co-3dd7` и `20251113-cloudflare-ingress.md`).
+
+---
+
+## Phase 4 — Verify & Handover
+
+Why  
+- Без чётких health‑чеков легко получить «оно где‑то крутится, но не факт, что работает».
+
+What  
+- Проверяем `/health` и ключевые UI‑флоу, фиксируем результаты и риски.
+
+How  
+- Команды curl, базовый UI walkthrough, при возможности — Playwright e2e.
+
+Result  
+- Описанный, воспроизводимый стенд с понятным статусом готовности.
+
+### Basic health
+- [ ] `curl http://<host>:55000/health` (gateway) → `200 OK`.
+- [ ] `curl http://<host>:55005/health` (issuance), `55006` (registry), `55007` (settlement), `55008` (compliance).
+- [ ] Keycloak доступен по HTTP (до настройки ingress/TLS).
+
+### Smoke‑flows (минимум)
+- [ ] Issuer портал открывается (локальный порт или домен через nginx/Cloudflare).
+- [ ] Базовый issuance‑flow (создание простого выпуска без сложного payout schedule).
+- [ ] Просмотр отчётности `/reports` (после NX‑05 implementation).
+
+### Memory‑bank / Logging
+- [ ] Создан файл в `memory-bank/Scrum/<date>/<timestamp>-<host>-bootstrap.session.md` с кратким логом команд и ссылками на tmux‑сессии.
+
+---
+
+## Troubleshooting / Lessons Learned
+
+- **Права на код (`chown -R user:user`).**  
+  При переносе `/opt/ois-cfa` или клонировании репозитория от `root` фронты (Next.js) и `npm install` под `user` ломаются с `EACCES` на `package-lock.json`/`node_modules`.  
+  Решение: после bootstrap/деплоя привести права в порядок:
+  - Для Control Plane‑пути: `chown -R user:user /srv/cfa/ois-cfa` (если репо там).  
+  - Для старых UK1‑образов (как на cfa1): `chown -R user:user /opt/ois-cfa`.
+
+- **NEXTAUTH_URL и Redirect URIs в Keycloak.**  
+  Если `NEXTAUTH_URL`/публичные URL фронтов (`issuer|investor|backoffice.cfa{N}.llmneighbors.com`) не совпадают с `redirectUris`/`webOrigins` в Keycloak, логин/регистрация падают (loop, `invalid redirect`, пустой экран).  
+  Решение:
+  - Для клиентов `portal-issuer`, `portal-investor`, `backoffice` в realm `ois-dev` держать:
+    - `rootUrl = https://<app>.cfa{N}.llmneighbors.com`
+    - `redirectUris = ["https://<app>.cfa{N}.llmneighbors.com/*"]`
+    - `webOrigins = ["https://<app>.cfa{N}.llmneighbors.com"]`
+  - В `.env.local` фронтов `NEXTAUTH_URL` должен быть ровно тем же публичным https‑URL.
+
+- **Playwright как канонический smoke для ingress.**  
+  E2E‑тесты (`tests/e2e-playwright`) с доменами `issuer|investor|backoffice.cfa1.llmneighbors.com` и логином через Keycloak — лучший индикатор, что весь стек (DNS/TLS/nginx + backend + фронты + почта) работает end‑to‑end. Скриншоты живут под `artifacts/tests/e2e/playwright/*.e2e.png` с timestamp и run id.
+
+---
+
+## Definition of Done (DoD)
+
+### 1. Control Plane & Scripts
+- [x] Runbook `10-eywa1-control-plane-runbook.md` и скрипты `ops/scripts/deploy/*` зафиксированы в текущей ветке (`deploy`/`tasks/NX-01-*`) и описаны в `README`/manifests.
+- [x] Для узлов `cfa1` и `fin2` успешно выполнены Phases 1–3 (Control Plane baseline):
+  - [x] Создан пользователь `user` (sudo + docker), настроен SSH по ключам.
+  - [x] Создана директория `/srv/cfa`, настроена `tmux`‑сессия `p-cfa`.
+  - [x] Репозиторий `npk/ois-cfa` клонирован в `/srv/cfa/ois-cfa` с нужной веткой (work3) или перенесён из UK1‑образа.
+- [ ] Состояние UK1 **не изменено** в процессе работ (используется только как референс).
+
+### 2. Parity с UK1 по docker-compose runbook’ам (00–09)
+Для каждого активного окружения (`uk1`, `cfa1`, `cfa2`/`fin2`) должны быть закрыты шаги из `docker-compose-at-vps`:
+
+- [ ] 00–02: `00-overview.md`, `01-prereqs-and-host-prep.md`, `02-env-and-compose.md` — выполнены, `.env` и compose‑файлы задокументированы.
+- [ ] 03–04: `03-infra.md`, `04-services.md` — базовая инфраструктура (Postgres, Kafka, Minio) и .NET‑сервисы подняты через `docker compose`.
+- [ ] 05–06: `05-gateway.md`, `06-keycloak.md` — API gateway и Keycloak работают, health‑эндпоинты и логин проверены.
+- [ ] 07–08: `07-frontends*.md`, `08-smoke-tests.md` — порталы (Issuer/Investor/Backoffice) подняты (PM2 или dev), basic UX‑флоу и e2e smoke‑тесты проходят.
+
+Фактический прогресс по узлам фиксируется в отдельных DoD/отчётах в `memory-bank` (например, `*-cfa1-fin2-deploy-DoD.md`), а не через изменение этого чеклиста.
+
+### 3. DNS, TLS и Ingress (Cloudflare + nginx)
+- [ ] Для UK1: актуальны записи `auth|issuer|investor|backoffice|api.cfa.llmneighbors.com` и wildcard‑сертификат `*.cfa.llmneighbors.com` (см. `20251113-cloudflare-ingress.md`).
+- [x] Для `cfa1`: созданы A‑записи в Cloudflare `auth|issuer|investor|backoffice|api.cfa1.llmneighbors.com` с IP `cfa1`; выпущен и установлен LE‑сертификат `*.cfa1.llmneighbors.com`, nginx‑конфиг задокументирован.
+- [ ] Для `cfa2` (fin2): аналогично `cfa1`, но с доменами `*.cfa2.llmneighbors.com` и IP `fin2`, при этом UK1 не затронут.
+- [ ] Для каждого окружения описана таблица `Service → URL → Health endpoint → Notes` (в docs/или memory‑bank).
+
+### 3a. Multi‑account Cloudflare / domains
+- [ ] Для разных узлов (например, `cfa1` и `cfa2/fin2`) поддерживается конфигурация **разных** Cloudflare‑аккаунтов и доменов (см. `docs/deploy/MULTI_ACCOUNT_SETUP.md`), без жёсткой привязки ко всем `*.cfa{N}.llmneighbors.com` в одном аккаунте.
+
+### 4. NX‑05 / NX‑06 Readiness
+- [x] Зафиксировано, на каких стендах (`uk1`, `cfa1`, `cfa2/fin2`) будет выполняться разработка и проверка NX‑05/NX‑06 (issuer dashboard, reports, payout schedule).
+- [x] Минимум один стенд (предпочтительно `cfa1`) имеет:
+  - [x] Рабочий issuer‑портал с доступом через домен (`issuer.cfa1.llmneighbors.com`).
+  - [x] Базовый issuance‑флоу и отчётность `/reports`, проверенные по runbook’у `08-smoke-tests.md` и e2e‑тестам Playwright.
+  - [x] Задокументированное состояние (ссылки на realm/URL‑ы/тест‑учётки) для быстрого включения backend/FE инженеров и агентов (см. e2e `.env` и memory‑bank DoD для cfa1).
+
+### CFA1 — текущий статус (2025‑11‑19)
+- [x] Control Plane: `user` + `/srv/cfa` + `tmux p-cfa` + клон `ois-cfa` (work3).
+- [x] Backend: Postgres, Kafka/ZK, Minio, Keycloak, все .NET‑сервисы и API Gateway запущены; все `/health` → `200`.
+- [x] Ingress: DNS/TLS/nginx настроены для `auth|issuer|investor|backoffice|api.cfa1.llmneighbors.com`; `https://api.cfa1.../health` → `200`.
+- [x] Frontends: Issuer/Investor/Backoffice подняты в dev‑режиме PM2; `curl -I https://issuer|investor|backoffice.cfa1...` → 30x → приложения.
+- [x] E2E: Playwright‑тесты (`public-auth`, `backoffice-auth`, `self-registration`) проходят против cfa1‑домена; скриншоты флоу лежат в `artifacts/tests/e2e/playwright`.
+
+---
+
+## Agent Kickoff Prompt (Codex/Claude/Gemini)
+
+Ниже — заготовка промпта для CLI‑агента, заточенная под этот runbook и `wt__ois-cfa__NX01`. Её можно адаптировать под конкретную задачу (например, «подними cfa1» или «подготовь fin2 для NX‑05/06»).
+
+```text
+You are a DevOps/Backend engineer working on the OIS-CFA project.
+
+Workspace:
+- You are running on host "eywa1".
+- Local repo: ~/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets
+- Main backend worktree: repositories/customer-gitlab/wt__ois-cfa__NX01 (branch tasks/NX-01-spec-validate-and-matrix / infra.defis.deploy)
+
+Goal:
+- Provision and deploy the OIS-CFA stack to a target VPS (e.g. cfa1 or fin2)
+  using the "Eywa1 Control Plane" approach described in:
+  - docs/deploy/docker-compose-at-vps/00-overview.md
+  - docs/deploy/docker-compose-at-vps/10-eywa1-control-plane-runbook.md
+
+Hard rules:
+- DO NOT touch or modify the existing UK1 environment (prod demo).
+- Use only the "user" account with sudo on target nodes (no root-only services).
+- Use /srv/cfa as the project root on all nodes.
+- Run all long-running commands inside tmux session "p-cfa" on the target node.
+- For code changes and NX-05/06 work, treat wt__ois-cfa__NX01 as the primary tree.
+
+Phases:
+1) Phase 1 – validate Eywa1: SSH keys, Cloudflare token, local repo state.
+2) Phase 2 – run ops/scripts/deploy/provision-node.sh <host> to bootstrap the node.
+3) Phase 3 – run ops/scripts/deploy/deploy-node.sh <host> with the correct branch.
+4) Phase 4 – run health checks (/health, Keycloak, portals) and record results in memory-bank.
+
+Output expectations:
+- Follow Why → What → How → Result structure.
+- Use numbered steps and small tables where helpful.
+- Explicitly call out any deviations from the runbook (SPEC DIFF-like).
+```
+
+```
+
+`deploy/localhost/FRONTEND-STARTUP.md`:
+
+```md
+# Frontend - Запуск
+
+## URLs
+
+| Приложение | URL | Порт |
+|------------|-----|------|
+| Portal Issuer | http://localhost:3001 | 3001 |
+| Portal Investor | http://localhost:3002 | 3002 |
+| Backoffice | http://localhost:3003 | 3003 |
+
+## Зависимости
+
+```bash
+# SDK (обязательно перед запуском порталов)
+cd packages/sdks/ts && npm install && npm run build
+
+# Порталы
+cd apps/portal-issuer && npm install
+cd apps/portal-investor && npm install
+cd apps/backoffice && npm install
+```
+
+## Запуск
+
+В отдельных терминалах:
+
+```bash
+# Terminal 1
+cd apps/portal-issuer && npm run dev
+
+# Terminal 2
+cd apps/portal-investor && npm run dev
+
+# Terminal 3
+cd apps/backoffice && npm run dev
+```
+
+## Учетные данные
+
+| User | Password | Роли |
+|------|----------|------|
+| testuser | testpass123 | issuer, investor, backoffice |
+
+## Роли и доступ
+
+| Портал | Требуемая роль |
+|--------|----------------|
+| Portal Issuer | `issuer` |
+| Portal Investor | `investor` |
+| Backoffice | `backoffice` или `admin` |
+
+## E2E тесты
+
+```bash
+cd tests/e2e
+npm install
+npx playwright test
+```
+
+## Troubleshooting
+
+**Module not found: @ois/api-client**
+```bash
+cd packages/sdks/ts && npm run build
+```
+
+**Редирект на логин после авторизации**
+- Проверьте роли пользователя в Keycloak
+- Выйдите из Keycloak и войдите заново
+
+```
+
+`deploy/localhost/KEYCLOAK-SETUP.md`:
+
+```md
+# Keycloak - Ручная настройка
+
+> Для автоматической настройки используйте `./ops/scripts/local-dev/setup-keycloak.sh`
+
+## Доступ к админке
+
+- **URL:** http://localhost:58080/admin
+- **Username:** `admin`
+- **Password:** `admin123`
+
+## Realm: `ois`
+
+1. Dropdown вверху слева (показывает "Master") → **Create Realm**
+2. Name: `ois`
+3. **Create**
+
+## Clients
+
+### portal-issuer
+1. **Clients** → **Create Client**
+2. Client ID: `portal-issuer`
+3. Client authentication: **ON**
+4. Valid Redirect URIs: `http://localhost:3001/*`
+5. Web Origins: `http://localhost:3001`
+6. Credentials tab → Client secret: `secret`
+
+### portal-investor
+- Client ID: `portal-investor`
+- Redirect URIs: `http://localhost:3002/*`
+- Web Origins: `http://localhost:3002`
+- Secret: `secret`
+
+### portal-backoffice
+- Client ID: `portal-backoffice`
+- Redirect URIs: `http://localhost:3003/*`
+- Web Origins: `http://localhost:3003`
+- Secret: `secret`
+
+## Roles
+
+**Realm Roles** → **Create Role**:
+- `issuer`
+- `investor`
+- `backoffice`
+
+## Test User
+
+1. **Users** → **Create User**
+2. Username: `testuser`
+3. Email: `testuser@example.com`
+4. Email Verified: **ON**
+5. **Create**
+6. **Credentials** tab: Password `testpass123`, Temporary: **OFF**
+7. **Role Mappings** tab: Assign roles `issuer`, `investor`, `backoffice`
+
+## Troubleshooting
+
+```bash
+# Проверить логи
+docker logs ois-keycloak --tail 50
+
+# Health check
+curl http://localhost:58080/health/ready
+```
+
+```
+
+`deploy/localhost/README.md`:
+
+```md
+# Локальная разработка - Быстрый старт
+
+## Требования
+
+- Docker / OrbStack
+- Node.js 20+
+- npm 10+
+
+## 1. Инфраструктура
+
+```bash
+# Запуск всех сервисов
+docker-compose up -d
+
+# Проверка статуса
+docker ps
+```
+
+**Порты:**
+| Сервис | Порт |
+|--------|------|
+| PostgreSQL | 55432 |
+| Keycloak | 58080 |
+| Kafka | 59092 |
+| MinIO | 59000, 59001 |
+| Redis | 56379 |
+
+## 2. Keycloak
+
+```bash
+# Автоматическая настройка (realm, clients, roles, test user)
+./ops/scripts/local-dev/setup-keycloak.sh
+```
+
+Детали конфигурации: [KEYCLOAK-SETUP.md](./KEYCLOAK-SETUP.md)
+
+**Realm:** `ois`
+**Clients:** `portal-issuer`, `portal-investor`, `portal-backoffice`
+
+## 3. Сборка SDK
+
+```bash
+cd packages/sdks/ts
+npm install && npm run build
+```
+
+## 4. Запуск порталов
+
+```bash
+# Portal Issuer
+cd apps/portal-issuer && npm install && npm run dev
+
+# Portal Investor
+cd apps/portal-investor && npm install && npm run dev
+
+# Backoffice
+cd apps/backoffice && npm install && npm run dev
+```
+
+**URL:**
+| Портал | URL | Роль |
+|--------|-----|------|
+| Portal Issuer | http://localhost:3001 | issuer |
+| Portal Investor | http://localhost:3002 | investor |
+| Backoffice | http://localhost:3003 | backoffice |
+
+## 5. Вход
+
+**Test User:** `testuser` / `testpass123`
+
+Пользователь имеет все роли и может входить в любой портал.
+
+## Остановка
+
+```bash
+docker-compose down
+```
+
+## См. также
+
+- [KEYCLOAK-SETUP.md](./KEYCLOAK-SETUP.md) - ручная настройка Keycloak
+- [FRONTEND-STARTUP.md](./FRONTEND-STARTUP.md) - запуск фронтенда
+- [ops/scripts/local-dev/README.md](../../../ops/scripts/local-dev/README.md) - скрипты настройки
+
+```
