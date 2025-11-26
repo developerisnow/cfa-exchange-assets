@@ -6,12 +6,16 @@ status: ✅ ACTIVE
 - polymarket-AIR.project
 # Sessions
 
-| partAgentID | Location | Imprtance | Title                   | Status      | Description | Last task | lines | Context left | AgentID                              | Start     | End |
-| ----------- | -------- | --------- | ----------------------- | ----------- | ----------- | --------- | ----- | ------------ | ------------------------------------ | --------- | --- |
-| 5758        | eywa1    | garbage   | submodules              |             |             |           |       | 72%          | 019a87aa-5758-7e93-8f1a-8891d8ee8cda |           |     |
-| 2b00        | eywa1    |           |                         |             |             | git zip   | 17K   | 37%          | 80393ef5-2b00-49a8-921c-b450fd7345d3 |           |     |
-| 4359        | eywa1    |           | 🧠 🤖                   | PAUSE/MOVED |             |           | 20.3K | 48%          | 019a8d7c-4359-7f10-af4b-c3a292f2cbe3 | 20251121? |     |
-| 1f3d        | local    |           | help with localhost run | ACTIVE      |             |           |       | 86%          | 019ab60c-1f3d-7793-9f07-a29c81e99bf8 |           |     |
+| partAgentID | Location | tmux.w | Imprtance | Title                   | Status      | Description | Last task | lines | Context left | AgentID                              | Start        | End |
+| ----------- | -------- | ------ | --------- | ----------------------- | ----------- | ----------- | --------- | ----- | ------------ | ------------------------------------ | ------------ | --- |
+| 5758        | eywa1    |        | garbage   | submodules              |             |             |           |       | 72%          | 019a87aa-5758-7e93-8f1a-8891d8ee8cda |              |     |
+| 2b00        | eywa1    |        |           |                         |             |             | git zip   | 17K   | 37%          | 80393ef5-2b00-49a8-921c-b450fd7345d3 |              |     |
+| 4359        | eywa1    |        |           | 🧠 🤖                   | PAUSE/MOVED |             |           | 20.3K | 48%          | 019a8d7c-4359-7f10-af4b-c3a292f2cbe3 | 20251121?    |     |
+| 1f3d        | local    | w5     |           | help with localhost run | Finished    |             |           | 1.96K | 6%           | 019ab60c-1f3d-7793-9f07-a29c81e99bf8 | 20251125     |     |
+| b2f9        | local    | w6     |           |                         | ACTIVE      |             |           | 1.85  | 47%          | 019aba90-b2f9-7162-a2c7-36896529241f | 20251125     |     |
+| c02b        | eywa1    | w12    |           |                         | ACTIVE      |             |           | 15K   | 28%          | 019a9d04-c02b-7e82-9ae3-b1f93b591e74 | 20251119-21? |     |
+| a642        | eywa1    | w13    |           |                         |             |             |           | 1.39K | 64%          | 019ab57e-a642-7c32-afb5-444d864da268 |              |     |
+| d792        | eywa1    | w16    |           |                         |             |             |           | 7.85K | 23%          | 019aa9cf-d792-7bc0-8083-f73177d4bfc6 |              |     |
 
 # Workflow
 1. Prompt [[oracle.prompt]]

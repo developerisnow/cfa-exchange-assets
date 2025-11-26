@@ -1,0 +1,83 @@
+apps
+├── _theme
+│   ├── components.css
+│   ├── package.json
+│   ├── README.md
+│   ├── tailwind-preset.js
+│   └── tokens.css 
+├── api-gateway
+│   ├── api-gateway.csproj
+│   ├── appsettings.Development.json
+│   ├── appsettings.json
+│   ├── Dockerfile
+│   ├── Program.cs
+│   └── Properties
+├── backoffice
+│   ├── Dockerfile
+│   ├── next-env.d.ts
+│   ├── next.config.js
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── public
+│   ├── README.md
+│   ├── src
+│   ├── tailwind.config.ts
+│   ├── tsconfig.json
+│   ├── tsconfig.tsbuildinfo
+│   ├── vitest.config.ts
+│   └── vitest.setup.ts
+├── broker-portal
+│   ├── next-env.d.ts
+│   ├── next.config.js
+│   ├── node_modules
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── src
+│   ├── tailwind.config.ts
+│   ├── tsconfig.json
+│   ├── vitest.config.ts
+│   └── vitest.setup.ts
+├── package-lock.json
+├── portal-investor
+│   ├── Dockerfile
+│   ├── next-env.d.ts
+│   ├── next.config.js
+│   ├── node_modules
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── README.md
+│   ├── src
+│   ├── tailwind.config.ts
+│   ├── tsconfig.json
+│   ├── vitest.config.ts
+│   └── vitest.setup.ts
+├── portal-issuer
+│   ├── Dockerfile
+│   ├── next-env.d.ts
+│   ├── next.config.js
+│   ├── node_modules
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── README.md
+│   ├── src
+│   ├── tailwind.config.ts
+│   ├── tsconfig.json
+│   ├── vitest.config.ts
+│   └── vitest.setup.ts
+└── shared-ui
+    ├── dist
+    ├── eslint.config.js
+    ├── node_modules
+    ├── package-lock.json
+    ├── package.json
+    ├── README.md
+    ├── src
+    ├── tailwind.config.ts
+    ├── tsconfig.json
+    └── tsup.config.ts
+
+19 directories, 61 files

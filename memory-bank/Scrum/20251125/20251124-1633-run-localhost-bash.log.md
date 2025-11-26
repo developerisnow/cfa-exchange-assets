@@ -1,5 +1,5 @@
 # Objectives
-- [ ] run locally full apps and check swaggers
+- [x] run locally full apps and check swaggers
 - [ ] understand all deeply for future finalization CI/CD gitlab pipeline
 
 ## Context (eywa1 main workspace, d792 log 20251125-1201)
@@ -67,3 +67,8 @@
 - Исправлена сборка фронтов: после `npm install` в корне подтянулся `autoprefixer`; собран `apps/shared-ui` (`npm run build --workspace apps/shared-ui`) → ошибка “Cannot find module '@ois/shared-ui'” снята.  
 - Keycloak: создан realm `ois`; клиенты `portal-issuer`/`portal-investor`/`backoffice` (confidential, secret=secret, redirect `http://localhost:300{1,2,3}/api/auth/callback/keycloak`, web origins `http://localhost:300{1,2,3}`), роли `issuer`/`investor`/`backoffice`. Пользователи: `issuer@demo.local`/`investor@demo.local`/`backoffice@demo.local` пароли `demo123`, emailVerified=true, first/last name заполнены, роли выданы.  
 - Проверка авторизации: password grant через `/realms/ois/protocol/openid-connect/token` успешен для всех клиентов/пользователей (получены access_token/refresh_token). Фронты отвечают 307 на `/auth/signin` (редирект на Keycloak). 
+
+## K3 тесты (2025-11-25 Codex)
+- Прогнан Playwright issuer auth suite: `DEBUG= npx playwright test e2e/issuer/issuer-auth.spec.ts --project=portal-issuer --workers=1 --reporter=line` — 3/3 passed после фикса локатора (теперь проверяем конкретную кнопку “Войти в портал”).  
+- webServer в root playwright.config.ts стартует dev без env → предупреждения NEXTAUTH_URL/NO_SECRET во время теста; при необходимости убрать webServer или пробросить env.  
+- J3 частично: issuer auth e2e зелёный, остальные e2e не гонялись в этом ране.

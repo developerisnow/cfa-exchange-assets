@@ -1,0 +1,2288 @@
+# Code Aggregation: apps
+
+Generated on: 2025-11-26 11:12
+Path: /Users/user/__Repositories/prj_Cifra-rwa-exachange-assets/repositories/customer-gitlab/ois-cfa/apps
+
+## Directory Structure
+
+```
+.
+└── Users
+    └── user
+        └── __Repositories
+            └── prj_Cifra-rwa-exachange-assets
+                └── repositories
+                    └── customer-gitlab
+                        └── ois-cfa
+                            └── apps
+                                ├── _theme
+                                │   ├── components.css
+                                │   ├── package.json
+                                │   ├── README.md
+                                │   ├── tailwind-preset.js
+                                │   └── tokens.css
+                                ├── api-gateway
+                                │   ├── api-gateway.csproj
+                                │   ├── appsettings.Development.json
+                                │   ├── appsettings.json
+                                │   ├── Dockerfile
+                                │   ├── Program.cs
+                                │   └── Properties
+                                │       └── launchSettings.json
+                                ├── backoffice
+                                │   ├── Dockerfile
+                                │   ├── next-env.d.ts
+                                │   ├── next.config.js
+                                │   ├── package-lock.json
+                                │   ├── package.json
+                                │   ├── postcss.config.js
+                                │   ├── public
+                                │   │   └── favicon.ico
+                                │   ├── README.md
+                                │   ├── src
+                                │   │   ├── app
+                                │   │   │   ├── api
+                                │   │   │   │   ├── auth
+                                │   │   │   │   │   └── [...nextauth]
+                                │   │   │   │   │       └── route.ts
+                                │   │   │   │   └── proxy
+                                │   │   │   │       └── route.ts
+                                │   │   │   ├── audit
+                                │   │   │   │   ├── [id]
+                                │   │   │   │   │   └── page.tsx
+                                │   │   │   │   └── page.tsx
+                                │   │   │   ├── auth
+                                │   │   │   │   └── signin
+                                │   │   │   │       └── page.tsx
+                                │   │   │   ├── complaints
+                                │   │   │   │   ├── components
+                                │   │   │   │   │   ├── ComplaintDetailsPanel.tsx
+                                │   │   │   │   │   └── ComplaintItem.tsx
+                                │   │   │   │   ├── hooks
+                                │   │   │   │   │   └── useComplaintMutations.ts
+                                │   │   │   │   └── page.tsx
+                                │   │   │   ├── globals.css
+                                │   │   │   ├── kyc
+                                │   │   │   │   ├── components
+                                │   │   │   │   │   ├── DocumentItem.tsx
+                                │   │   │   │   │   ├── DocumentPreviewModal.tsx
+                                │   │   │   │   │   ├── KycDetails.tsx
+                                │   │   │   │   │   ├── QualificationDecisionForm.tsx
+                                │   │   │   │   │   ├── QualificationDetailsPanel.tsx
+                                │   │   │   │   │   ├── QualificationList.tsx
+                                │   │   │   │   │   └── QualificationTaskItem.tsx
+                                │   │   │   │   ├── hooks
+                                │   │   │   │   │   └── useQualificationMutations.ts
+                                │   │   │   │   └── page.tsx
+                                │   │   │   ├── layout.tsx
+                                │   │   │   ├── login
+                                │   │   │   │   └── page.tsx
+                                │   │   │   ├── not-found.tsx
+                                │   │   │   ├── page.tsx
+                                │   │   │   ├── payouts
+                                │   │   │   │   └── page.tsx
+                                │   │   │   ├── providers.tsx
+                                │   │   │   ├── qualification
+                                │   │   │   │   └── page.tsx
+                                │   │   │   └── users
+                                │   │   │       ├── components
+                                │   │   │       │   ├── UserModal.tsx
+                                │   │   │       │   └── UsersTable.tsx
+                                │   │   │       ├── hooks
+                                │   │   │       │   └── useUserMutations.ts
+                                │   │   │       └── page.tsx
+                                │   │   ├── components
+                                │   │   │   ├── layout
+                                │   │   │   │   └── AppShell.tsx
+                                │   │   │   └── providers
+                                │   │   │       └── Providers.tsx
+                                │   │   ├── lib
+                                │   │   │   ├── api
+                                │   │   │   │   ├── audit.ts
+                                │   │   │   │   ├── compliance
+                                │   │   │   │   │   ├── complaints-api.ts
+                                │   │   │   │   │   ├── http-client.ts
+                                │   │   │   │   │   ├── index.ts
+                                │   │   │   │   │   ├── kyc-api.ts
+                                │   │   │   │   │   ├── kyc-documents-api.ts
+                                │   │   │   │   │   ├── mocks.ts
+                                │   │   │   │   │   ├── qualification-api.ts
+                                │   │   │   │   │   ├── types.ts
+                                │   │   │   │   │   └── users-api.ts
+                                │   │   │   │   ├── compliance.ts
+                                │   │   │   │   └── reports.ts
+                                │   │   │   ├── api-client.ts
+                                │   │   │   ├── auth.ts
+                                │   │   │   ├── constants
+                                │   │   │   │   ├── index.ts
+                                │   │   │   │   ├── navigation.ts
+                                │   │   │   │   └── status.ts
+                                │   │   │   ├── hooks
+                                │   │   │   │   └── useConfirmDialog.ts
+                                │   │   │   ├── services
+                                │   │   │   │   ├── audit.ts
+                                │   │   │   │   ├── complaints.ts
+                                │   │   │   │   ├── dashboard.ts
+                                │   │   │   │   └── users.ts
+                                │   │   │   └── utils
+                                │   │   │       └── file.ts
+                                │   │   ├── middleware.ts
+                                │   │   ├── mocks
+                                │   │   │   ├── audit.ts
+                                │   │   │   ├── complaints.ts
+                                │   │   │   └── users.ts
+                                │   │   └── types
+                                │   │       └── next-auth.d.ts
+                                │   ├── tailwind.config.ts
+                                │   ├── tsconfig.json
+                                │   ├── tsconfig.tsbuildinfo
+                                │   ├── vitest.config.ts
+                                │   └── vitest.setup.ts
+                                ├── broker-portal
+                                │   ├── next-env.d.ts
+                                │   ├── next.config.js
+                                │   ├── node_modules
+                                │   │   └── tailwind-merge
+                                │   │       ├── dist
+                                │   │       │   ├── bundle-cjs.js
+                                │   │       │   ├── bundle-cjs.js.map
+                                │   │       │   ├── bundle-mjs.mjs
+                                │   │       │   ├── bundle-mjs.mjs.map
+                                │   │       │   ├── es5
+                                │   │       │   │   ├── bundle-cjs.js
+                                │   │       │   │   ├── bundle-cjs.js.map
+                                │   │       │   │   ├── bundle-mjs.mjs
+                                │   │       │   │   └── bundle-mjs.mjs.map
+                                │   │       │   └── types.d.ts
+                                │   │       ├── LICENSE.md
+                                │   │       ├── package.json
+                                │   │       ├── README.md
+                                │   │       └── src
+                                │   │           ├── index.ts
+                                │   │           └── lib
+                                │   │               ├── class-group-utils.ts
+                                │   │               ├── config-utils.ts
+                                │   │               ├── create-tailwind-merge.ts
+                                │   │               ├── default-config.ts
+                                │   │               ├── extend-tailwind-merge.ts
+                                │   │               ├── from-theme.ts
+                                │   │               ├── lru-cache.ts
+                                │   │               ├── merge-classlist.ts
+                                │   │               ├── merge-configs.ts
+                                │   │               ├── parse-class-name.ts
+                                │   │               ├── tw-join.ts
+                                │   │               ├── tw-merge.ts
+                                │   │               ├── types.ts
+                                │   │               └── validators.ts
+                                │   ├── package-lock.json
+                                │   ├── package.json
+                                │   ├── postcss.config.js
+                                │   ├── src
+                                │   │   ├── app
+                                │   │   │   ├── api
+                                │   │   │   │   └── auth
+                                │   │   │   │       └── [...nextauth]
+                                │   │   │   │           └── route.ts
+                                │   │   │   ├── auth
+                                │   │   │   │   └── signin
+                                │   │   │   │       └── page.tsx
+                                │   │   │   ├── clients
+                                │   │   │   │   ├── [id]
+                                │   │   │   │   │   └── page.tsx
+                                │   │   │   │   └── page.tsx
+                                │   │   │   ├── dashboard
+                                │   │   │   │   └── page.tsx
+                                │   │   │   ├── feed
+                                │   │   │   │   └── page.tsx
+                                │   │   │   ├── globals.css
+                                │   │   │   ├── layout.tsx
+                                │   │   │   ├── orders
+                                │   │   │   │   └── new
+                                │   │   │   │       └── page.tsx
+                                │   │   │   ├── page.tsx
+                                │   │   │   └── providers.tsx
+                                │   │   ├── lib
+                                │   │   │   ├── api-client.ts
+                                │   │   │   └── auth.ts
+                                │   │   ├── middleware.ts
+                                │   │   └── types
+                                │   │       └── next-auth.d.ts
+                                │   ├── tailwind.config.ts
+                                │   ├── tsconfig.json
+                                │   ├── vitest.config.ts
+                                │   └── vitest.setup.ts
+                                ├── package-lock.json
+                                ├── portal-investor
+                                │   ├── Dockerfile
+                                │   ├── next-env.d.ts
+                                │   ├── next.config.js
+                                │   ├── node_modules
+                                │   │   ├── recharts
+                                │   │   │   ├── CHANGELOG.md
+                                │   │   │   ├── CONTRIBUTING.md
+                                │   │   │   ├── es6
+                                │   │   │   │   ├── cartesian
+                                │   │   │   │   │   ├── Area.js
+                                │   │   │   │   │   ├── Bar.js
+                                │   │   │   │   │   ├── Brush.js
+                                │   │   │   │   │   ├── CartesianAxis.js
+                                │   │   │   │   │   ├── CartesianGrid.js
+                                │   │   │   │   │   ├── ErrorBar.js
+                                │   │   │   │   │   ├── getEquidistantTicks.js
+                                │   │   │   │   │   ├── getTicks.js
+                                │   │   │   │   │   ├── Line.js
+                                │   │   │   │   │   ├── ReferenceArea.js
+                                │   │   │   │   │   ├── ReferenceDot.js
+                                │   │   │   │   │   ├── ReferenceLine.js
+                                │   │   │   │   │   ├── Scatter.js
+                                │   │   │   │   │   ├── XAxis.js
+                                │   │   │   │   │   ├── YAxis.js
+                                │   │   │   │   │   └── ZAxis.js
+                                │   │   │   │   ├── chart
+                                │   │   │   │   │   ├── AccessibilityManager.js
+                                │   │   │   │   │   ├── AreaChart.js
+                                │   │   │   │   │   ├── BarChart.js
+                                │   │   │   │   │   ├── ComposedChart.js
+                                │   │   │   │   │   ├── FunnelChart.js
+                                │   │   │   │   │   ├── generateCategoricalChart.js
+                                │   │   │   │   │   ├── LineChart.js
+                                │   │   │   │   │   ├── PieChart.js
+                                │   │   │   │   │   ├── RadarChart.js
+                                │   │   │   │   │   ├── RadialBarChart.js
+                                │   │   │   │   │   ├── Sankey.js
+                                │   │   │   │   │   ├── ScatterChart.js
+                                │   │   │   │   │   ├── SunburstChart.js
+                                │   │   │   │   │   ├── Treemap.js
+                                │   │   │   │   │   └── types.js
+                                │   │   │   │   ├── component
+                                │   │   │   │   │   ├── Cell.js
+                                │   │   │   │   │   ├── Cursor.js
+                                │   │   │   │   │   ├── Customized.js
+                                │   │   │   │   │   ├── DefaultLegendContent.js
+                                │   │   │   │   │   ├── DefaultTooltipContent.js
+                                │   │   │   │   │   ├── Label.js
+                                │   │   │   │   │   ├── LabelList.js
+                                │   │   │   │   │   ├── Legend.js
+                                │   │   │   │   │   ├── ResponsiveContainer.js
+                                │   │   │   │   │   ├── Text.js
+                                │   │   │   │   │   ├── Tooltip.js
+                                │   │   │   │   │   └── TooltipBoundingBox.js
+                                │   │   │   │   ├── container
+                                │   │   │   │   │   ├── Layer.js
+                                │   │   │   │   │   └── Surface.js
+                                │   │   │   │   ├── context
+                                │   │   │   │   │   └── chartLayoutContext.js
+                                │   │   │   │   ├── index.js
+                                │   │   │   │   ├── numberAxis
+                                │   │   │   │   │   └── Funnel.js
+                                │   │   │   │   ├── polar
+                                │   │   │   │   │   ├── Pie.js
+                                │   │   │   │   │   ├── PolarAngleAxis.js
+                                │   │   │   │   │   ├── PolarGrid.js
+                                │   │   │   │   │   ├── PolarRadiusAxis.js
+                                │   │   │   │   │   ├── Radar.js
+                                │   │   │   │   │   ├── RadialBar.js
+                                │   │   │   │   │   └── types.js
+                                │   │   │   │   ├── shape
+                                │   │   │   │   │   ├── Cross.js
+                                │   │   │   │   │   ├── Curve.js
+                                │   │   │   │   │   ├── Dot.js
+                                │   │   │   │   │   ├── Polygon.js
+                                │   │   │   │   │   ├── Rectangle.js
+                                │   │   │   │   │   ├── Sector.js
+                                │   │   │   │   │   ├── Symbols.js
+                                │   │   │   │   │   └── Trapezoid.js
+                                │   │   │   │   └── util
+                                │   │   │   │       ├── ActiveShapeUtils.js
+                                │   │   │   │       ├── BarUtils.js
+                                │   │   │   │       ├── calculateViewBox.js
+                                │   │   │   │       ├── CartesianUtils.js
+                                │   │   │   │       ├── ChartUtils.js
+                                │   │   │   │       ├── Constants.js
+                                │   │   │   │       ├── CssPrefixUtils.js
+                                │   │   │   │       ├── cursor
+                                │   │   │   │       │   ├── getCursorPoints.js
+                                │   │   │   │       │   ├── getCursorRectangle.js
+                                │   │   │   │       │   └── getRadialCursorPoints.js
+                                │   │   │   │       ├── DataUtils.js
+                                │   │   │   │       ├── DetectReferenceElementsDomain.js
+                                │   │   │   │       ├── DOMUtils.js
+                                │   │   │   │       ├── Events.js
+                                │   │   │   │       ├── FunnelUtils.js
+                                │   │   │   │       ├── getEveryNthWithCondition.js
+                                │   │   │   │       ├── getLegendProps.js
+                                │   │   │   │       ├── Global.js
+                                │   │   │   │       ├── IfOverflowMatches.js
+                                │   │   │   │       ├── isDomainSpecifiedByUser.js
+                                │   │   │   │       ├── LogUtils.js
+                                │   │   │   │       ├── payload
+                                │   │   │   │       │   └── getUniqPayload.js
+                                │   │   │   │       ├── PolarUtils.js
+                                │   │   │   │       ├── RadialBarUtils.js
+                                │   │   │   │       ├── ReactUtils.js
+                                │   │   │   │       ├── ReduceCSSCalc.js
+                                │   │   │   │       ├── ScatterUtils.js
+                                │   │   │   │       ├── ShallowEqual.js
+                                │   │   │   │       ├── TickUtils.js
+                                │   │   │   │       ├── tooltip
+                                │   │   │   │       │   └── translate.js
+                                │   │   │   │       └── types.js
+                                │   │   │   ├── lib
+                                │   │   │   │   ├── cartesian
+                                │   │   │   │   │   ├── Area.js
+                                │   │   │   │   │   ├── Bar.js
+                                │   │   │   │   │   ├── Brush.js
+                                │   │   │   │   │   ├── CartesianAxis.js
+                                │   │   │   │   │   ├── CartesianGrid.js
+                                │   │   │   │   │   ├── ErrorBar.js
+                                │   │   │   │   │   ├── getEquidistantTicks.js
+                                │   │   │   │   │   ├── getTicks.js
+                                │   │   │   │   │   ├── Line.js
+                                │   │   │   │   │   ├── ReferenceArea.js
+                                │   │   │   │   │   ├── ReferenceDot.js
+                                │   │   │   │   │   ├── ReferenceLine.js
+                                │   │   │   │   │   ├── Scatter.js
+                                │   │   │   │   │   ├── XAxis.js
+                                │   │   │   │   │   ├── YAxis.js
+                                │   │   │   │   │   └── ZAxis.js
+                                │   │   │   │   ├── chart
+                                │   │   │   │   │   ├── AccessibilityManager.js
+                                │   │   │   │   │   ├── AreaChart.js
+                                │   │   │   │   │   ├── BarChart.js
+                                │   │   │   │   │   ├── ComposedChart.js
+                                │   │   │   │   │   ├── FunnelChart.js
+                                │   │   │   │   │   ├── generateCategoricalChart.js
+                                │   │   │   │   │   ├── LineChart.js
+                                │   │   │   │   │   ├── PieChart.js
+                                │   │   │   │   │   ├── RadarChart.js
+                                │   │   │   │   │   ├── RadialBarChart.js
+                                │   │   │   │   │   ├── Sankey.js
+                                │   │   │   │   │   ├── ScatterChart.js
+                                │   │   │   │   │   ├── SunburstChart.js
+                                │   │   │   │   │   ├── Treemap.js
+                                │   │   │   │   │   └── types.js
+                                │   │   │   │   ├── component
+                                │   │   │   │   │   ├── Cell.js
+                                │   │   │   │   │   ├── Cursor.js
+                                │   │   │   │   │   ├── Customized.js
+                                │   │   │   │   │   ├── DefaultLegendContent.js
+                                │   │   │   │   │   ├── DefaultTooltipContent.js
+                                │   │   │   │   │   ├── Label.js
+                                │   │   │   │   │   ├── LabelList.js
+                                │   │   │   │   │   ├── Legend.js
+                                │   │   │   │   │   ├── ResponsiveContainer.js
+                                │   │   │   │   │   ├── Text.js
+                                │   │   │   │   │   ├── Tooltip.js
+                                │   │   │   │   │   └── TooltipBoundingBox.js
+                                │   │   │   │   ├── container
+                                │   │   │   │   │   ├── Layer.js
+                                │   │   │   │   │   └── Surface.js
+                                │   │   │   │   ├── context
+                                │   │   │   │   │   └── chartLayoutContext.js
+                                │   │   │   │   ├── index.js
+                                │   │   │   │   ├── numberAxis
+                                │   │   │   │   │   └── Funnel.js
+                                │   │   │   │   ├── polar
+                                │   │   │   │   │   ├── Pie.js
+                                │   │   │   │   │   ├── PolarAngleAxis.js
+                                │   │   │   │   │   ├── PolarGrid.js
+                                │   │   │   │   │   ├── PolarRadiusAxis.js
+                                │   │   │   │   │   ├── Radar.js
+                                │   │   │   │   │   ├── RadialBar.js
+                                │   │   │   │   │   └── types.js
+                                │   │   │   │   ├── shape
+                                │   │   │   │   │   ├── Cross.js
+                                │   │   │   │   │   ├── Curve.js
+                                │   │   │   │   │   ├── Dot.js
+                                │   │   │   │   │   ├── Polygon.js
+                                │   │   │   │   │   ├── Rectangle.js
+                                │   │   │   │   │   ├── Sector.js
+                                │   │   │   │   │   ├── Symbols.js
+                                │   │   │   │   │   └── Trapezoid.js
+                                │   │   │   │   └── util
+                                │   │   │   │       ├── ActiveShapeUtils.js
+                                │   │   │   │       ├── BarUtils.js
+                                │   │   │   │       ├── calculateViewBox.js
+                                │   │   │   │       ├── CartesianUtils.js
+                                │   │   │   │       ├── ChartUtils.js
+                                │   │   │   │       ├── Constants.js
+                                │   │   │   │       ├── CssPrefixUtils.js
+                                │   │   │   │       ├── cursor
+                                │   │   │   │       │   ├── getCursorPoints.js
+                                │   │   │   │       │   ├── getCursorRectangle.js
+                                │   │   │   │       │   └── getRadialCursorPoints.js
+                                │   │   │   │       ├── DataUtils.js
+                                │   │   │   │       ├── DetectReferenceElementsDomain.js
+                                │   │   │   │       ├── DOMUtils.js
+                                │   │   │   │       ├── Events.js
+                                │   │   │   │       ├── FunnelUtils.js
+                                │   │   │   │       ├── getEveryNthWithCondition.js
+                                │   │   │   │       ├── getLegendProps.js
+                                │   │   │   │       ├── Global.js
+                                │   │   │   │       ├── IfOverflowMatches.js
+                                │   │   │   │       ├── isDomainSpecifiedByUser.js
+                                │   │   │   │       ├── LogUtils.js
+                                │   │   │   │       ├── payload
+                                │   │   │   │       │   └── getUniqPayload.js
+                                │   │   │   │       ├── PolarUtils.js
+                                │   │   │   │       ├── RadialBarUtils.js
+                                │   │   │   │       ├── ReactUtils.js
+                                │   │   │   │       ├── ReduceCSSCalc.js
+                                │   │   │   │       ├── ScatterUtils.js
+                                │   │   │   │       ├── ShallowEqual.js
+                                │   │   │   │       ├── TickUtils.js
+                                │   │   │   │       ├── tooltip
+                                │   │   │   │       │   └── translate.js
+                                │   │   │   │       └── types.js
+                                │   │   │   ├── LICENSE
+                                │   │   │   ├── package.json
+                                │   │   │   ├── README.md
+                                │   │   │   ├── types
+                                │   │   │   │   ├── cartesian
+                                │   │   │   │   │   ├── Area.d.ts
+                                │   │   │   │   │   ├── Bar.d.ts
+                                │   │   │   │   │   ├── Brush.d.ts
+                                │   │   │   │   │   ├── CartesianAxis.d.ts
+                                │   │   │   │   │   ├── CartesianGrid.d.ts
+                                │   │   │   │   │   ├── ErrorBar.d.ts
+                                │   │   │   │   │   ├── getEquidistantTicks.d.ts
+                                │   │   │   │   │   ├── getTicks.d.ts
+                                │   │   │   │   │   ├── Line.d.ts
+                                │   │   │   │   │   ├── ReferenceArea.d.ts
+                                │   │   │   │   │   ├── ReferenceDot.d.ts
+                                │   │   │   │   │   ├── ReferenceLine.d.ts
+                                │   │   │   │   │   ├── Scatter.d.ts
+                                │   │   │   │   │   ├── XAxis.d.ts
+                                │   │   │   │   │   ├── YAxis.d.ts
+                                │   │   │   │   │   └── ZAxis.d.ts
+                                │   │   │   │   ├── chart
+                                │   │   │   │   │   ├── AccessibilityManager.d.ts
+                                │   │   │   │   │   ├── AreaChart.d.ts
+                                │   │   │   │   │   ├── BarChart.d.ts
+                                │   │   │   │   │   ├── ComposedChart.d.ts
+                                │   │   │   │   │   ├── FunnelChart.d.ts
+                                │   │   │   │   │   ├── generateCategoricalChart.d.ts
+                                │   │   │   │   │   ├── LineChart.d.ts
+                                │   │   │   │   │   ├── PieChart.d.ts
+                                │   │   │   │   │   ├── RadarChart.d.ts
+                                │   │   │   │   │   ├── RadialBarChart.d.ts
+                                │   │   │   │   │   ├── Sankey.d.ts
+                                │   │   │   │   │   ├── ScatterChart.d.ts
+                                │   │   │   │   │   ├── SunburstChart.d.ts
+                                │   │   │   │   │   ├── Treemap.d.ts
+                                │   │   │   │   │   └── types.d.ts
+                                │   │   │   │   ├── component
+                                │   │   │   │   │   ├── Cell.d.ts
+                                │   │   │   │   │   ├── Cursor.d.ts
+                                │   │   │   │   │   ├── Customized.d.ts
+                                │   │   │   │   │   ├── DefaultLegendContent.d.ts
+                                │   │   │   │   │   ├── DefaultTooltipContent.d.ts
+                                │   │   │   │   │   ├── Label.d.ts
+                                │   │   │   │   │   ├── LabelList.d.ts
+                                │   │   │   │   │   ├── Legend.d.ts
+                                │   │   │   │   │   ├── ResponsiveContainer.d.ts
+                                │   │   │   │   │   ├── Text.d.ts
+                                │   │   │   │   │   ├── Tooltip.d.ts
+                                │   │   │   │   │   └── TooltipBoundingBox.d.ts
+                                │   │   │   │   ├── container
+                                │   │   │   │   │   ├── Layer.d.ts
+                                │   │   │   │   │   └── Surface.d.ts
+                                │   │   │   │   ├── context
+                                │   │   │   │   │   └── chartLayoutContext.d.ts
+                                │   │   │   │   ├── index.d.ts
+                                │   │   │   │   ├── numberAxis
+                                │   │   │   │   │   └── Funnel.d.ts
+                                │   │   │   │   ├── polar
+                                │   │   │   │   │   ├── Pie.d.ts
+                                │   │   │   │   │   ├── PolarAngleAxis.d.ts
+                                │   │   │   │   │   ├── PolarGrid.d.ts
+                                │   │   │   │   │   ├── PolarRadiusAxis.d.ts
+                                │   │   │   │   │   ├── Radar.d.ts
+                                │   │   │   │   │   ├── RadialBar.d.ts
+                                │   │   │   │   │   └── types.d.ts
+                                │   │   │   │   ├── shape
+                                │   │   │   │   │   ├── Cross.d.ts
+                                │   │   │   │   │   ├── Curve.d.ts
+                                │   │   │   │   │   ├── Dot.d.ts
+                                │   │   │   │   │   ├── Polygon.d.ts
+                                │   │   │   │   │   ├── Rectangle.d.ts
+                                │   │   │   │   │   ├── Sector.d.ts
+                                │   │   │   │   │   ├── Symbols.d.ts
+                                │   │   │   │   │   └── Trapezoid.d.ts
+                                │   │   │   │   └── util
+                                │   │   │   │       ├── ActiveShapeUtils.d.ts
+                                │   │   │   │       ├── BarUtils.d.ts
+                                │   │   │   │       ├── calculateViewBox.d.ts
+                                │   │   │   │       ├── CartesianUtils.d.ts
+                                │   │   │   │       ├── ChartUtils.d.ts
+                                │   │   │   │       ├── Constants.d.ts
+                                │   │   │   │       ├── CssPrefixUtils.d.ts
+                                │   │   │   │       ├── cursor
+                                │   │   │   │       │   ├── getCursorPoints.d.ts
+                                │   │   │   │       │   ├── getCursorRectangle.d.ts
+                                │   │   │   │       │   └── getRadialCursorPoints.d.ts
+                                │   │   │   │       ├── DataUtils.d.ts
+                                │   │   │   │       ├── DetectReferenceElementsDomain.d.ts
+                                │   │   │   │       ├── DOMUtils.d.ts
+                                │   │   │   │       ├── Events.d.ts
+                                │   │   │   │       ├── FunnelUtils.d.ts
+                                │   │   │   │       ├── getEveryNthWithCondition.d.ts
+                                │   │   │   │       ├── getLegendProps.d.ts
+                                │   │   │   │       ├── Global.d.ts
+                                │   │   │   │       ├── IfOverflowMatches.d.ts
+                                │   │   │   │       ├── isDomainSpecifiedByUser.d.ts
+                                │   │   │   │       ├── LogUtils.d.ts
+                                │   │   │   │       ├── payload
+                                │   │   │   │       │   └── getUniqPayload.d.ts
+                                │   │   │   │       ├── PolarUtils.d.ts
+                                │   │   │   │       ├── RadialBarUtils.d.ts
+                                │   │   │   │       ├── ReactUtils.d.ts
+                                │   │   │   │       ├── ReduceCSSCalc.d.ts
+                                │   │   │   │       ├── ScatterUtils.d.ts
+                                │   │   │   │       ├── ShallowEqual.d.ts
+                                │   │   │   │       ├── TickUtils.d.ts
+                                │   │   │   │       ├── tooltip
+                                │   │   │   │       │   └── translate.d.ts
+                                │   │   │   │       └── types.d.ts
+                                │   │   │   └── umd
+                                │   │   │       ├── Recharts.js
+                                │   │   │       ├── Recharts.js.LICENSE.txt
+                                │   │   │       ├── Recharts.js.map
+                                │   │   │       └── report.html
+                                │   │   └── tailwind-merge
+                                │   │       ├── dist
+                                │   │       │   ├── bundle-cjs.js
+                                │   │       │   ├── bundle-cjs.js.map
+                                │   │       │   ├── bundle-mjs.mjs
+                                │   │       │   ├── bundle-mjs.mjs.map
+                                │   │       │   ├── es5
+                                │   │       │   │   ├── bundle-cjs.js
+                                │   │       │   │   ├── bundle-cjs.js.map
+                                │   │       │   │   ├── bundle-mjs.mjs
+                                │   │       │   │   └── bundle-mjs.mjs.map
+                                │   │       │   └── types.d.ts
+                                │   │       ├── LICENSE.md
+                                │   │       ├── package.json
+                                │   │       ├── README.md
+                                │   │       └── src
+                                │   │           ├── index.ts
+                                │   │           └── lib
+                                │   │               ├── class-group-utils.ts
+                                │   │               ├── config-utils.ts
+                                │   │               ├── create-tailwind-merge.ts
+                                │   │               ├── default-config.ts
+                                │   │               ├── extend-tailwind-merge.ts
+                                │   │               ├── from-theme.ts
+                                │   │               ├── lru-cache.ts
+                                │   │               ├── merge-classlist.ts
+                                │   │               ├── merge-configs.ts
+                                │   │               ├── parse-class-name.ts
+                                │   │               ├── tw-join.ts
+                                │   │               ├── tw-merge.ts
+                                │   │               ├── types.ts
+                                │   │               └── validators.ts
+                                │   ├── package-lock.json
+                                │   ├── package.json
+                                │   ├── postcss.config.js
+                                │   ├── README.md
+                                │   ├── src
+                                │   │   ├── app
+                                │   │   │   ├── api
+                                │   │   │   │   └── auth
+                                │   │   │   │       └── [...nextauth]
+                                │   │   │   │           └── route.ts
+                                │   │   │   ├── auth
+                                │   │   │   │   └── signin
+                                │   │   │   │       └── page.tsx
+                                │   │   │   ├── catalog
+                                │   │   │   │   └── page.tsx
+                                │   │   │   ├── globals.css
+                                │   │   │   ├── history
+                                │   │   │   │   ├── columns.tsx
+                                │   │   │   │   ├── components
+                                │   │   │   │   │   ├── DateRangeFilter.tsx
+                                │   │   │   │   │   └── HistoryTabs.tsx
+                                │   │   │   │   └── page.tsx
+                                │   │   │   ├── issuances
+                                │   │   │   │   └── [id]
+                                │   │   │   │       ├── components
+                                │   │   │   │       │   ├── DocumentsSection.tsx
+                                │   │   │   │       │   ├── MetricsCard.tsx
+                                │   │   │   │       │   ├── OrderPanel.tsx
+                                │   │   │   │       │   ├── ScheduleSection.tsx
+                                │   │   │   │       │   └── YieldChartSection.tsx
+                                │   │   │   │       └── page.tsx
+                                │   │   │   ├── kyc
+                                │   │   │   │   ├── components
+                                │   │   │   │   │   ├── KycStatusCard.tsx
+                                │   │   │   │   │   ├── KycStepper.tsx
+                                │   │   │   │   │   └── steps
+                                │   │   │   │   │       ├── AddressStep.tsx
+                                │   │   │   │   │       ├── ContactsStep.tsx
+                                │   │   │   │   │       ├── DocumentsStep.tsx
+                                │   │   │   │   │       ├── IdentityStep.tsx
+                                │   │   │   │   │       └── PersonalStep.tsx
+                                │   │   │   │   ├── constants.ts
+                                │   │   │   │   ├── countries.ts
+                                │   │   │   │   ├── page.tsx
+                                │   │   │   │   ├── types.ts
+                                │   │   │   │   └── validation.ts
+                                │   │   │   ├── layout.tsx
+                                │   │   │   ├── orders
+                                │   │   │   │   └── new
+                                │   │   │   │       └── page.tsx
+                                │   │   │   ├── page.tsx
+                                │   │   │   ├── portfolio
+                                │   │   │   │   └── page.tsx
+                                │   │   │   ├── profile
+                                │   │   │   │   └── page.tsx
+                                │   │   │   └── providers.tsx
+                                │   │   ├── lib
+                                │   │   │   ├── api
+                                │   │   │   │   └── compliance.ts
+                                │   │   │   ├── api-client.ts
+                                │   │   │   ├── auth.ts
+                                │   │   │   ├── format.ts
+                                │   │   │   ├── mocks.ts
+                                │   │   │   ├── nav.ts
+                                │   │   │   └── navigation.tsx
+                                │   │   ├── middleware.ts
+                                │   │   └── types
+                                │   │       ├── api-client.d.ts
+                                │   │       └── next-auth.d.ts
+                                │   ├── tailwind.config.ts
+                                │   ├── tsconfig.json
+                                │   ├── vitest.config.ts
+                                │   └── vitest.setup.ts
+                                ├── portal-issuer
+                                │   ├── Dockerfile
+                                │   ├── next-env.d.ts
+                                │   ├── next.config.js
+                                │   ├── node_modules
+                                │   │   ├── recharts
+                                │   │   │   ├── CHANGELOG.md
+                                │   │   │   ├── CONTRIBUTING.md
+                                │   │   │   ├── es6
+                                │   │   │   │   ├── cartesian
+                                │   │   │   │   │   ├── Area.js
+                                │   │   │   │   │   ├── Bar.js
+                                │   │   │   │   │   ├── Brush.js
+                                │   │   │   │   │   ├── CartesianAxis.js
+                                │   │   │   │   │   ├── CartesianGrid.js
+                                │   │   │   │   │   ├── ErrorBar.js
+                                │   │   │   │   │   ├── getEquidistantTicks.js
+                                │   │   │   │   │   ├── getTicks.js
+                                │   │   │   │   │   ├── Line.js
+                                │   │   │   │   │   ├── ReferenceArea.js
+                                │   │   │   │   │   ├── ReferenceDot.js
+                                │   │   │   │   │   ├── ReferenceLine.js
+                                │   │   │   │   │   ├── Scatter.js
+                                │   │   │   │   │   ├── XAxis.js
+                                │   │   │   │   │   ├── YAxis.js
+                                │   │   │   │   │   └── ZAxis.js
+                                │   │   │   │   ├── chart
+                                │   │   │   │   │   ├── AccessibilityManager.js
+                                │   │   │   │   │   ├── AreaChart.js
+                                │   │   │   │   │   ├── BarChart.js
+                                │   │   │   │   │   ├── ComposedChart.js
+                                │   │   │   │   │   ├── FunnelChart.js
+                                │   │   │   │   │   ├── generateCategoricalChart.js
+                                │   │   │   │   │   ├── LineChart.js
+                                │   │   │   │   │   ├── PieChart.js
+                                │   │   │   │   │   ├── RadarChart.js
+                                │   │   │   │   │   ├── RadialBarChart.js
+                                │   │   │   │   │   ├── Sankey.js
+                                │   │   │   │   │   ├── ScatterChart.js
+                                │   │   │   │   │   ├── SunburstChart.js
+                                │   │   │   │   │   ├── Treemap.js
+                                │   │   │   │   │   └── types.js
+                                │   │   │   │   ├── component
+                                │   │   │   │   │   ├── Cell.js
+                                │   │   │   │   │   ├── Cursor.js
+                                │   │   │   │   │   ├── Customized.js
+                                │   │   │   │   │   ├── DefaultLegendContent.js
+                                │   │   │   │   │   ├── DefaultTooltipContent.js
+                                │   │   │   │   │   ├── Label.js
+                                │   │   │   │   │   ├── LabelList.js
+                                │   │   │   │   │   ├── Legend.js
+                                │   │   │   │   │   ├── ResponsiveContainer.js
+                                │   │   │   │   │   ├── Text.js
+                                │   │   │   │   │   ├── Tooltip.js
+                                │   │   │   │   │   └── TooltipBoundingBox.js
+                                │   │   │   │   ├── container
+                                │   │   │   │   │   ├── Layer.js
+                                │   │   │   │   │   └── Surface.js
+                                │   │   │   │   ├── context
+                                │   │   │   │   │   └── chartLayoutContext.js
+                                │   │   │   │   ├── index.js
+                                │   │   │   │   ├── numberAxis
+                                │   │   │   │   │   └── Funnel.js
+                                │   │   │   │   ├── polar
+                                │   │   │   │   │   ├── Pie.js
+                                │   │   │   │   │   ├── PolarAngleAxis.js
+                                │   │   │   │   │   ├── PolarGrid.js
+                                │   │   │   │   │   ├── PolarRadiusAxis.js
+                                │   │   │   │   │   ├── Radar.js
+                                │   │   │   │   │   ├── RadialBar.js
+                                │   │   │   │   │   └── types.js
+                                │   │   │   │   ├── shape
+                                │   │   │   │   │   ├── Cross.js
+                                │   │   │   │   │   ├── Curve.js
+                                │   │   │   │   │   ├── Dot.js
+                                │   │   │   │   │   ├── Polygon.js
+                                │   │   │   │   │   ├── Rectangle.js
+                                │   │   │   │   │   ├── Sector.js
+                                │   │   │   │   │   ├── Symbols.js
+                                │   │   │   │   │   └── Trapezoid.js
+                                │   │   │   │   └── util
+                                │   │   │   │       ├── ActiveShapeUtils.js
+                                │   │   │   │       ├── BarUtils.js
+                                │   │   │   │       ├── calculateViewBox.js
+                                │   │   │   │       ├── CartesianUtils.js
+                                │   │   │   │       ├── ChartUtils.js
+                                │   │   │   │       ├── Constants.js
+                                │   │   │   │       ├── CssPrefixUtils.js
+                                │   │   │   │       ├── cursor
+                                │   │   │   │       │   ├── getCursorPoints.js
+                                │   │   │   │       │   ├── getCursorRectangle.js
+                                │   │   │   │       │   └── getRadialCursorPoints.js
+                                │   │   │   │       ├── DataUtils.js
+                                │   │   │   │       ├── DetectReferenceElementsDomain.js
+                                │   │   │   │       ├── DOMUtils.js
+                                │   │   │   │       ├── Events.js
+                                │   │   │   │       ├── FunnelUtils.js
+                                │   │   │   │       ├── getEveryNthWithCondition.js
+                                │   │   │   │       ├── getLegendProps.js
+                                │   │   │   │       ├── Global.js
+                                │   │   │   │       ├── IfOverflowMatches.js
+                                │   │   │   │       ├── isDomainSpecifiedByUser.js
+                                │   │   │   │       ├── LogUtils.js
+                                │   │   │   │       ├── payload
+                                │   │   │   │       │   └── getUniqPayload.js
+                                │   │   │   │       ├── PolarUtils.js
+                                │   │   │   │       ├── RadialBarUtils.js
+                                │   │   │   │       ├── ReactUtils.js
+                                │   │   │   │       ├── ReduceCSSCalc.js
+                                │   │   │   │       ├── ScatterUtils.js
+                                │   │   │   │       ├── ShallowEqual.js
+                                │   │   │   │       ├── TickUtils.js
+                                │   │   │   │       ├── tooltip
+                                │   │   │   │       │   └── translate.js
+                                │   │   │   │       └── types.js
+                                │   │   │   ├── lib
+                                │   │   │   │   ├── cartesian
+                                │   │   │   │   │   ├── Area.js
+                                │   │   │   │   │   ├── Bar.js
+                                │   │   │   │   │   ├── Brush.js
+                                │   │   │   │   │   ├── CartesianAxis.js
+                                │   │   │   │   │   ├── CartesianGrid.js
+                                │   │   │   │   │   ├── ErrorBar.js
+                                │   │   │   │   │   ├── getEquidistantTicks.js
+                                │   │   │   │   │   ├── getTicks.js
+                                │   │   │   │   │   ├── Line.js
+                                │   │   │   │   │   ├── ReferenceArea.js
+                                │   │   │   │   │   ├── ReferenceDot.js
+                                │   │   │   │   │   ├── ReferenceLine.js
+                                │   │   │   │   │   ├── Scatter.js
+                                │   │   │   │   │   ├── XAxis.js
+                                │   │   │   │   │   ├── YAxis.js
+                                │   │   │   │   │   └── ZAxis.js
+                                │   │   │   │   ├── chart
+                                │   │   │   │   │   ├── AccessibilityManager.js
+                                │   │   │   │   │   ├── AreaChart.js
+                                │   │   │   │   │   ├── BarChart.js
+                                │   │   │   │   │   ├── ComposedChart.js
+                                │   │   │   │   │   ├── FunnelChart.js
+                                │   │   │   │   │   ├── generateCategoricalChart.js
+                                │   │   │   │   │   ├── LineChart.js
+                                │   │   │   │   │   ├── PieChart.js
+                                │   │   │   │   │   ├── RadarChart.js
+                                │   │   │   │   │   ├── RadialBarChart.js
+                                │   │   │   │   │   ├── Sankey.js
+                                │   │   │   │   │   ├── ScatterChart.js
+                                │   │   │   │   │   ├── SunburstChart.js
+                                │   │   │   │   │   ├── Treemap.js
+                                │   │   │   │   │   └── types.js
+                                │   │   │   │   ├── component
+                                │   │   │   │   │   ├── Cell.js
+                                │   │   │   │   │   ├── Cursor.js
+                                │   │   │   │   │   ├── Customized.js
+                                │   │   │   │   │   ├── DefaultLegendContent.js
+                                │   │   │   │   │   ├── DefaultTooltipContent.js
+                                │   │   │   │   │   ├── Label.js
+                                │   │   │   │   │   ├── LabelList.js
+                                │   │   │   │   │   ├── Legend.js
+                                │   │   │   │   │   ├── ResponsiveContainer.js
+                                │   │   │   │   │   ├── Text.js
+                                │   │   │   │   │   ├── Tooltip.js
+                                │   │   │   │   │   └── TooltipBoundingBox.js
+                                │   │   │   │   ├── container
+                                │   │   │   │   │   ├── Layer.js
+                                │   │   │   │   │   └── Surface.js
+                                │   │   │   │   ├── context
+                                │   │   │   │   │   └── chartLayoutContext.js
+                                │   │   │   │   ├── index.js
+                                │   │   │   │   ├── numberAxis
+                                │   │   │   │   │   └── Funnel.js
+                                │   │   │   │   ├── polar
+                                │   │   │   │   │   ├── Pie.js
+                                │   │   │   │   │   ├── PolarAngleAxis.js
+                                │   │   │   │   │   ├── PolarGrid.js
+                                │   │   │   │   │   ├── PolarRadiusAxis.js
+                                │   │   │   │   │   ├── Radar.js
+                                │   │   │   │   │   ├── RadialBar.js
+                                │   │   │   │   │   └── types.js
+                                │   │   │   │   ├── shape
+                                │   │   │   │   │   ├── Cross.js
+                                │   │   │   │   │   ├── Curve.js
+                                │   │   │   │   │   ├── Dot.js
+                                │   │   │   │   │   ├── Polygon.js
+                                │   │   │   │   │   ├── Rectangle.js
+                                │   │   │   │   │   ├── Sector.js
+                                │   │   │   │   │   ├── Symbols.js
+                                │   │   │   │   │   └── Trapezoid.js
+                                │   │   │   │   └── util
+                                │   │   │   │       ├── ActiveShapeUtils.js
+                                │   │   │   │       ├── BarUtils.js
+                                │   │   │   │       ├── calculateViewBox.js
+                                │   │   │   │       ├── CartesianUtils.js
+                                │   │   │   │       ├── ChartUtils.js
+                                │   │   │   │       ├── Constants.js
+                                │   │   │   │       ├── CssPrefixUtils.js
+                                │   │   │   │       ├── cursor
+                                │   │   │   │       │   ├── getCursorPoints.js
+                                │   │   │   │       │   ├── getCursorRectangle.js
+                                │   │   │   │       │   └── getRadialCursorPoints.js
+                                │   │   │   │       ├── DataUtils.js
+                                │   │   │   │       ├── DetectReferenceElementsDomain.js
+                                │   │   │   │       ├── DOMUtils.js
+                                │   │   │   │       ├── Events.js
+                                │   │   │   │       ├── FunnelUtils.js
+                                │   │   │   │       ├── getEveryNthWithCondition.js
+                                │   │   │   │       ├── getLegendProps.js
+                                │   │   │   │       ├── Global.js
+                                │   │   │   │       ├── IfOverflowMatches.js
+                                │   │   │   │       ├── isDomainSpecifiedByUser.js
+                                │   │   │   │       ├── LogUtils.js
+                                │   │   │   │       ├── payload
+                                │   │   │   │       │   └── getUniqPayload.js
+                                │   │   │   │       ├── PolarUtils.js
+                                │   │   │   │       ├── RadialBarUtils.js
+                                │   │   │   │       ├── ReactUtils.js
+                                │   │   │   │       ├── ReduceCSSCalc.js
+                                │   │   │   │       ├── ScatterUtils.js
+                                │   │   │   │       ├── ShallowEqual.js
+                                │   │   │   │       ├── TickUtils.js
+                                │   │   │   │       ├── tooltip
+                                │   │   │   │       │   └── translate.js
+                                │   │   │   │       └── types.js
+                                │   │   │   ├── LICENSE
+                                │   │   │   ├── package.json
+                                │   │   │   ├── README.md
+                                │   │   │   ├── types
+                                │   │   │   │   ├── cartesian
+                                │   │   │   │   │   ├── Area.d.ts
+                                │   │   │   │   │   ├── Bar.d.ts
+                                │   │   │   │   │   ├── Brush.d.ts
+                                │   │   │   │   │   ├── CartesianAxis.d.ts
+                                │   │   │   │   │   ├── CartesianGrid.d.ts
+                                │   │   │   │   │   ├── ErrorBar.d.ts
+                                │   │   │   │   │   ├── getEquidistantTicks.d.ts
+                                │   │   │   │   │   ├── getTicks.d.ts
+                                │   │   │   │   │   ├── Line.d.ts
+                                │   │   │   │   │   ├── ReferenceArea.d.ts
+                                │   │   │   │   │   ├── ReferenceDot.d.ts
+                                │   │   │   │   │   ├── ReferenceLine.d.ts
+                                │   │   │   │   │   ├── Scatter.d.ts
+                                │   │   │   │   │   ├── XAxis.d.ts
+                                │   │   │   │   │   ├── YAxis.d.ts
+                                │   │   │   │   │   └── ZAxis.d.ts
+                                │   │   │   │   ├── chart
+                                │   │   │   │   │   ├── AccessibilityManager.d.ts
+                                │   │   │   │   │   ├── AreaChart.d.ts
+                                │   │   │   │   │   ├── BarChart.d.ts
+                                │   │   │   │   │   ├── ComposedChart.d.ts
+                                │   │   │   │   │   ├── FunnelChart.d.ts
+                                │   │   │   │   │   ├── generateCategoricalChart.d.ts
+                                │   │   │   │   │   ├── LineChart.d.ts
+                                │   │   │   │   │   ├── PieChart.d.ts
+                                │   │   │   │   │   ├── RadarChart.d.ts
+                                │   │   │   │   │   ├── RadialBarChart.d.ts
+                                │   │   │   │   │   ├── Sankey.d.ts
+                                │   │   │   │   │   ├── ScatterChart.d.ts
+                                │   │   │   │   │   ├── SunburstChart.d.ts
+                                │   │   │   │   │   ├── Treemap.d.ts
+                                │   │   │   │   │   └── types.d.ts
+                                │   │   │   │   ├── component
+                                │   │   │   │   │   ├── Cell.d.ts
+                                │   │   │   │   │   ├── Cursor.d.ts
+                                │   │   │   │   │   ├── Customized.d.ts
+                                │   │   │   │   │   ├── DefaultLegendContent.d.ts
+                                │   │   │   │   │   ├── DefaultTooltipContent.d.ts
+                                │   │   │   │   │   ├── Label.d.ts
+                                │   │   │   │   │   ├── LabelList.d.ts
+                                │   │   │   │   │   ├── Legend.d.ts
+                                │   │   │   │   │   ├── ResponsiveContainer.d.ts
+                                │   │   │   │   │   ├── Text.d.ts
+                                │   │   │   │   │   ├── Tooltip.d.ts
+                                │   │   │   │   │   └── TooltipBoundingBox.d.ts
+                                │   │   │   │   ├── container
+                                │   │   │   │   │   ├── Layer.d.ts
+                                │   │   │   │   │   └── Surface.d.ts
+                                │   │   │   │   ├── context
+                                │   │   │   │   │   └── chartLayoutContext.d.ts
+                                │   │   │   │   ├── index.d.ts
+                                │   │   │   │   ├── numberAxis
+                                │   │   │   │   │   └── Funnel.d.ts
+                                │   │   │   │   ├── polar
+                                │   │   │   │   │   ├── Pie.d.ts
+                                │   │   │   │   │   ├── PolarAngleAxis.d.ts
+                                │   │   │   │   │   ├── PolarGrid.d.ts
+                                │   │   │   │   │   ├── PolarRadiusAxis.d.ts
+                                │   │   │   │   │   ├── Radar.d.ts
+                                │   │   │   │   │   ├── RadialBar.d.ts
+                                │   │   │   │   │   └── types.d.ts
+                                │   │   │   │   ├── shape
+                                │   │   │   │   │   ├── Cross.d.ts
+                                │   │   │   │   │   ├── Curve.d.ts
+                                │   │   │   │   │   ├── Dot.d.ts
+                                │   │   │   │   │   ├── Polygon.d.ts
+                                │   │   │   │   │   ├── Rectangle.d.ts
+                                │   │   │   │   │   ├── Sector.d.ts
+                                │   │   │   │   │   ├── Symbols.d.ts
+                                │   │   │   │   │   └── Trapezoid.d.ts
+                                │   │   │   │   └── util
+                                │   │   │   │       ├── ActiveShapeUtils.d.ts
+                                │   │   │   │       ├── BarUtils.d.ts
+                                │   │   │   │       ├── calculateViewBox.d.ts
+                                │   │   │   │       ├── CartesianUtils.d.ts
+                                │   │   │   │       ├── ChartUtils.d.ts
+                                │   │   │   │       ├── Constants.d.ts
+                                │   │   │   │       ├── CssPrefixUtils.d.ts
+                                │   │   │   │       ├── cursor
+                                │   │   │   │       │   ├── getCursorPoints.d.ts
+                                │   │   │   │       │   ├── getCursorRectangle.d.ts
+                                │   │   │   │       │   └── getRadialCursorPoints.d.ts
+                                │   │   │   │       ├── DataUtils.d.ts
+                                │   │   │   │       ├── DetectReferenceElementsDomain.d.ts
+                                │   │   │   │       ├── DOMUtils.d.ts
+                                │   │   │   │       ├── Events.d.ts
+                                │   │   │   │       ├── FunnelUtils.d.ts
+                                │   │   │   │       ├── getEveryNthWithCondition.d.ts
+                                │   │   │   │       ├── getLegendProps.d.ts
+                                │   │   │   │       ├── Global.d.ts
+                                │   │   │   │       ├── IfOverflowMatches.d.ts
+                                │   │   │   │       ├── isDomainSpecifiedByUser.d.ts
+                                │   │   │   │       ├── LogUtils.d.ts
+                                │   │   │   │       ├── payload
+                                │   │   │   │       │   └── getUniqPayload.d.ts
+                                │   │   │   │       ├── PolarUtils.d.ts
+                                │   │   │   │       ├── RadialBarUtils.d.ts
+                                │   │   │   │       ├── ReactUtils.d.ts
+                                │   │   │   │       ├── ReduceCSSCalc.d.ts
+                                │   │   │   │       ├── ScatterUtils.d.ts
+                                │   │   │   │       ├── ShallowEqual.d.ts
+                                │   │   │   │       ├── TickUtils.d.ts
+                                │   │   │   │       ├── tooltip
+                                │   │   │   │       │   └── translate.d.ts
+                                │   │   │   │       └── types.d.ts
+                                │   │   │   └── umd
+                                │   │   │       ├── Recharts.js
+                                │   │   │       ├── Recharts.js.LICENSE.txt
+                                │   │   │       ├── Recharts.js.map
+                                │   │   │       └── report.html
+                                │   │   └── tailwind-merge
+                                │   │       ├── dist
+                                │   │       │   ├── bundle-cjs.js
+                                │   │       │   ├── bundle-cjs.js.map
+                                │   │       │   ├── bundle-mjs.mjs
+                                │   │       │   ├── bundle-mjs.mjs.map
+                                │   │       │   ├── es5
+                                │   │       │   │   ├── bundle-cjs.js
+                                │   │       │   │   ├── bundle-cjs.js.map
+                                │   │       │   │   ├── bundle-mjs.mjs
+                                │   │       │   │   └── bundle-mjs.mjs.map
+                                │   │       │   └── types.d.ts
+                                │   │       ├── LICENSE.md
+                                │   │       ├── package.json
+                                │   │       ├── README.md
+                                │   │       └── src
+                                │   │           ├── index.ts
+                                │   │           └── lib
+                                │   │               ├── class-group-utils.ts
+                                │   │               ├── config-utils.ts
+                                │   │               ├── create-tailwind-merge.ts
+                                │   │               ├── default-config.ts
+                                │   │               ├── extend-tailwind-merge.ts
+                                │   │               ├── from-theme.ts
+                                │   │               ├── lru-cache.ts
+                                │   │               ├── merge-classlist.ts
+                                │   │               ├── merge-configs.ts
+                                │   │               ├── parse-class-name.ts
+                                │   │               ├── tw-join.ts
+                                │   │               ├── tw-merge.ts
+                                │   │               ├── types.ts
+                                │   │               └── validators.ts
+                                │   ├── package-lock.json
+                                │   ├── package.json
+                                │   ├── postcss.config.js
+                                │   ├── README.md
+                                │   ├── src
+                                │   │   ├── app
+                                │   │   │   ├── api
+                                │   │   │   │   └── auth
+                                │   │   │   │       └── [...nextauth]
+                                │   │   │   │           └── route.ts
+                                │   │   │   ├── auth
+                                │   │   │   │   └── signin
+                                │   │   │   │       └── page.tsx
+                                │   │   │   ├── dashboard
+                                │   │   │   │   └── page.tsx
+                                │   │   │   ├── globals.css
+                                │   │   │   ├── issuances
+                                │   │   │   │   ├── [id]
+                                │   │   │   │   │   ├── components
+                                │   │   │   │   │   │   ├── DocumentsCard.tsx
+                                │   │   │   │   │   │   ├── PayoutScheduleTable.tsx
+                                │   │   │   │   │   │   └── StatusBadges.tsx
+                                │   │   │   │   │   ├── hooks
+                                │   │   │   │   │   │   └── useIssuanceDetail.ts
+                                │   │   │   │   │   └── page.tsx
+                                │   │   │   │   ├── create
+                                │   │   │   │   │   └── page.tsx
+                                │   │   │   │   └── page.tsx
+                                │   │   │   ├── kyc
+                                │   │   │   │   └── page.tsx
+                                │   │   │   ├── layout.tsx
+                                │   │   │   ├── page.tsx
+                                │   │   │   ├── payouts
+                                │   │   │   │   └── schedule
+                                │   │   │   │       └── page.tsx
+                                │   │   │   ├── profile
+                                │   │   │   │   └── page.tsx
+                                │   │   │   ├── providers.tsx
+                                │   │   │   └── reports
+                                │   │   │       ├── components
+                                │   │   │       │   └── IssuancesReportTable.tsx
+                                │   │   │       ├── hooks
+                                │   │   │       │   └── useReportsData.ts
+                                │   │   │       └── page.tsx
+                                │   │   ├── lib
+                                │   │   │   ├── api
+                                │   │   │   │   ├── compliance.ts
+                                │   │   │   │   └── issuances.ts
+                                │   │   │   ├── api-client.ts
+                                │   │   │   ├── auth.ts
+                                │   │   │   ├── mocks
+                                │   │   │   │   ├── issuances.test.ts
+                                │   │   │   │   ├── issuances.ts
+                                │   │   │   │   ├── profile.test.ts
+                                │   │   │   │   ├── profile.ts
+                                │   │   │   │   └── reports.ts
+                                │   │   │   ├── nav.ts
+                                │   │   │   └── navigation.tsx
+                                │   │   ├── middleware.ts
+                                │   │   └── types
+                                │   │       └── next-auth.d.ts
+                                │   ├── tailwind.config.ts
+                                │   ├── tsconfig.json
+                                │   ├── vitest.config.ts
+                                │   └── vitest.setup.ts
+                                └── shared-ui
+                                    ├── dist
+                                    │   ├── index.cjs
+                                    │   ├── index.d.cts
+                                    │   ├── index.d.ts
+                                    │   └── index.js
+                                    ├── eslint.config.js
+                                    ├── node_modules
+                                    │   ├── @eslint
+                                    │   │   ├── eslintrc
+                                    │   │   │   ├── conf
+                                    │   │   │   │   ├── config-schema.js
+                                    │   │   │   │   └── environments.js
+                                    │   │   │   ├── dist
+                                    │   │   │   │   ├── eslintrc-universal.cjs
+                                    │   │   │   │   ├── eslintrc-universal.cjs.map
+                                    │   │   │   │   ├── eslintrc.cjs
+                                    │   │   │   │   ├── eslintrc.cjs.map
+                                    │   │   │   │   └── eslintrc.d.cts
+                                    │   │   │   ├── lib
+                                    │   │   │   │   ├── cascading-config-array-factory.js
+                                    │   │   │   │   ├── config-array
+                                    │   │   │   │   │   ├── config-array.js
+                                    │   │   │   │   │   ├── config-dependency.js
+                                    │   │   │   │   │   ├── extracted-config.js
+                                    │   │   │   │   │   ├── ignore-pattern.js
+                                    │   │   │   │   │   ├── index.js
+                                    │   │   │   │   │   └── override-tester.js
+                                    │   │   │   │   ├── config-array-factory.js
+                                    │   │   │   │   ├── flat-compat.js
+                                    │   │   │   │   ├── index-universal.js
+                                    │   │   │   │   ├── index.js
+                                    │   │   │   │   ├── shared
+                                    │   │   │   │   │   ├── ajv.js
+                                    │   │   │   │   │   ├── config-ops.js
+                                    │   │   │   │   │   ├── config-validator.js
+                                    │   │   │   │   │   ├── deep-merge-arrays.js
+                                    │   │   │   │   │   ├── deprecation-warnings.js
+                                    │   │   │   │   │   ├── naming.js
+                                    │   │   │   │   │   ├── relative-module-resolver.js
+                                    │   │   │   │   │   └── types.js
+                                    │   │   │   │   └── types
+                                    │   │   │   │       └── index.d.ts
+                                    │   │   │   ├── LICENSE
+                                    │   │   │   ├── node_modules
+                                    │   │   │   │   └── globals
+                                    │   │   │   │       ├── globals.json
+                                    │   │   │   │       ├── index.d.ts
+                                    │   │   │   │       ├── index.js
+                                    │   │   │   │       ├── license
+                                    │   │   │   │       ├── package.json
+                                    │   │   │   │       └── readme.md
+                                    │   │   │   ├── package.json
+                                    │   │   │   ├── README.md
+                                    │   │   │   └── universal.js
+                                    │   │   └── js
+                                    │   │       ├── LICENSE
+                                    │   │       ├── package.json
+                                    │   │       ├── README.md
+                                    │   │       ├── src
+                                    │   │       │   ├── configs
+                                    │   │       │   │   ├── eslint-all.js
+                                    │   │       │   │   └── eslint-recommended.js
+                                    │   │       │   └── index.js
+                                    │   │       └── types
+                                    │   │           └── index.d.ts
+                                    │   ├── @types
+                                    │   │   └── estree
+                                    │   │       ├── flow.d.ts
+                                    │   │       ├── index.d.ts
+                                    │   │       ├── LICENSE
+                                    │   │       ├── package.json
+                                    │   │       └── README.md
+                                    │   ├── acorn
+                                    │   │   ├── bin
+                                    │   │   │   └── acorn
+                                    │   │   ├── CHANGELOG.md
+                                    │   │   ├── dist
+                                    │   │   │   ├── acorn.d.mts
+                                    │   │   │   ├── acorn.d.ts
+                                    │   │   │   ├── acorn.js
+                                    │   │   │   ├── acorn.mjs
+                                    │   │   │   └── bin.js
+                                    │   │   ├── LICENSE
+                                    │   │   ├── package.json
+                                    │   │   └── README.md
+                                    │   ├── ajv
+                                    │   │   ├── dist
+                                    │   │   │   ├── ajv.bundle.js
+                                    │   │   │   ├── ajv.min.js
+                                    │   │   │   └── ajv.min.js.map
+                                    │   │   ├── lib
+                                    │   │   │   ├── ajv.d.ts
+                                    │   │   │   ├── ajv.js
+                                    │   │   │   ├── cache.js
+                                    │   │   │   ├── compile
+                                    │   │   │   │   ├── async.js
+                                    │   │   │   │   ├── equal.js
+                                    │   │   │   │   ├── error_classes.js
+                                    │   │   │   │   ├── formats.js
+                                    │   │   │   │   ├── index.js
+                                    │   │   │   │   ├── resolve.js
+                                    │   │   │   │   ├── rules.js
+                                    │   │   │   │   ├── schema_obj.js
+                                    │   │   │   │   ├── ucs2length.js
+                                    │   │   │   │   └── util.js
+                                    │   │   │   ├── data.js
+                                    │   │   │   ├── definition_schema.js
+                                    │   │   │   ├── dot
+                                    │   │   │   │   ├── _limit.jst
+                                    │   │   │   │   ├── _limitItems.jst
+                                    │   │   │   │   ├── _limitLength.jst
+                                    │   │   │   │   ├── _limitProperties.jst
+                                    │   │   │   │   ├── allOf.jst
+                                    │   │   │   │   ├── anyOf.jst
+                                    │   │   │   │   ├── coerce.def
+                                    │   │   │   │   ├── comment.jst
+                                    │   │   │   │   ├── const.jst
+                                    │   │   │   │   ├── contains.jst
+                                    │   │   │   │   ├── custom.jst
+                                    │   │   │   │   ├── defaults.def
+                                    │   │   │   │   ├── definitions.def
+                                    │   │   │   │   ├── dependencies.jst
+                                    │   │   │   │   ├── enum.jst
+                                    │   │   │   │   ├── errors.def
+                                    │   │   │   │   ├── format.jst
+                                    │   │   │   │   ├── if.jst
+                                    │   │   │   │   ├── items.jst
+                                    │   │   │   │   ├── missing.def
+                                    │   │   │   │   ├── multipleOf.jst
+                                    │   │   │   │   ├── not.jst
+                                    │   │   │   │   ├── oneOf.jst
+                                    │   │   │   │   ├── pattern.jst
+                                    │   │   │   │   ├── properties.jst
+                                    │   │   │   │   ├── propertyNames.jst
+                                    │   │   │   │   ├── ref.jst
+                                    │   │   │   │   ├── required.jst
+                                    │   │   │   │   ├── uniqueItems.jst
+                                    │   │   │   │   └── validate.jst
+                                    │   │   │   ├── dotjs
+                                    │   │   │   │   ├── _limit.js
+                                    │   │   │   │   ├── _limitItems.js
+                                    │   │   │   │   ├── _limitLength.js
+                                    │   │   │   │   ├── _limitProperties.js
+                                    │   │   │   │   ├── allOf.js
+                                    │   │   │   │   ├── anyOf.js
+                                    │   │   │   │   ├── comment.js
+                                    │   │   │   │   ├── const.js
+                                    │   │   │   │   ├── contains.js
+                                    │   │   │   │   ├── custom.js
+                                    │   │   │   │   ├── dependencies.js
+                                    │   │   │   │   ├── enum.js
+                                    │   │   │   │   ├── format.js
+                                    │   │   │   │   ├── if.js
+                                    │   │   │   │   ├── index.js
+                                    │   │   │   │   ├── items.js
+                                    │   │   │   │   ├── multipleOf.js
+                                    │   │   │   │   ├── not.js
+                                    │   │   │   │   ├── oneOf.js
+                                    │   │   │   │   ├── pattern.js
+                                    │   │   │   │   ├── properties.js
+                                    │   │   │   │   ├── propertyNames.js
+                                    │   │   │   │   ├── README.md
+                                    │   │   │   │   ├── ref.js
+                                    │   │   │   │   ├── required.js
+                                    │   │   │   │   ├── uniqueItems.js
+                                    │   │   │   │   └── validate.js
+                                    │   │   │   ├── keyword.js
+                                    │   │   │   └── refs
+                                    │   │   │       ├── data.json
+                                    │   │   │       ├── json-schema-draft-04.json
+                                    │   │   │       ├── json-schema-draft-06.json
+                                    │   │   │       ├── json-schema-draft-07.json
+                                    │   │   │       └── json-schema-secure.json
+                                    │   │   ├── LICENSE
+                                    │   │   ├── package.json
+                                    │   │   ├── README.md
+                                    │   │   └── scripts
+                                    │   │       ├── bundle.js
+                                    │   │       ├── compile-dots.js
+                                    │   │       ├── info
+                                    │   │       ├── prepare-tests
+                                    │   │       ├── publish-built-version
+                                    │   │       └── travis-gh-pages
+                                    │   ├── argparse
+                                    │   │   ├── argparse.js
+                                    │   │   ├── CHANGELOG.md
+                                    │   │   ├── lib
+                                    │   │   │   ├── sub.js
+                                    │   │   │   └── textwrap.js
+                                    │   │   ├── LICENSE
+                                    │   │   ├── package.json
+                                    │   │   └── README.md
+                                    │   ├── eslint
+                                    │   │   ├── bin
+                                    │   │   │   └── eslint.js
+                                    │   │   ├── conf
+                                    │   │   │   ├── default-cli-options.js
+                                    │   │   │   ├── ecma-version.js
+                                    │   │   │   ├── globals.js
+                                    │   │   │   ├── replacements.json
+                                    │   │   │   └── rule-type-list.json
+                                    │   │   ├── lib
+                                    │   │   │   ├── api.js
+                                    │   │   │   ├── cli-engine
+                                    │   │   │   │   ├── cli-engine.js
+                                    │   │   │   │   ├── file-enumerator.js
+                                    │   │   │   │   ├── formatters
+                                    │   │   │   │   │   ├── formatters-meta.json
+                                    │   │   │   │   │   ├── html.js
+                                    │   │   │   │   │   ├── json-with-metadata.js
+                                    │   │   │   │   │   ├── json.js
+                                    │   │   │   │   │   └── stylish.js
+                                    │   │   │   │   ├── hash.js
+                                    │   │   │   │   ├── index.js
+                                    │   │   │   │   ├── lint-result-cache.js
+                                    │   │   │   │   └── load-rules.js
+                                    │   │   │   ├── cli.js
+                                    │   │   │   ├── config
+                                    │   │   │   │   ├── config-loader.js
+                                    │   │   │   │   ├── config.js
+                                    │   │   │   │   ├── default-config.js
+                                    │   │   │   │   ├── flat-config-array.js
+                                    │   │   │   │   └── flat-config-schema.js
+                                    │   │   │   ├── config-api.js
+                                    │   │   │   ├── eslint
+                                    │   │   │   │   ├── eslint-helpers.js
+                                    │   │   │   │   ├── eslint.js
+                                    │   │   │   │   ├── index.js
+                                    │   │   │   │   ├── legacy-eslint.js
+                                    │   │   │   │   └── worker.js
+                                    │   │   │   ├── languages
+                                    │   │   │   │   └── js
+                                    │   │   │   │       ├── index.js
+                                    │   │   │   │       ├── source-code
+                                    │   │   │   │       │   ├── index.js
+                                    │   │   │   │       │   ├── source-code.js
+                                    │   │   │   │       │   └── token-store
+                                    │   │   │   │       │       ├── backward-token-comment-cursor.js
+                                    │   │   │   │       │       ├── backward-token-cursor.js
+                                    │   │   │   │       │       ├── cursor.js
+                                    │   │   │   │       │       ├── cursors.js
+                                    │   │   │   │       │       ├── decorative-cursor.js
+                                    │   │   │   │       │       ├── filter-cursor.js
+                                    │   │   │   │       │       ├── forward-token-comment-cursor.js
+                                    │   │   │   │       │       ├── forward-token-cursor.js
+                                    │   │   │   │       │       ├── index.js
+                                    │   │   │   │       │       ├── limit-cursor.js
+                                    │   │   │   │       │       ├── padded-token-cursor.js
+                                    │   │   │   │       │       ├── skip-cursor.js
+                                    │   │   │   │       │       └── utils.js
+                                    │   │   │   │       └── validate-language-options.js
+                                    │   │   │   ├── linter
+                                    │   │   │   │   ├── apply-disable-directives.js
+                                    │   │   │   │   ├── code-path-analysis
+                                    │   │   │   │   │   ├── code-path-analyzer.js
+                                    │   │   │   │   │   ├── code-path-segment.js
+                                    │   │   │   │   │   ├── code-path-state.js
+                                    │   │   │   │   │   ├── code-path.js
+                                    │   │   │   │   │   ├── debug-helpers.js
+                                    │   │   │   │   │   ├── fork-context.js
+                                    │   │   │   │   │   └── id-generator.js
+                                    │   │   │   │   ├── esquery.js
+                                    │   │   │   │   ├── file-context.js
+                                    │   │   │   │   ├── file-report.js
+                                    │   │   │   │   ├── index.js
+                                    │   │   │   │   ├── interpolate.js
+                                    │   │   │   │   ├── linter.js
+                                    │   │   │   │   ├── rule-fixer.js
+                                    │   │   │   │   ├── rules.js
+                                    │   │   │   │   ├── source-code-fixer.js
+                                    │   │   │   │   ├── source-code-traverser.js
+                                    │   │   │   │   ├── source-code-visitor.js
+                                    │   │   │   │   ├── timing.js
+                                    │   │   │   │   └── vfile.js
+                                    │   │   │   ├── options.js
+                                    │   │   │   ├── rule-tester
+                                    │   │   │   │   ├── index.js
+                                    │   │   │   │   └── rule-tester.js
+                                    │   │   │   ├── rules
+                                    │   │   │   │   ├── accessor-pairs.js
+                                    │   │   │   │   ├── array-bracket-newline.js
+                                    │   │   │   │   ├── array-bracket-spacing.js
+                                    │   │   │   │   ├── array-callback-return.js
+                                    │   │   │   │   ├── array-element-newline.js
+                                    │   │   │   │   ├── arrow-body-style.js
+                                    │   │   │   │   ├── arrow-parens.js
+                                    │   │   │   │   ├── arrow-spacing.js
+                                    │   │   │   │   ├── block-scoped-var.js
+                                    │   │   │   │   ├── block-spacing.js
+                                    │   │   │   │   ├── brace-style.js
+                                    │   │   │   │   ├── callback-return.js
+                                    │   │   │   │   ├── camelcase.js
+                                    │   │   │   │   ├── capitalized-comments.js
+                                    │   │   │   │   ├── class-methods-use-this.js
+                                    │   │   │   │   ├── comma-dangle.js
+                                    │   │   │   │   ├── comma-spacing.js
+                                    │   │   │   │   ├── comma-style.js
+                                    │   │   │   │   ├── complexity.js
+                                    │   │   │   │   ├── computed-property-spacing.js
+                                    │   │   │   │   ├── consistent-return.js
+                                    │   │   │   │   ├── consistent-this.js
+                                    │   │   │   │   ├── constructor-super.js
+                                    │   │   │   │   ├── curly.js
+                                    │   │   │   │   ├── default-case-last.js
+                                    │   │   │   │   ├── default-case.js
+                                    │   │   │   │   ├── default-param-last.js
+                                    │   │   │   │   ├── dot-location.js
+                                    │   │   │   │   ├── dot-notation.js
+                                    │   │   │   │   ├── eol-last.js
+                                    │   │   │   │   ├── eqeqeq.js
+                                    │   │   │   │   ├── for-direction.js
+                                    │   │   │   │   ├── func-call-spacing.js
+                                    │   │   │   │   ├── func-name-matching.js
+                                    │   │   │   │   ├── func-names.js
+                                    │   │   │   │   ├── func-style.js
+                                    │   │   │   │   ├── function-call-argument-newline.js
+                                    │   │   │   │   ├── function-paren-newline.js
+                                    │   │   │   │   ├── generator-star-spacing.js
+                                    │   │   │   │   ├── getter-return.js
+                                    │   │   │   │   ├── global-require.js
+                                    │   │   │   │   ├── grouped-accessor-pairs.js
+                                    │   │   │   │   ├── guard-for-in.js
+                                    │   │   │   │   ├── handle-callback-err.js
+                                    │   │   │   │   ├── id-blacklist.js
+                                    │   │   │   │   ├── id-denylist.js
+                                    │   │   │   │   ├── id-length.js
+                                    │   │   │   │   ├── id-match.js
+                                    │   │   │   │   ├── implicit-arrow-linebreak.js
+                                    │   │   │   │   ├── indent-legacy.js
+                                    │   │   │   │   ├── indent.js
+                                    │   │   │   │   ├── index.js
+                                    │   │   │   │   ├── init-declarations.js
+                                    │   │   │   │   ├── jsx-quotes.js
+                                    │   │   │   │   ├── key-spacing.js
+                                    │   │   │   │   ├── keyword-spacing.js
+                                    │   │   │   │   ├── line-comment-position.js
+                                    │   │   │   │   ├── linebreak-style.js
+                                    │   │   │   │   ├── lines-around-comment.js
+                                    │   │   │   │   ├── lines-around-directive.js
+                                    │   │   │   │   ├── lines-between-class-members.js
+                                    │   │   │   │   ├── logical-assignment-operators.js
+                                    │   │   │   │   ├── max-classes-per-file.js
+                                    │   │   │   │   ├── max-depth.js
+                                    │   │   │   │   ├── max-len.js
+                                    │   │   │   │   ├── max-lines-per-function.js
+                                    │   │   │   │   ├── max-lines.js
+                                    │   │   │   │   ├── max-nested-callbacks.js
+                                    │   │   │   │   ├── max-params.js
+                                    │   │   │   │   ├── max-statements-per-line.js
+                                    │   │   │   │   ├── max-statements.js
+                                    │   │   │   │   ├── multiline-comment-style.js
+                                    │   │   │   │   ├── multiline-ternary.js
+                                    │   │   │   │   ├── new-cap.js
+                                    │   │   │   │   ├── new-parens.js
+                                    │   │   │   │   ├── newline-after-var.js
+                                    │   │   │   │   ├── newline-before-return.js
+                                    │   │   │   │   ├── newline-per-chained-call.js
+                                    │   │   │   │   ├── no-alert.js
+                                    │   │   │   │   ├── no-array-constructor.js
+                                    │   │   │   │   ├── no-async-promise-executor.js
+                                    │   │   │   │   ├── no-await-in-loop.js
+                                    │   │   │   │   ├── no-bitwise.js
+                                    │   │   │   │   ├── no-buffer-constructor.js
+                                    │   │   │   │   ├── no-caller.js
+                                    │   │   │   │   ├── no-case-declarations.js
+                                    │   │   │   │   ├── no-catch-shadow.js
+                                    │   │   │   │   ├── no-class-assign.js
+                                    │   │   │   │   ├── no-compare-neg-zero.js
+                                    │   │   │   │   ├── no-cond-assign.js
+                                    │   │   │   │   ├── no-confusing-arrow.js
+                                    │   │   │   │   ├── no-console.js
+                                    │   │   │   │   ├── no-const-assign.js
+                                    │   │   │   │   ├── no-constant-binary-expression.js
+                                    │   │   │   │   ├── no-constant-condition.js
+                                    │   │   │   │   ├── no-constructor-return.js
+                                    │   │   │   │   ├── no-continue.js
+                                    │   │   │   │   ├── no-control-regex.js
+                                    │   │   │   │   ├── no-debugger.js
+                                    │   │   │   │   ├── no-delete-var.js
+                                    │   │   │   │   ├── no-div-regex.js
+                                    │   │   │   │   ├── no-dupe-args.js
+                                    │   │   │   │   ├── no-dupe-class-members.js
+                                    │   │   │   │   ├── no-dupe-else-if.js
+                                    │   │   │   │   ├── no-dupe-keys.js
+                                    │   │   │   │   ├── no-duplicate-case.js
+                                    │   │   │   │   ├── no-duplicate-imports.js
+                                    │   │   │   │   ├── no-else-return.js
+                                    │   │   │   │   ├── no-empty-character-class.js
+                                    │   │   │   │   ├── no-empty-function.js
+                                    │   │   │   │   ├── no-empty-pattern.js
+                                    │   │   │   │   ├── no-empty-static-block.js
+                                    │   │   │   │   ├── no-empty.js
+                                    │   │   │   │   ├── no-eq-null.js
+                                    │   │   │   │   ├── no-eval.js
+                                    │   │   │   │   ├── no-ex-assign.js
+                                    │   │   │   │   ├── no-extend-native.js
+                                    │   │   │   │   ├── no-extra-bind.js
+                                    │   │   │   │   ├── no-extra-boolean-cast.js
+                                    │   │   │   │   ├── no-extra-label.js
+                                    │   │   │   │   ├── no-extra-parens.js
+                                    │   │   │   │   ├── no-extra-semi.js
+                                    │   │   │   │   ├── no-fallthrough.js
+                                    │   │   │   │   ├── no-floating-decimal.js
+                                    │   │   │   │   ├── no-func-assign.js
+                                    │   │   │   │   ├── no-global-assign.js
+                                    │   │   │   │   ├── no-implicit-coercion.js
+                                    │   │   │   │   ├── no-implicit-globals.js
+                                    │   │   │   │   ├── no-implied-eval.js
+                                    │   │   │   │   ├── no-import-assign.js
+                                    │   │   │   │   ├── no-inline-comments.js
+                                    │   │   │   │   ├── no-inner-declarations.js
+                                    │   │   │   │   ├── no-invalid-regexp.js
+                                    │   │   │   │   ├── no-invalid-this.js
+                                    │   │   │   │   ├── no-irregular-whitespace.js
+                                    │   │   │   │   ├── no-iterator.js
+                                    │   │   │   │   ├── no-label-var.js
+                                    │   │   │   │   ├── no-labels.js
+                                    │   │   │   │   ├── no-lone-blocks.js
+                                    │   │   │   │   ├── no-lonely-if.js
+                                    │   │   │   │   ├── no-loop-func.js
+                                    │   │   │   │   ├── no-loss-of-precision.js
+                                    │   │   │   │   ├── no-magic-numbers.js
+                                    │   │   │   │   ├── no-misleading-character-class.js
+                                    │   │   │   │   ├── no-mixed-operators.js
+                                    │   │   │   │   ├── no-mixed-requires.js
+                                    │   │   │   │   ├── no-mixed-spaces-and-tabs.js
+                                    │   │   │   │   ├── no-multi-assign.js
+                                    │   │   │   │   ├── no-multi-spaces.js
+                                    │   │   │   │   ├── no-multi-str.js
+                                    │   │   │   │   ├── no-multiple-empty-lines.js
+                                    │   │   │   │   ├── no-native-reassign.js
+                                    │   │   │   │   ├── no-negated-condition.js
+                                    │   │   │   │   ├── no-negated-in-lhs.js
+                                    │   │   │   │   ├── no-nested-ternary.js
+                                    │   │   │   │   ├── no-new-func.js
+                                    │   │   │   │   ├── no-new-native-nonconstructor.js
+                                    │   │   │   │   ├── no-new-object.js
+                                    │   │   │   │   ├── no-new-require.js
+                                    │   │   │   │   ├── no-new-symbol.js
+                                    │   │   │   │   ├── no-new-wrappers.js
+                                    │   │   │   │   ├── no-new.js
+                                    │   │   │   │   ├── no-nonoctal-decimal-escape.js
+                                    │   │   │   │   ├── no-obj-calls.js
+                                    │   │   │   │   ├── no-object-constructor.js
+                                    │   │   │   │   ├── no-octal-escape.js
+                                    │   │   │   │   ├── no-octal.js
+                                    │   │   │   │   ├── no-param-reassign.js
+                                    │   │   │   │   ├── no-path-concat.js
+                                    │   │   │   │   ├── no-plusplus.js
+                                    │   │   │   │   ├── no-process-env.js
+                                    │   │   │   │   ├── no-process-exit.js
+                                    │   │   │   │   ├── no-promise-executor-return.js
+                                    │   │   │   │   ├── no-proto.js
+                                    │   │   │   │   ├── no-prototype-builtins.js
+                                    │   │   │   │   ├── no-redeclare.js
+                                    │   │   │   │   ├── no-regex-spaces.js
+                                    │   │   │   │   ├── no-restricted-exports.js
+                                    │   │   │   │   ├── no-restricted-globals.js
+                                    │   │   │   │   ├── no-restricted-imports.js
+                                    │   │   │   │   ├── no-restricted-modules.js
+                                    │   │   │   │   ├── no-restricted-properties.js
+                                    │   │   │   │   ├── no-restricted-syntax.js
+                                    │   │   │   │   ├── no-return-assign.js
+                                    │   │   │   │   ├── no-return-await.js
+                                    │   │   │   │   ├── no-script-url.js
+                                    │   │   │   │   ├── no-self-assign.js
+                                    │   │   │   │   ├── no-self-compare.js
+                                    │   │   │   │   ├── no-sequences.js
+                                    │   │   │   │   ├── no-setter-return.js
+                                    │   │   │   │   ├── no-shadow-restricted-names.js
+                                    │   │   │   │   ├── no-shadow.js
+                                    │   │   │   │   ├── no-spaced-func.js
+                                    │   │   │   │   ├── no-sparse-arrays.js
+                                    │   │   │   │   ├── no-sync.js
+                                    │   │   │   │   ├── no-tabs.js
+                                    │   │   │   │   ├── no-template-curly-in-string.js
+                                    │   │   │   │   ├── no-ternary.js
+                                    │   │   │   │   ├── no-this-before-super.js
+                                    │   │   │   │   ├── no-throw-literal.js
+                                    │   │   │   │   ├── no-trailing-spaces.js
+                                    │   │   │   │   ├── no-unassigned-vars.js
+                                    │   │   │   │   ├── no-undef-init.js
+                                    │   │   │   │   ├── no-undef.js
+                                    │   │   │   │   ├── no-undefined.js
+                                    │   │   │   │   ├── no-underscore-dangle.js
+                                    │   │   │   │   ├── no-unexpected-multiline.js
+                                    │   │   │   │   ├── no-unmodified-loop-condition.js
+                                    │   │   │   │   ├── no-unneeded-ternary.js
+                                    │   │   │   │   ├── no-unreachable-loop.js
+                                    │   │   │   │   ├── no-unreachable.js
+                                    │   │   │   │   ├── no-unsafe-finally.js
+                                    │   │   │   │   ├── no-unsafe-negation.js
+                                    │   │   │   │   ├── no-unsafe-optional-chaining.js
+                                    │   │   │   │   ├── no-unused-expressions.js
+                                    │   │   │   │   ├── no-unused-labels.js
+                                    │   │   │   │   ├── no-unused-private-class-members.js
+                                    │   │   │   │   ├── no-unused-vars.js
+                                    │   │   │   │   ├── no-use-before-define.js
+                                    │   │   │   │   ├── no-useless-assignment.js
+                                    │   │   │   │   ├── no-useless-backreference.js
+                                    │   │   │   │   ├── no-useless-call.js
+                                    │   │   │   │   ├── no-useless-catch.js
+                                    │   │   │   │   ├── no-useless-computed-key.js
+                                    │   │   │   │   ├── no-useless-concat.js
+                                    │   │   │   │   ├── no-useless-constructor.js
+                                    │   │   │   │   ├── no-useless-escape.js
+                                    │   │   │   │   ├── no-useless-rename.js
+                                    │   │   │   │   ├── no-useless-return.js
+                                    │   │   │   │   ├── no-var.js
+                                    │   │   │   │   ├── no-void.js
+                                    │   │   │   │   ├── no-warning-comments.js
+                                    │   │   │   │   ├── no-whitespace-before-property.js
+                                    │   │   │   │   ├── no-with.js
+                                    │   │   │   │   ├── nonblock-statement-body-position.js
+                                    │   │   │   │   ├── object-curly-newline.js
+                                    │   │   │   │   ├── object-curly-spacing.js
+                                    │   │   │   │   ├── object-property-newline.js
+                                    │   │   │   │   ├── object-shorthand.js
+                                    │   │   │   │   ├── one-var-declaration-per-line.js
+                                    │   │   │   │   ├── one-var.js
+                                    │   │   │   │   ├── operator-assignment.js
+                                    │   │   │   │   ├── operator-linebreak.js
+                                    │   │   │   │   ├── padded-blocks.js
+                                    │   │   │   │   ├── padding-line-between-statements.js
+                                    │   │   │   │   ├── prefer-arrow-callback.js
+                                    │   │   │   │   ├── prefer-const.js
+                                    │   │   │   │   ├── prefer-destructuring.js
+                                    │   │   │   │   ├── prefer-exponentiation-operator.js
+                                    │   │   │   │   ├── prefer-named-capture-group.js
+                                    │   │   │   │   ├── prefer-numeric-literals.js
+                                    │   │   │   │   ├── prefer-object-has-own.js
+                                    │   │   │   │   ├── prefer-object-spread.js
+                                    │   │   │   │   ├── prefer-promise-reject-errors.js
+                                    │   │   │   │   ├── prefer-reflect.js
+                                    │   │   │   │   ├── prefer-regex-literals.js
+                                    │   │   │   │   ├── prefer-rest-params.js
+                                    │   │   │   │   ├── prefer-spread.js
+                                    │   │   │   │   ├── prefer-template.js
+                                    │   │   │   │   ├── preserve-caught-error.js
+                                    │   │   │   │   ├── quote-props.js
+                                    │   │   │   │   ├── quotes.js
+                                    │   │   │   │   ├── radix.js
+                                    │   │   │   │   ├── require-atomic-updates.js
+                                    │   │   │   │   ├── require-await.js
+                                    │   │   │   │   ├── require-unicode-regexp.js
+                                    │   │   │   │   ├── require-yield.js
+                                    │   │   │   │   ├── rest-spread-spacing.js
+                                    │   │   │   │   ├── semi-spacing.js
+                                    │   │   │   │   ├── semi-style.js
+                                    │   │   │   │   ├── semi.js
+                                    │   │   │   │   ├── sort-imports.js
+                                    │   │   │   │   ├── sort-keys.js
+                                    │   │   │   │   ├── sort-vars.js
+                                    │   │   │   │   ├── space-before-blocks.js
+                                    │   │   │   │   ├── space-before-function-paren.js
+                                    │   │   │   │   ├── space-in-parens.js
+                                    │   │   │   │   ├── space-infix-ops.js
+                                    │   │   │   │   ├── space-unary-ops.js
+                                    │   │   │   │   ├── spaced-comment.js
+                                    │   │   │   │   ├── strict.js
+                                    │   │   │   │   ├── switch-colon-spacing.js
+                                    │   │   │   │   ├── symbol-description.js
+                                    │   │   │   │   ├── template-curly-spacing.js
+                                    │   │   │   │   ├── template-tag-spacing.js
+                                    │   │   │   │   ├── unicode-bom.js
+                                    │   │   │   │   ├── use-isnan.js
+                                    │   │   │   │   ├── utils
+                                    │   │   │   │   │   ├── ast-utils.js
+                                    │   │   │   │   │   ├── char-source.js
+                                    │   │   │   │   │   ├── fix-tracker.js
+                                    │   │   │   │   │   ├── keywords.js
+                                    │   │   │   │   │   ├── lazy-loading-rule-map.js
+                                    │   │   │   │   │   ├── regular-expressions.js
+                                    │   │   │   │   │   └── unicode
+                                    │   │   │   │   │       ├── index.js
+                                    │   │   │   │   │       ├── is-combining-character.js
+                                    │   │   │   │   │       ├── is-emoji-modifier.js
+                                    │   │   │   │   │       ├── is-regional-indicator-symbol.js
+                                    │   │   │   │   │       └── is-surrogate-pair.js
+                                    │   │   │   │   ├── valid-typeof.js
+                                    │   │   │   │   ├── vars-on-top.js
+                                    │   │   │   │   ├── wrap-iife.js
+                                    │   │   │   │   ├── wrap-regex.js
+                                    │   │   │   │   ├── yield-star-spacing.js
+                                    │   │   │   │   └── yoda.js
+                                    │   │   │   ├── services
+                                    │   │   │   │   ├── parser-service.js
+                                    │   │   │   │   ├── processor-service.js
+                                    │   │   │   │   ├── suppressions-service.js
+                                    │   │   │   │   └── warning-service.js
+                                    │   │   │   ├── shared
+                                    │   │   │   │   ├── ajv.js
+                                    │   │   │   │   ├── assert.js
+                                    │   │   │   │   ├── ast-utils.js
+                                    │   │   │   │   ├── deep-merge-arrays.js
+                                    │   │   │   │   ├── directives.js
+                                    │   │   │   │   ├── flags.js
+                                    │   │   │   │   ├── logging.js
+                                    │   │   │   │   ├── naming.js
+                                    │   │   │   │   ├── option-utils.js
+                                    │   │   │   │   ├── relative-module-resolver.js
+                                    │   │   │   │   ├── runtime-info.js
+                                    │   │   │   │   ├── serialization.js
+                                    │   │   │   │   ├── severity.js
+                                    │   │   │   │   ├── stats.js
+                                    │   │   │   │   ├── string-utils.js
+                                    │   │   │   │   ├── text-table.js
+                                    │   │   │   │   ├── translate-cli-options.js
+                                    │   │   │   │   └── traverser.js
+                                    │   │   │   ├── types
+                                    │   │   │   │   ├── config-api.d.ts
+                                    │   │   │   │   ├── index.d.ts
+                                    │   │   │   │   ├── rules.d.ts
+                                    │   │   │   │   ├── universal.d.ts
+                                    │   │   │   │   └── use-at-your-own-risk.d.ts
+                                    │   │   │   ├── universal.js
+                                    │   │   │   └── unsupported-api.js
+                                    │   │   ├── LICENSE
+                                    │   │   ├── messages
+                                    │   │   │   ├── all-files-ignored.js
+                                    │   │   │   ├── all-matched-files-ignored.js
+                                    │   │   │   ├── config-file-missing.js
+                                    │   │   │   ├── config-plugin-missing.js
+                                    │   │   │   ├── config-serialize-function.js
+                                    │   │   │   ├── eslintrc-incompat.js
+                                    │   │   │   ├── eslintrc-plugins.js
+                                    │   │   │   ├── extend-config-missing.js
+                                    │   │   │   ├── failed-to-read-json.js
+                                    │   │   │   ├── file-not-found.js
+                                    │   │   │   ├── invalid-rule-options.js
+                                    │   │   │   ├── invalid-rule-severity.js
+                                    │   │   │   ├── no-config-found.js
+                                    │   │   │   ├── plugin-conflict.js
+                                    │   │   │   ├── plugin-invalid.js
+                                    │   │   │   ├── plugin-missing.js
+                                    │   │   │   ├── print-config-with-directory-path.js
+                                    │   │   │   ├── shared.js
+                                    │   │   │   └── whitespace-found.js
+                                    │   │   ├── package.json
+                                    │   │   └── README.md
+                                    │   ├── eslint-plugin-react-hooks
+                                    │   │   ├── cjs
+                                    │   │   │   ├── eslint-plugin-react-hooks.d.ts
+                                    │   │   │   ├── eslint-plugin-react-hooks.development.js
+                                    │   │   │   └── eslint-plugin-react-hooks.production.js
+                                    │   │   ├── index.d.ts
+                                    │   │   ├── index.js
+                                    │   │   ├── LICENSE
+                                    │   │   ├── node_modules
+                                    │   │   │   └── zod-validation-error
+                                    │   │   │       ├── LICENSE
+                                    │   │   │       ├── package.json
+                                    │   │   │       ├── README.md
+                                    │   │   │       ├── README.v3.md
+                                    │   │   │       ├── v3
+                                    │   │   │       │   ├── index.d.mts
+                                    │   │   │       │   ├── index.d.ts
+                                    │   │   │       │   ├── index.js
+                                    │   │   │       │   ├── index.js.map
+                                    │   │   │       │   ├── index.mjs
+                                    │   │   │       │   └── index.mjs.map
+                                    │   │   │       └── v4
+                                    │   │   │           ├── index.d.mts
+                                    │   │   │           ├── index.d.ts
+                                    │   │   │           ├── index.js
+                                    │   │   │           ├── index.js.map
+                                    │   │   │           ├── index.mjs
+                                    │   │   │           └── index.mjs.map
+                                    │   │   ├── package.json
+                                    │   │   └── README.md
+                                    │   ├── eslint-scope
+                                    │   │   ├── dist
+                                    │   │   │   └── eslint-scope.cjs
+                                    │   │   ├── lib
+                                    │   │   │   ├── assert.js
+                                    │   │   │   ├── definition.js
+                                    │   │   │   ├── index.js
+                                    │   │   │   ├── pattern-visitor.js
+                                    │   │   │   ├── reference.js
+                                    │   │   │   ├── referencer.js
+                                    │   │   │   ├── scope-manager.js
+                                    │   │   │   ├── scope.js
+                                    │   │   │   ├── variable.js
+                                    │   │   │   └── version.js
+                                    │   │   ├── LICENSE
+                                    │   │   ├── package.json
+                                    │   │   └── README.md
+                                    │   ├── eslint-visitor-keys
+                                    │   │   ├── dist
+                                    │   │   │   ├── eslint-visitor-keys.cjs
+                                    │   │   │   ├── eslint-visitor-keys.d.cts
+                                    │   │   │   ├── index.d.ts
+                                    │   │   │   └── visitor-keys.d.ts
+                                    │   │   ├── lib
+                                    │   │   │   ├── index.js
+                                    │   │   │   └── visitor-keys.js
+                                    │   │   ├── LICENSE
+                                    │   │   ├── package.json
+                                    │   │   └── README.md
+                                    │   ├── espree
+                                    │   │   ├── dist
+                                    │   │   │   └── espree.cjs
+                                    │   │   ├── espree.js
+                                    │   │   ├── lib
+                                    │   │   │   ├── espree.js
+                                    │   │   │   ├── features.js
+                                    │   │   │   ├── options.js
+                                    │   │   │   ├── token-translator.js
+                                    │   │   │   └── version.js
+                                    │   │   ├── LICENSE
+                                    │   │   ├── package.json
+                                    │   │   └── README.md
+                                    │   ├── file-entry-cache
+                                    │   │   ├── cache.js
+                                    │   │   ├── LICENSE
+                                    │   │   ├── package.json
+                                    │   │   └── README.md
+                                    │   ├── flat-cache
+                                    │   │   ├── changelog.md
+                                    │   │   ├── LICENSE
+                                    │   │   ├── package.json
+                                    │   │   ├── README.md
+                                    │   │   └── src
+                                    │   │       ├── cache.js
+                                    │   │       ├── del.js
+                                    │   │       └── utils.js
+                                    │   ├── globals
+                                    │   │   ├── globals.json
+                                    │   │   ├── index.d.ts
+                                    │   │   ├── index.js
+                                    │   │   ├── license
+                                    │   │   ├── package.json
+                                    │   │   └── readme.md
+                                    │   ├── js-yaml
+                                    │   │   ├── bin
+                                    │   │   │   └── js-yaml.js
+                                    │   │   ├── dist
+                                    │   │   │   ├── js-yaml.js
+                                    │   │   │   ├── js-yaml.min.js
+                                    │   │   │   └── js-yaml.mjs
+                                    │   │   ├── index.js
+                                    │   │   ├── lib
+                                    │   │   │   ├── common.js
+                                    │   │   │   ├── dumper.js
+                                    │   │   │   ├── exception.js
+                                    │   │   │   ├── loader.js
+                                    │   │   │   ├── schema
+                                    │   │   │   │   ├── core.js
+                                    │   │   │   │   ├── default.js
+                                    │   │   │   │   ├── failsafe.js
+                                    │   │   │   │   └── json.js
+                                    │   │   │   ├── schema.js
+                                    │   │   │   ├── snippet.js
+                                    │   │   │   ├── type
+                                    │   │   │   │   ├── binary.js
+                                    │   │   │   │   ├── bool.js
+                                    │   │   │   │   ├── float.js
+                                    │   │   │   │   ├── int.js
+                                    │   │   │   │   ├── map.js
+                                    │   │   │   │   ├── merge.js
+                                    │   │   │   │   ├── null.js
+                                    │   │   │   │   ├── omap.js
+                                    │   │   │   │   ├── pairs.js
+                                    │   │   │   │   ├── seq.js
+                                    │   │   │   │   ├── set.js
+                                    │   │   │   │   ├── str.js
+                                    │   │   │   │   └── timestamp.js
+                                    │   │   │   └── type.js
+                                    │   │   ├── LICENSE
+                                    │   │   ├── package.json
+                                    │   │   └── README.md
+                                    │   ├── json-schema-traverse
+                                    │   │   ├── index.js
+                                    │   │   ├── LICENSE
+                                    │   │   ├── package.json
+                                    │   │   ├── README.md
+                                    │   │   └── spec
+                                    │   │       ├── fixtures
+                                    │   │       │   └── schema.js
+                                    │   │       └── index.spec.js
+                                    │   ├── recharts
+                                    │   │   ├── CHANGELOG.md
+                                    │   │   ├── CONTRIBUTING.md
+                                    │   │   ├── es6
+                                    │   │   │   ├── cartesian
+                                    │   │   │   │   ├── Area.js
+                                    │   │   │   │   ├── Bar.js
+                                    │   │   │   │   ├── Brush.js
+                                    │   │   │   │   ├── CartesianAxis.js
+                                    │   │   │   │   ├── CartesianGrid.js
+                                    │   │   │   │   ├── ErrorBar.js
+                                    │   │   │   │   ├── getEquidistantTicks.js
+                                    │   │   │   │   ├── getTicks.js
+                                    │   │   │   │   ├── Line.js
+                                    │   │   │   │   ├── ReferenceArea.js
+                                    │   │   │   │   ├── ReferenceDot.js
+                                    │   │   │   │   ├── ReferenceLine.js
+                                    │   │   │   │   ├── Scatter.js
+                                    │   │   │   │   ├── XAxis.js
+                                    │   │   │   │   ├── YAxis.js
+                                    │   │   │   │   └── ZAxis.js
+                                    │   │   │   ├── chart
+                                    │   │   │   │   ├── AccessibilityManager.js
+                                    │   │   │   │   ├── AreaChart.js
+                                    │   │   │   │   ├── BarChart.js
+                                    │   │   │   │   ├── ComposedChart.js
+                                    │   │   │   │   ├── FunnelChart.js
+                                    │   │   │   │   ├── generateCategoricalChart.js
+                                    │   │   │   │   ├── LineChart.js
+                                    │   │   │   │   ├── PieChart.js
+                                    │   │   │   │   ├── RadarChart.js
+                                    │   │   │   │   ├── RadialBarChart.js
+                                    │   │   │   │   ├── Sankey.js
+                                    │   │   │   │   ├── ScatterChart.js
+                                    │   │   │   │   ├── SunburstChart.js
+                                    │   │   │   │   ├── Treemap.js
+                                    │   │   │   │   └── types.js
+                                    │   │   │   ├── component
+                                    │   │   │   │   ├── Cell.js
+                                    │   │   │   │   ├── Cursor.js
+                                    │   │   │   │   ├── Customized.js
+                                    │   │   │   │   ├── DefaultLegendContent.js
+                                    │   │   │   │   ├── DefaultTooltipContent.js
+                                    │   │   │   │   ├── Label.js
+                                    │   │   │   │   ├── LabelList.js
+                                    │   │   │   │   ├── Legend.js
+                                    │   │   │   │   ├── ResponsiveContainer.js
+                                    │   │   │   │   ├── Text.js
+                                    │   │   │   │   ├── Tooltip.js
+                                    │   │   │   │   └── TooltipBoundingBox.js
+                                    │   │   │   ├── container
+                                    │   │   │   │   ├── Layer.js
+                                    │   │   │   │   └── Surface.js
+                                    │   │   │   ├── context
+                                    │   │   │   │   └── chartLayoutContext.js
+                                    │   │   │   ├── index.js
+                                    │   │   │   ├── numberAxis
+                                    │   │   │   │   └── Funnel.js
+                                    │   │   │   ├── polar
+                                    │   │   │   │   ├── Pie.js
+                                    │   │   │   │   ├── PolarAngleAxis.js
+                                    │   │   │   │   ├── PolarGrid.js
+                                    │   │   │   │   ├── PolarRadiusAxis.js
+                                    │   │   │   │   ├── Radar.js
+                                    │   │   │   │   ├── RadialBar.js
+                                    │   │   │   │   └── types.js
+                                    │   │   │   ├── shape
+                                    │   │   │   │   ├── Cross.js
+                                    │   │   │   │   ├── Curve.js
+                                    │   │   │   │   ├── Dot.js
+                                    │   │   │   │   ├── Polygon.js
+                                    │   │   │   │   ├── Rectangle.js
+                                    │   │   │   │   ├── Sector.js
+                                    │   │   │   │   ├── Symbols.js
+                                    │   │   │   │   └── Trapezoid.js
+                                    │   │   │   └── util
+                                    │   │   │       ├── ActiveShapeUtils.js
+                                    │   │   │       ├── BarUtils.js
+                                    │   │   │       ├── calculateViewBox.js
+                                    │   │   │       ├── CartesianUtils.js
+                                    │   │   │       ├── ChartUtils.js
+                                    │   │   │       ├── Constants.js
+                                    │   │   │       ├── CssPrefixUtils.js
+                                    │   │   │       ├── cursor
+                                    │   │   │       │   ├── getCursorPoints.js
+                                    │   │   │       │   ├── getCursorRectangle.js
+                                    │   │   │       │   └── getRadialCursorPoints.js
+                                    │   │   │       ├── DataUtils.js
+                                    │   │   │       ├── DetectReferenceElementsDomain.js
+                                    │   │   │       ├── DOMUtils.js
+                                    │   │   │       ├── Events.js
+                                    │   │   │       ├── FunnelUtils.js
+                                    │   │   │       ├── getEveryNthWithCondition.js
+                                    │   │   │       ├── getLegendProps.js
+                                    │   │   │       ├── Global.js
+                                    │   │   │       ├── IfOverflowMatches.js
+                                    │   │   │       ├── isDomainSpecifiedByUser.js
+                                    │   │   │       ├── LogUtils.js
+                                    │   │   │       ├── payload
+                                    │   │   │       │   └── getUniqPayload.js
+                                    │   │   │       ├── PolarUtils.js
+                                    │   │   │       ├── RadialBarUtils.js
+                                    │   │   │       ├── ReactUtils.js
+                                    │   │   │       ├── ReduceCSSCalc.js
+                                    │   │   │       ├── ScatterUtils.js
+                                    │   │   │       ├── ShallowEqual.js
+                                    │   │   │       ├── TickUtils.js
+                                    │   │   │       ├── tooltip
+                                    │   │   │       │   └── translate.js
+                                    │   │   │       └── types.js
+                                    │   │   ├── lib
+                                    │   │   │   ├── cartesian
+                                    │   │   │   │   ├── Area.js
+                                    │   │   │   │   ├── Bar.js
+                                    │   │   │   │   ├── Brush.js
+                                    │   │   │   │   ├── CartesianAxis.js
+                                    │   │   │   │   ├── CartesianGrid.js
+                                    │   │   │   │   ├── ErrorBar.js
+                                    │   │   │   │   ├── getEquidistantTicks.js
+                                    │   │   │   │   ├── getTicks.js
+                                    │   │   │   │   ├── Line.js
+                                    │   │   │   │   ├── ReferenceArea.js
+                                    │   │   │   │   ├── ReferenceDot.js
+                                    │   │   │   │   ├── ReferenceLine.js
+                                    │   │   │   │   ├── Scatter.js
+                                    │   │   │   │   ├── XAxis.js
+                                    │   │   │   │   ├── YAxis.js
+                                    │   │   │   │   └── ZAxis.js
+                                    │   │   │   ├── chart
+                                    │   │   │   │   ├── AccessibilityManager.js
+                                    │   │   │   │   ├── AreaChart.js
+                                    │   │   │   │   ├── BarChart.js
+                                    │   │   │   │   ├── ComposedChart.js
+                                    │   │   │   │   ├── FunnelChart.js
+                                    │   │   │   │   ├── generateCategoricalChart.js
+                                    │   │   │   │   ├── LineChart.js
+                                    │   │   │   │   ├── PieChart.js
+                                    │   │   │   │   ├── RadarChart.js
+                                    │   │   │   │   ├── RadialBarChart.js
+                                    │   │   │   │   ├── Sankey.js
+                                    │   │   │   │   ├── ScatterChart.js
+                                    │   │   │   │   ├── SunburstChart.js
+                                    │   │   │   │   ├── Treemap.js
+                                    │   │   │   │   └── types.js
+                                    │   │   │   ├── component
+                                    │   │   │   │   ├── Cell.js
+                                    │   │   │   │   ├── Cursor.js
+                                    │   │   │   │   ├── Customized.js
+                                    │   │   │   │   ├── DefaultLegendContent.js
+                                    │   │   │   │   ├── DefaultTooltipContent.js
+                                    │   │   │   │   ├── Label.js
+                                    │   │   │   │   ├── LabelList.js
+                                    │   │   │   │   ├── Legend.js
+                                    │   │   │   │   ├── ResponsiveContainer.js
+                                    │   │   │   │   ├── Text.js
+                                    │   │   │   │   ├── Tooltip.js
+                                    │   │   │   │   └── TooltipBoundingBox.js
+                                    │   │   │   ├── container
+                                    │   │   │   │   ├── Layer.js
+                                    │   │   │   │   └── Surface.js
+                                    │   │   │   ├── context
+                                    │   │   │   │   └── chartLayoutContext.js
+                                    │   │   │   ├── index.js
+                                    │   │   │   ├── numberAxis
+                                    │   │   │   │   └── Funnel.js
+                                    │   │   │   ├── polar
+                                    │   │   │   │   ├── Pie.js
+                                    │   │   │   │   ├── PolarAngleAxis.js
+                                    │   │   │   │   ├── PolarGrid.js
+                                    │   │   │   │   ├── PolarRadiusAxis.js
+                                    │   │   │   │   ├── Radar.js
+                                    │   │   │   │   ├── RadialBar.js
+                                    │   │   │   │   └── types.js
+                                    │   │   │   ├── shape
+                                    │   │   │   │   ├── Cross.js
+                                    │   │   │   │   ├── Curve.js
+                                    │   │   │   │   ├── Dot.js
+                                    │   │   │   │   ├── Polygon.js
+                                    │   │   │   │   ├── Rectangle.js
+                                    │   │   │   │   ├── Sector.js
+                                    │   │   │   │   ├── Symbols.js
+                                    │   │   │   │   └── Trapezoid.js
+                                    │   │   │   └── util
+                                    │   │   │       ├── ActiveShapeUtils.js
+                                    │   │   │       ├── BarUtils.js
+                                    │   │   │       ├── calculateViewBox.js
+                                    │   │   │       ├── CartesianUtils.js
+                                    │   │   │       ├── ChartUtils.js
+                                    │   │   │       ├── Constants.js
+                                    │   │   │       ├── CssPrefixUtils.js
+                                    │   │   │       ├── cursor
+                                    │   │   │       │   ├── getCursorPoints.js
+                                    │   │   │       │   ├── getCursorRectangle.js
+                                    │   │   │       │   └── getRadialCursorPoints.js
+                                    │   │   │       ├── DataUtils.js
+                                    │   │   │       ├── DetectReferenceElementsDomain.js
+                                    │   │   │       ├── DOMUtils.js
+                                    │   │   │       ├── Events.js
+                                    │   │   │       ├── FunnelUtils.js
+                                    │   │   │       ├── getEveryNthWithCondition.js
+                                    │   │   │       ├── getLegendProps.js
+                                    │   │   │       ├── Global.js
+                                    │   │   │       ├── IfOverflowMatches.js
+                                    │   │   │       ├── isDomainSpecifiedByUser.js
+                                    │   │   │       ├── LogUtils.js
+                                    │   │   │       ├── payload
+                                    │   │   │       │   └── getUniqPayload.js
+                                    │   │   │       ├── PolarUtils.js
+                                    │   │   │       ├── RadialBarUtils.js
+                                    │   │   │       ├── ReactUtils.js
+                                    │   │   │       ├── ReduceCSSCalc.js
+                                    │   │   │       ├── ScatterUtils.js
+                                    │   │   │       ├── ShallowEqual.js
+                                    │   │   │       ├── TickUtils.js
+                                    │   │   │       ├── tooltip
+                                    │   │   │       │   └── translate.js
+                                    │   │   │       └── types.js
+                                    │   │   ├── LICENSE
+                                    │   │   ├── package.json
+                                    │   │   ├── README.md
+                                    │   │   ├── types
+                                    │   │   │   ├── cartesian
+                                    │   │   │   │   ├── Area.d.ts
+                                    │   │   │   │   ├── Bar.d.ts
+                                    │   │   │   │   ├── Brush.d.ts
+                                    │   │   │   │   ├── CartesianAxis.d.ts
+                                    │   │   │   │   ├── CartesianGrid.d.ts
+                                    │   │   │   │   ├── ErrorBar.d.ts
+                                    │   │   │   │   ├── getEquidistantTicks.d.ts
+                                    │   │   │   │   ├── getTicks.d.ts
+                                    │   │   │   │   ├── Line.d.ts
+                                    │   │   │   │   ├── ReferenceArea.d.ts
+                                    │   │   │   │   ├── ReferenceDot.d.ts
+                                    │   │   │   │   ├── ReferenceLine.d.ts
+                                    │   │   │   │   ├── Scatter.d.ts
+                                    │   │   │   │   ├── XAxis.d.ts
+                                    │   │   │   │   ├── YAxis.d.ts
+                                    │   │   │   │   └── ZAxis.d.ts
+                                    │   │   │   ├── chart
+                                    │   │   │   │   ├── AccessibilityManager.d.ts
+                                    │   │   │   │   ├── AreaChart.d.ts
+                                    │   │   │   │   ├── BarChart.d.ts
+                                    │   │   │   │   ├── ComposedChart.d.ts
+                                    │   │   │   │   ├── FunnelChart.d.ts
+                                    │   │   │   │   ├── generateCategoricalChart.d.ts
+                                    │   │   │   │   ├── LineChart.d.ts
+                                    │   │   │   │   ├── PieChart.d.ts
+                                    │   │   │   │   ├── RadarChart.d.ts
+                                    │   │   │   │   ├── RadialBarChart.d.ts
+                                    │   │   │   │   ├── Sankey.d.ts
+                                    │   │   │   │   ├── ScatterChart.d.ts
+                                    │   │   │   │   ├── SunburstChart.d.ts
+                                    │   │   │   │   ├── Treemap.d.ts
+                                    │   │   │   │   └── types.d.ts
+                                    │   │   │   ├── component
+                                    │   │   │   │   ├── Cell.d.ts
+                                    │   │   │   │   ├── Cursor.d.ts
+                                    │   │   │   │   ├── Customized.d.ts
+                                    │   │   │   │   ├── DefaultLegendContent.d.ts
+                                    │   │   │   │   ├── DefaultTooltipContent.d.ts
+                                    │   │   │   │   ├── Label.d.ts
+                                    │   │   │   │   ├── LabelList.d.ts
+                                    │   │   │   │   ├── Legend.d.ts
+                                    │   │   │   │   ├── ResponsiveContainer.d.ts
+                                    │   │   │   │   ├── Text.d.ts
+                                    │   │   │   │   ├── Tooltip.d.ts
+                                    │   │   │   │   └── TooltipBoundingBox.d.ts
+                                    │   │   │   ├── container
+                                    │   │   │   │   ├── Layer.d.ts
+                                    │   │   │   │   └── Surface.d.ts
+                                    │   │   │   ├── context
+                                    │   │   │   │   └── chartLayoutContext.d.ts
+                                    │   │   │   ├── index.d.ts
+                                    │   │   │   ├── numberAxis
+                                    │   │   │   │   └── Funnel.d.ts
+                                    │   │   │   ├── polar
+                                    │   │   │   │   ├── Pie.d.ts
+                                    │   │   │   │   ├── PolarAngleAxis.d.ts
+                                    │   │   │   │   ├── PolarGrid.d.ts
+                                    │   │   │   │   ├── PolarRadiusAxis.d.ts
+                                    │   │   │   │   ├── Radar.d.ts
+                                    │   │   │   │   ├── RadialBar.d.ts
+                                    │   │   │   │   └── types.d.ts
+                                    │   │   │   ├── shape
+                                    │   │   │   │   ├── Cross.d.ts
+                                    │   │   │   │   ├── Curve.d.ts
+                                    │   │   │   │   ├── Dot.d.ts
+                                    │   │   │   │   ├── Polygon.d.ts
+                                    │   │   │   │   ├── Rectangle.d.ts
+                                    │   │   │   │   ├── Sector.d.ts
+                                    │   │   │   │   ├── Symbols.d.ts
+                                    │   │   │   │   └── Trapezoid.d.ts
+                                    │   │   │   └── util
+                                    │   │   │       ├── ActiveShapeUtils.d.ts
+                                    │   │   │       ├── BarUtils.d.ts
+                                    │   │   │       ├── calculateViewBox.d.ts
+                                    │   │   │       ├── CartesianUtils.d.ts
+                                    │   │   │       ├── ChartUtils.d.ts
+                                    │   │   │       ├── Constants.d.ts
+                                    │   │   │       ├── CssPrefixUtils.d.ts
+                                    │   │   │       ├── cursor
+                                    │   │   │       │   ├── getCursorPoints.d.ts
+                                    │   │   │       │   ├── getCursorRectangle.d.ts
+                                    │   │   │       │   └── getRadialCursorPoints.d.ts
+                                    │   │   │       ├── DataUtils.d.ts
+                                    │   │   │       ├── DetectReferenceElementsDomain.d.ts
+                                    │   │   │       ├── DOMUtils.d.ts
+                                    │   │   │       ├── Events.d.ts
+                                    │   │   │       ├── FunnelUtils.d.ts
+                                    │   │   │       ├── getEveryNthWithCondition.d.ts
+                                    │   │   │       ├── getLegendProps.d.ts
+                                    │   │   │       ├── Global.d.ts
+                                    │   │   │       ├── IfOverflowMatches.d.ts
+                                    │   │   │       ├── isDomainSpecifiedByUser.d.ts
+                                    │   │   │       ├── LogUtils.d.ts
+                                    │   │   │       ├── payload
+                                    │   │   │       │   └── getUniqPayload.d.ts
+                                    │   │   │       ├── PolarUtils.d.ts
+                                    │   │   │       ├── RadialBarUtils.d.ts
+                                    │   │   │       ├── ReactUtils.d.ts
+                                    │   │   │       ├── ReduceCSSCalc.d.ts
+                                    │   │   │       ├── ScatterUtils.d.ts
+                                    │   │   │       ├── ShallowEqual.d.ts
+                                    │   │   │       ├── TickUtils.d.ts
+                                    │   │   │       ├── tooltip
+                                    │   │   │       │   └── translate.d.ts
+                                    │   │   │       └── types.d.ts
+                                    │   │   └── umd
+                                    │   │       ├── Recharts.js
+                                    │   │       ├── Recharts.js.LICENSE.txt
+                                    │   │       ├── Recharts.js.map
+                                    │   │       └── report.html
+                                    │   └── tailwind-merge
+                                    │       ├── dist
+                                    │       │   ├── bundle-cjs.js
+                                    │       │   ├── bundle-cjs.js.map
+                                    │       │   ├── bundle-mjs.mjs
+                                    │       │   ├── bundle-mjs.mjs.map
+                                    │       │   ├── es5
+                                    │       │   │   ├── bundle-cjs.js
+                                    │       │   │   ├── bundle-cjs.js.map
+                                    │       │   │   ├── bundle-mjs.mjs
+                                    │       │   │   └── bundle-mjs.mjs.map
+                                    │       │   └── types.d.ts
+                                    │       ├── LICENSE.md
+                                    │       ├── package.json
+                                    │       ├── README.md
+                                    │       └── src
+                                    │           ├── index.ts
+                                    │           └── lib
+                                    │               ├── class-group-utils.ts
+                                    │               ├── config-utils.ts
+                                    │               ├── create-tailwind-merge.ts
+                                    │               ├── default-config.ts
+                                    │               ├── extend-tailwind-merge.ts
+                                    │               ├── from-theme.ts
+                                    │               ├── lru-cache.ts
+                                    │               ├── merge-classlist.ts
+                                    │               ├── merge-configs.ts
+                                    │               ├── parse-class-name.ts
+                                    │               ├── tw-join.ts
+                                    │               ├── tw-merge.ts
+                                    │               ├── types.ts
+                                    │               └── validators.ts
+                                    ├── package-lock.json
+                                    ├── package.json
+                                    ├── README.md
+                                    ├── src
+                                    │   ├── components
+                                    │   │   ├── charts
+                                    │   │   │   ├── BarChart.tsx
+                                    │   │   │   ├── ChartContainer.tsx
+                                    │   │   │   ├── LineChart.tsx
+                                    │   │   │   └── PieChart.tsx
+                                    │   │   ├── data
+                                    │   │   │   ├── DataTable.tsx
+                                    │   │   │   ├── KPIGrid.tsx
+                                    │   │   │   └── StatCard.tsx
+                                    │   │   ├── feedback
+                                    │   │   │   ├── EmptyState.tsx
+                                    │   │   │   ├── ErrorBoundary.tsx
+                                    │   │   │   └── Skeleton.tsx
+                                    │   │   ├── forms
+                                    │   │   │   └── OrderForm.tsx
+                                    │   │   ├── layout
+                                    │   │   │   ├── AppShell.tsx
+                                    │   │   │   ├── PageHeader.tsx
+                                    │   │   │   ├── SidebarContent.tsx
+                                    │   │   │   └── types.ts
+                                    │   │   ├── primitives
+                                    │   │   │   ├── Badge.tsx
+                                    │   │   │   ├── Button.tsx
+                                    │   │   │   ├── Card.tsx
+                                    │   │   │   ├── ConfirmDialog.tsx
+                                    │   │   │   ├── index.ts
+                                    │   │   │   ├── Input.tsx
+                                    │   │   │   ├── Modal.tsx
+                                    │   │   │   ├── Select.tsx
+                                    │   │   │   ├── Spinner.tsx
+                                    │   │   │   └── Tooltip.tsx
+                                    │   │   ├── theme
+                                    │   │   │   └── ThemeProvider.tsx
+                                    │   │   ├── timeline
+                                    │   │   │   ├── AuditLog.tsx
+                                    │   │   │   └── Timeline.tsx
+                                    │   │   └── widgets
+                                    │   │       └── MiniTicker.tsx
+                                    │   ├── index.ts
+                                    │   └── utils
+                                    │       ├── cn.ts
+                                    │       └── webVitals.ts
+                                    ├── tailwind.config.ts
+                                    ├── tsconfig.json
+                                    └── tsup.config.ts
+
+352 directories, 1924 files
+```

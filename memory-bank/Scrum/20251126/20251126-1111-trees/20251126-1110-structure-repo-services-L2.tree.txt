@@ -1,0 +1,73 @@
+services
+├── compliance
+│   ├── appsettings.json
+│   ├── Background
+│   ├── compliance.csproj
+│   ├── compliance.Tests
+│   ├── ComplianceDbContext.cs
+│   ├── Dockerfile
+│   ├── DTOs
+│   ├── Infrastructure
+│   ├── Migrations
+│   ├── Program.cs
+│   ├── Properties
+│   └── Services
+├── fabric-gateway
+│   ├── FabricGatewayService.cs
+│   └── Program.cs
+├── identity
+│   ├── appsettings.json
+│   ├── Dockerfile
+│   ├── identity.csproj
+│   ├── packages-microsoft-prod.deb
+│   ├── Program.cs
+│   └── Properties
+├── integrations
+│   ├── bank-nominal
+│   ├── edo-connector
+│   └── esia-adapter
+├── issuance
+│   ├── appsettings.json
+│   ├── Background
+│   ├── Dockerfile
+│   ├── DTOs
+│   ├── Infrastructure
+│   ├── issuance.csproj
+│   ├── issuance.Tests
+│   ├── issuance.Tests.csproj
+│   ├── IssuanceDbContext.cs
+│   ├── Migrations
+│   ├── Program.cs
+│   ├── Properties
+│   ├── Services
+│   └── Validators
+├── registry
+│   ├── appsettings.json
+│   ├── Background
+│   ├── Dockerfile
+│   ├── DTOs
+│   ├── Infrastructure
+│   ├── Migrations
+│   ├── Program.cs
+│   ├── Properties
+│   ├── registry.csproj
+│   ├── registry.Tests
+│   ├── RegistryDbContext.cs
+│   ├── Services
+│   └── Validators
+└── settlement
+    ├── appsettings.json
+    ├── Background
+    ├── Consumers
+    ├── Dockerfile
+    ├── DTOs
+    ├── Infrastructure
+    ├── Migrations
+    ├── Program.cs
+    ├── Properties
+    ├── Services
+    ├── settlement.csproj
+    ├── settlement.Tests
+    └── SettlementDbContext.cs
+
+42 directories, 28 files
