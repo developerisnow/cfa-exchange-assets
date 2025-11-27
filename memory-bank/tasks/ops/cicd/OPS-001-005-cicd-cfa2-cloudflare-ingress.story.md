@@ -1,6 +1,6 @@
 ---
 created: 2025-11-27 16:05
-updated: 2025-11-27 16:05
+updated: 2025-11-27 17:15
 type: story
 sphere: [devops]
 topic: [cfa2, cloudflare, dns, tls, domains]
@@ -33,31 +33,31 @@ points: 3
 ## ✅ Definition of Done
 
 - [ ] Cloudflare DNS:
-  - [ ] В нужном CF-аккаунте есть зона `telex.global`.
-  - [ ] A-записи `auth|issuer|investor|backoffice|api.cfa2.telex.global` указывают на `92.51.38.126`.
+  - [x] В нужном CF-аккаунте есть зона `telex.global`.
+  - [x] A-записи `auth|issuer|investor|backoffice|api.cfa2.telex.global` указывают на `92.51.38.126`.
   - [ ] Записи заведены через скрипт `ops/scripts/cloudflare-dns-upsert.sh` и конфиг `.../.env.cfa2.telex` (без хардкода токенов в коде).
-- [ ] TLS / nginx:
-  - [ ] На cfa2 установлен nginx и слушает 443 для `*.cfa2.telex.global`.
-  - [ ] Выпущен сертификат (`certbot`/Cloudflare DNS challenge или Cloudflare Origin), файлы лежат под `/etc/letsencrypt/live/...` или эквивалент.
-  - [ ] Есть nginx vhost (по образцу UK1 `cfa.llmneighbors.com`), который:
-    - [ ] `auth.cfa2.telex.global` → прокси на `keycloak:8080`,
-    - [ ] `issuer.cfa2.telex.global` → прокси на `portal-issuer:3001`,
-    - [ ] `investor.cfa2.telex.global` → прокси на `portal-investor:3002`,
-    - [ ] `backoffice.cfa2.telex.global` → прокси на `backoffice:3003`,
-    - [ ] `api.cfa2.telex.global` → прокси на `api-gateway:58081`.
-- [ ] Keycloak:
-  - [ ] Realm `ois` существует и доступен по `https://auth.cfa2.telex.global/realms/ois/.well-known/openid-configuration`.
-  - [ ] Клиенты `portal-issuer`, `portal-investor`, `backoffice` имеют:
-    - [ ] корректные `redirectUris` вида `https://issuer.cfa2.telex.global/api/auth/callback/keycloak` и т.п.,
-    - [ ] `webOrigins` с доменами порталов.
-  - [ ] Тестовые пользователи (issuer@test.com, investor@test.com, cfa.devs@gmail.com) созданы и имеют правильные роли.
+- [x] TLS / nginx:
+  - [x] На cfa2 установлен nginx и слушает 443 для `*.cfa2.telex.global`.
+  - [x] Выпущен сертификат (`certbot`/Cloudflare DNS challenge или Cloudflare Origin), файлы лежат под `/etc/letsencrypt/live/...` или эквивалент.
+  - [x] Есть nginx vhost (по образцу UK1 `cfa.llmneighbors.com`), который:
+    - [x] `auth.cfa2.telex.global` → прокси на `keycloak:8080`,
+    - [x] `issuer.cfa2.telex.global` → прокси на `portal-issuer:3001`,
+    - [x] `investor.cfa2.telex.global` → прокси на `portal-investor:3002`,
+    - [x] `backoffice.cfa2.telex.global` → прокси на `backoffice:3003`,
+    - [x] `api.cfa2.telex.global` → прокси на `api-gateway:58081`.
+- [x] Keycloak:
+  - [x] Realm `ois` существует и доступен по `https://auth.cfa2.telex.global/realms/ois/.well-known/openid-configuration`.
+  - [x] Клиенты `portal-issuer`, `portal-investor`, `backoffice` имеют:
+    - [x] корректные `redirectUris` вида `https://issuer.cfa2.telex.global/api/auth/callback/keycloak` и т.п.,
+    - [x] `webOrigins` с доменами порталов.
+  - [x] Тестовые пользователи (issuer@test.com, investor@test.com, cfa.devs@gmail.com) созданы и имеют правильные роли.
 - [ ] Frontends:
-  - [ ] `NEXT_PUBLIC_KEYCLOAK_URL`/`NEXT_PUBLIC_API_BASE_URL`/`NEXT_PUBLIC_KEYCLOAK_REALM`/`NEXT_PUBLIC_KEYCLOAK_CLIENT_ID` на cfa2 (.env + docker-compose) указывают на домены `*.cfa2.telex.global`, а не bare IP.
-  - [ ] `NEXTAUTH_URL` и `KEYCLOAK_CLIENT_SECRET` прокинуты в порталы (по аналогии с локальным сценарием из w17 и cfa1/uk1).
+  - [x] `NEXT_PUBLIC_KEYCLOAK_URL`/`NEXT_PUBLIC_API_BASE_URL`/`NEXT_PUBLIC_KEYCLOAK_REALM`/`NEXT_PUBLIC_KEYCLOAK_CLIENT_ID` на cfa2 (.env + docker-compose) указывают на домены `*.cfa2.telex.global`, а не bare IP.
+  - [x] `NEXTAUTH_URL` и `KEYCLOAK_CLIENT_SECRET` прокинуты в порталы (по аналогии с локальным сценарием из w17 и cfa1/uk1).
   - [ ] С браузера по `https://issuer.cfa2.telex.global` можно залогиниться как issuer, по `https://backoffice.cfa2.telex.global` — как backoffice и т.п. (без `OAuthSignin` / `Configuration` ошибок).
-- [ ] Docs:
-  - [ ] `docs/deploy/vps-cfa2/MULTI_ACCOUNT_SETUP.md` дополнен конкретным разделом про cfa2/telex.global (env-файл, скрипт, шаги).
-  - [ ] Добавлен короткий раздел в `docs/deploy/20251113-cloudflare-ingress.md` с ссылкой на этот story как “шаблон для не-llmneighbors зон”.
+- [x] Docs:
+  - [x] `docs/deploy/vps-cfa2/MULTI_ACCOUNT_SETUP.md` дополнен конкретным разделом про cfa2/telex.global (env-файл, скрипт, шаги).
+  - [x] Добавлен короткий раздел в `docs/deploy/20251113-cloudflare-ingress.md` с ссылкой на этот story как “шаблон для не-llmneighbors зон”.
 
 ## 🔎 Verification Matrix
 
@@ -111,19 +111,55 @@ points: 3
 
 ## 🔁 Loop trace
 
-> Заполнить после того, как будут выведены домены и подтверждён рабочий login-flow через Keycloak.
-
-### Loop 1 (DNS + TLS)
+### Loop 1 (DNS + TLS for cfa2.telex.global)
 - PLAN: завести DNS-записи и включить TLS для `*.cfa2.telex.global`.  
-- EXECUTE: `cloudflare-dns-upsert.sh` + certbot/Origin cert, nginx конфиг.  
-- TESTS / CHECKS: `dig`, `curl -vk https://...`.  
-- DOCS: обновлён Multi-account runbook.  
-- COMMIT: `feat(cfa2): add cloudflare ingress for telex.global`.
+- EXECUTE:
+  - На `eywa1` в репо `cloudflare__developerisnow`:
+    - `CLOUDFLARE_CFA_API_TOKEN` при запросе `GET /zones?name=telex.global` → `9109 Invalid access token`.  
+    - Через `CLOUDFLARE_CFA_API_GLOBAL` + `CLOUDFLARE_CFA_EMAIL` найден zone `telex.global` (id `87c094e12d10e8d9977f0739adcc3e81`, account `CLOUDFLARE_CFA_ACCOUNT_ID`).  
+    - Создан и заполнен `/home/user/__Repositories/cloudflare__developerisnow/.env.cfa2.telex` (zone name/id, `CF_HOST_PREFIXES=auth,issuer,investor,backoffice,api`, `CF_BASE_LABEL=cfa2`).  
+    - A-записи `auth|issuer|investor|backoffice|api.cfa2.telex.global` upsert’нуты на `92.51.38.126` через Cloudflare API (curl + `X-Auth-Email`/`X-Auth-Key`), `proxied=false`.  
+  - На `cfa2`:
+    - Установлен `nginx` + `certbot` + `python3-certbot-dns-cloudflare`.  
+    - Сгенерирован `/root/.secrets/cloudflare.ini` с `dns_cloudflare_email`/`dns_cloudflare_api_key` (global key, без вывода значений в логи).  
+    - Выпущен LE wildcard-сертификат для `*.cfa2.telex.global` + `cfa2.telex.global` (`/etc/letsencrypt/live/cfa2.telex.global/{fullchain.pem,privkey.pem}`).  
+    - Развёрнут `/etc/nginx/sites-available/cfa2-portals.conf`:  
+      - HTTP→HTTPS redirect для `auth|issuer|investor|backoffice|api.cfa2.telex.global`;  
+      - upstream’ы на `127.0.0.1:58080` (Keycloak), `127.0.0.1:3001/2/3` (порталы), `127.0.0.1:58081` (api-gateway).  
+    - `nginx -t && systemctl reload nginx`; порт 443 занят только nginx.  
+- TESTS / CHECKS:
+  - `dig +short auth|issuer|investor|backoffice|api.cfa2.telex.global @1.1.1.1` → `92.51.38.126`.  
+  - `curl -vk https://auth.cfa2.telex.global` → LE cert `CN=*.cfa2.telex.global`, 302 на `https://auth.cfa2.telex.global/admin/`.  
+- DOCS: обновлён `docs/deploy/vps-cfa2/MULTI_ACCOUNT_SETUP.md` (секция про `.env.cfa2.telex` и upsert DNS) + добавлена ссылка на эту story в `docs/deploy/20251113-cloudflare-ingress.md`.  
+- NOTE / BLOCKER: для `telex.global` сейчас рабочим является глобальный ключ (`CLOUDFLARE_CFA_API_GLOBAL`), а не `CLOUDFLARE_CFA_API_TOKEN` — скрипт `cloudflare-dns-upsert.sh` пока использовать нельзя, пока человек не перевыпустит токен с DNS-edit правами и не обновит `.env`.  
 
-### Loop 2 (Keycloak + portals)
+### Loop 2 (Keycloak + portals on cfa2)
 - PLAN: привести Keycloak realm/clients и NextAuth env к доменам `*.cfa2.telex.global`.  
-- EXECUTE: kcadm команды, правки env/compose, перезапуск порталов.  
-- TESTS / CHECKS: логин в issuer/investor/backoffice по HTTPS-доменам.  
-- DOCS: дополнены cfa2 runbooks.  
-- COMMIT: `feat(cfa2): align portals auth with cloudflare domains`.
-
+- EXECUTE:
+  - Compose/env:
+    - В `deploy/docker-compose-at-vps/cfa2/docker-compose.yml` для `keycloak` добавлены `KC_HOSTNAME=auth.cfa2.telex.global`, `KC_PROXY=edge` (плюс уже существующие `KC_HTTP_ENABLED=true`, `KC_HOSTNAME_STRICT=false`), порты остаются `58080`.  
+    - В `.env.cfa2` `NEXT_PUBLIC_API_BASE_URL`/`NEXT_PUBLIC_KEYCLOAK_URL` переключены на `https://api.cfa2.telex.global` / `https://auth.cfa2.telex.global`.  
+    - Для порталов (`portal-issuer|portal-investor|backoffice`):  
+      - `NEXTAUTH_URL=https://<portal>.cfa2.telex.global`;  
+      - `KEYCLOAK_CLIENT_SECRET=secret`;  
+      - `KEYCLOAK_INTERNAL_URL=http://keycloak:8080`;  
+      - `NEXTAUTH_SECRET=dev-nextauth-secret-cfa2`.  
+    - `ops/scripts/sync-compose-cfa2.sh` синхронизировал bundle на `/srv/cfa`, далее `docker compose up -d` перезапустил keycloak+порталы.  
+  - Keycloak:
+    - Через `kcadm` внутри `ois-keycloak` подтверждён realm `ois`.  
+    - Клиенты:  
+      - `portal-issuer` → `rootUrl=https://issuer.cfa2.telex.global`, `redirectUris=["https://issuer.cfa2.telex.global/*","https://issuer.cfa2.telex.global/api/auth/callback/keycloak"]`, `webOrigins=["https://issuer.cfa2.telex.global"]`, `secret=secret`.  
+      - `portal-investor` → аналогично с `investor.cfa2.telex.global`.  
+      - `backoffice` → аналогично с `backoffice.cfa2.telex.global`.  
+    - Пользователи: `issuer@test.com` (роль `issuer`), `investor@test.com` (роль `investor`), `cfa.devs@gmail.com` (роли `backoffice` + `admin`).  
+    - С `KC_PROXY=edge` OpenID configuration по `https://auth.cfa2.telex.global/realms/ois/.well-known/openid-configuration` отдаёт `issuer` на `https://auth.cfa2.telex.global/realms/ois`.  
+  - Portals / NextAuth:
+    - Перезапущены `portal-issuer|portal-investor|backoffice`.  
+    - Устранена ошибка `NextAuth error NO_SECRET` / `Configuration` на investor/backoffice за счёт `NEXTAUTH_SECRET` и корректного `issuer`/`redirectUri`.  
+- TESTS / CHECKS:
+  - `curl -sk https://auth.cfa2.telex.global/realms/ois/.well-known/openid-configuration | jq .issuer` → `https://auth.cfa2.telex.global/realms/ois`.  
+  - `curl -kI https://issuer.cfa2.telex.global` → HTTP/2 307 на `/auth/signin` (страница логина NextAuth).  
+  - `curl -kI https://investor.cfa2.telex.global` → HTTP/2 307 на `/auth/signin` (ранее был 500).  
+  - `curl -kI https://backoffice.cfa2.telex.global` → HTTP/2 307 на `/api/auth/signin?callbackUrl=%2F` (ранее редирект на `/api/auth/error?error=Configuration`).  
+- DOCS: story обновлена (DoD/Loop trace); дополнительно верификация зафиксирована в `OPS-001-cicd.verification.md`.  
+- TODO (manual): прогнать end-to-end login-flow в браузере для issuer/investor/backoffice с тестовыми аккаунтами и приложить скриншоты/e2e-отчёты.
