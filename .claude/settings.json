@@ -3,11 +3,9 @@
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "perplexity-official",
-    "perplexity-dainfernalcoder",
     "brave-search",
     "sequential-thinking",
     "time",
-    "zen-mcp",
   ],
   "outputStyle": "default",
   "env": {
