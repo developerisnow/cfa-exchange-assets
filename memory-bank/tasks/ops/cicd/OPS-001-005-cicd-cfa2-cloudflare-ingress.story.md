@@ -16,7 +16,7 @@ priority: high
 points: 3
 ---
 
-# OPS-001-005: PHASE3 · cfa2 Cloudflare ingress (telex.global)
+# OPS-001-005: PHASE3 · cfa2 Cloudflare ingress (telex.global) (DoD ~70%)
 
 ## 👔 JTBD
 
@@ -34,7 +34,14 @@ points: 3
 
 - [ ] Cloudflare DNS:
   - [x] В нужном CF-аккаунте есть зона `telex.global`.
+    - Команды:
+      - `cd cloudflare__developerisnow && curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=telex.global" -H "Authorization: Bearer $CLOUDFLARE_CFA_API_GLOBAL" | jq '.result[0] | {id,name,account}'`
+    - Результат: зона `telex.global` найдена, `CF_ZONE_ID` выписан и использован в `.env.cfa2.telex`.
   - [x] A-записи `auth|issuer|investor|backoffice|api.cfa2.telex.global` указывают на `92.51.38.126`.
+    - Команды:
+      - curl-петли / ручной upsert через Cloudflare API с `CLOUDFLARE_CFA_API_GLOBAL`
+      - `dig +short auth.cfa2.telex.global issuer.cfa2.telex.global investor.cfa2.telex.global backoffice.cfa2.telex.global api.cfa2.telex.global`
+    - Результат: все хосты резолвятся в `92.51.38.126`.
   - [ ] Записи заведены через скрипт `ops/scripts/cloudflare-dns-upsert.sh` и конфиг `.../.env.cfa2.telex` (без хардкода токенов в коде).
 - [x] TLS / nginx:
   - [x] На cfa2 установлен nginx и слушает 443 для `*.cfa2.telex.global`.
@@ -61,13 +68,13 @@ points: 3
 
 ## 🔎 Verification Matrix
 
-| Check type   | Required | How exactly                                                                                      | Evidence                           |
-|-------------|----------|---------------------------------------------------------------------------------------------------|------------------------------------|
-| DNS records | ✅        | `dig +short auth.cfa2.telex.global` и остальные → `92.51.38.126`                                | dig output                         |
-| TLS         | ✅        | `curl -vk https://auth.cfa2.telex.global` (сертификат валиден, CN/SAN совпадает)                | curl -v output                     |
-| Keycloak    | ✅        | `curl -s https://auth.cfa2.telex.global/realms/ois/.well-known/openid-configuration | jq .issuer`                        | issuer URL                         |
-| Frontends   | ✅        | Открыть issuer/investor/backoffice в браузере, пройти login-flow с тест-аккаунтами              | скриншоты / e2e отчёты             |
-| CI / scripts| ✅        | `./ops/scripts/cloudflare-dns-upsert.sh ...` отработал без ошибок, записи видны в Cloudflare UI | лог скрипта + Cloudflare dashboard |
+| Check type   | Required | How exactly                                                                                      | Evidence                           | Fact / Comment                                                                 |
+|-------------|----------|---------------------------------------------------------------------------------------------------|------------------------------------|-------------------------------------------------------------------------------|
+| DNS records | ✅        | `dig +short auth.cfa2.telex.global` и остальные → `92.51.38.126`                                | dig output                         | ✔ A-записи на `92.51.38.126` созданы через CF API с `CLOUDFLARE_CFA_API_GLOBAL` |
+| TLS         | ✅        | `curl -vk https://auth.cfa2.telex.global` (сертификат валиден, CN/SAN совпадает)                | curl -v output                     | ✔ LE wildcard `*.cfa2.telex.global`, TLSv1.3 handshake OK                     |
+| Keycloak    | ✅        | `curl -s https://auth.cfa2.telex.global/realms/ois/.well-known/openid-configuration | jq .issuer`                        | issuer URL                         | ✔ issuer = `https://auth.cfa2.telex.global/realms/ois`                        |
+| Frontends   | ✅        | Открыть issuer/investor/backoffice в браузере, пройти login-flow с тест-аккаунтами              | скриншоты / e2e отчёты             | ◑ домены + редиректы работают; логин-флоу частично проверен, без formal e2e  |
+| CI / scripts| ✅        | `./ops/scripts/cloudflare-dns-upsert.sh ...` отработал без ошибок, записи видны в Cloudflare UI | лог скрипта + Cloudflare dashboard | ☐ для telex.global пока используется ручной CF API (нужно завести env+token) |
 
 ## 🚀 Kickoff / Plan (для агента)
 

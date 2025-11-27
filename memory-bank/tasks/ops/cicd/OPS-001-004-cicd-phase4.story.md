@@ -16,7 +16,7 @@ priority: medium
 points: 2
 ---
 
-# OPS-001-004: PHASE4 · JSON-guardians & guardrails for CI/CD
+# OPS-001-004: PHASE4 · JSON-guardians & guardrails for CI/CD (DoD ~0%)
 
 ## 👔 JTBD
 
@@ -46,12 +46,12 @@ points: 2
 
 ## 🔎 Verification Matrix
 
-| Check type | Required | How exactly                                                         | Evidence                         |
-|-----------|----------|----------------------------------------------------------------------|----------------------------------|
-| Config    | ✅       | `cat ops/guardians/guardian.config.json` и быстрая JSON-валидация  | jq/validator ok                  |
-| Script    | ✅       | локально: `scripts/guardians/check-guardians.sh` с тестовыми staged файлами | вывод ошибок/ok                 |
-| CI job    | ✅       | GitLab job `guardians:check` в pipeline dev-cfa2                    | зелёный статус, лог проверки     |
-| Docs      | ✅       | упоминание guardians в epic/runbooks                               | `git diff` по docs/tasks         |
+| Check type | Required | How exactly                                                         | Evidence                         | Fact / Comment                         |
+|-----------|----------|----------------------------------------------------------------------|----------------------------------|----------------------------------------|
+| Config    | ✅       | `cat ops/guardians/guardian.config.json` и быстрая JSON-валидация  | jq/validator ok                  | ☐ файл/config ещё не созданы          |
+| Script    | ✅       | локально: `scripts/guardians/check-guardians.sh` с тестовыми staged файлами | вывод ошибок/ok                 | ☐ скрипт отсутствует                   |
+| CI job    | ✅       | GitLab job `guardians:check` в pipeline dev-cfa2                    | зелёный статус, лог проверки     | ☐ job не добавлен                      |
+| Docs      | ✅       | упоминание guardians в epic/runbooks                               | `git diff` по docs/tasks         | ☐ документация под guardians не писалась |
 
 ## 🚀 Kickoff / Plan (для агента)
 
