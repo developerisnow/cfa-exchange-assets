@@ -30,6 +30,7 @@ status: in_progress
 | OPS-001-002 | `tasks/ops/cicd/OPS-001-002-cicd-phase1.story.md` | Стабилизировать backend dev pipeline для cfa2 (compose + build/deploy) | in_progress |
 | OPS-001-003 | `tasks/ops/cicd/OPS-001-003-cicd-phase2.story.md` | Добавить фронты в pipeline/compose и внедрить path-based builds + SDK jobs | in_progress |
 | OPS-001-004 | `tasks/ops/cicd/OPS-001-004-cicd-phase4.story.md` | Ввести JSON-guardians и pre-commit guardrails для CI/CD артефактов | planned |
+| OPS-001-005 | `tasks/ops/cicd/OPS-001-005-cicd-cfa2-cloudflare-ingress.story.md` | Cloudflare ingress для cfa2 (telex.global, домены+TLS) | in_progress |
 
 ## 🔍 Acceptance (Epic-level DoD)
 
