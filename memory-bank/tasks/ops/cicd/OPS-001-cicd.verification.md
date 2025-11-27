@@ -164,7 +164,7 @@ K1lbJq0e9dpxq6MywA9EAAAAFHVzZXJANjAzMzU5OS1kcTk1NDUzAQ==
         --dns-cloudflare-credentials /root/.secrets/cloudflare.ini \
         --dns-cloudflare-propagation-seconds 45 \
         -d '*.cfa2.telex.global' -d 'cfa2.telex.global' \
-        --agree-tos --email ops@developerisnow.com --non-interactive
+        --agree-tos --email alex.ocr.ai.llm@gmail.com --non-interactive
       ```
       → сертификат в `/etc/letsencrypt/live/cfa2.telex.global/`.  
     - Развёрнут `/etc/nginx/sites-available/cfa2-portals.conf`:

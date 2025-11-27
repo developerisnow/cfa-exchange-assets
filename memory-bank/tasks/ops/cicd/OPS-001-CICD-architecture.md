@@ -165,7 +165,7 @@ sequenceDiagram
 
 - **cfa2 · `*.cfa2.telex.global` (наш текущий таргет)**
   - На `cfa2`:
-    - `sudo certbot certonly --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/cloudflare.ini --dns-cloudflare-propagation-seconds 45 -d '*.cfa2.telex.global' -d 'cfa2.telex.global' --agree-tos --email ops@developerisnow.com --non-interactive`
+    - `sudo certbot certonly --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/cloudflare.ini --dns-cloudflare-propagation-seconds 45 -d '*.cfa2.telex.global' -d 'cfa2.telex.global' --agree-tos --email alex.ocr.ai.llm@gmail.com --non-interactive`
   - Файлы:
     - `/etc/letsencrypt/live/cfa2.telex.global/fullchain.pem`
     - `/etc/letsencrypt/live/cfa2.telex.global/privkey.pem`
@@ -187,14 +187,14 @@ ssh cfa2 "systemctl list-timers | grep certbot || echo 'no-certbot-timer'"
 
 ### Alerts / notifications (TLS)
 
-- При выпуске LE‑серта для `cfa2.telex.global` использовался email `ops@developerisnow.com` — Let’s Encrypt шлёт на него письма об истечении.
+- При выпуске LE‑серта для `cfa2.telex.global` используется email `alex.ocr.ai.llm@gmail.com` — Let’s Encrypt шлёт на него письма об истечении.
 - GitLab / Telegram:
   - В текущих stories нет явно описанной интеграции по TLS expiry (ни GitLab alerts, ни Telegram‑бота).
   - Это кандидаты для отдельной истории (например, “OPS-001-00X: TLS expiry monitoring & Telegram alerts”), которая бы:
     - периодически гоняла `certbot renew --dry-run` или парсила даты истечения,
     - отправляла оповещения в Telegram‑бот/канал или GitLab Alert.
 
-До тех пор основная защита — штатный auto‑renew certbot + письма LE на `ops@developerisnow.com`.
+До тех пор основная защита — штатный auto‑renew certbot + письма LE на `alex.ocr.ai.llm@gmail.com`.
 
 ## C4-style container view (text)
 
@@ -230,4 +230,3 @@ graph LR
 - **OPS-001-005 (PHASE3)** — Cloudflare ingress + Keycloak + portals login (K↔L↔J↔I + M).
 
 > For concrete commands and step-by-step flows, see the cheatsheet: `memory-bank/tasks/ops/cicd/OPS-001-CICD-cheatsheet.md`.
-

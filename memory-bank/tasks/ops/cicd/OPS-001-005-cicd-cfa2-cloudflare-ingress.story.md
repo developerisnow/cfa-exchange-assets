@@ -46,6 +46,7 @@ points: 3
 - [x] TLS / nginx:
   - [x] На cfa2 установлен nginx и слушает 443 для `*.cfa2.telex.global`.
   - [x] Выпущен сертификат (`certbot`/Cloudflare DNS challenge или Cloudflare Origin), файлы лежат под `/etc/letsencrypt/live/...` или эквивалент.
+    - [ ] У аккаунта Let’s Encrypt, используемого на cfa2 для `cfa2.telex.global`, обновлён контактный email на `alex.ocr.ai.llm@gmail.com` (через `certbot register --update-registration -m ...`); предупреждения об истечении будут приходить туда.
   - [x] Есть nginx vhost (по образцу UK1 `cfa.llmneighbors.com`), который:
     - [x] `auth.cfa2.telex.global` → прокси на `keycloak:8080`,
     - [x] `issuer.cfa2.telex.global` → прокси на `portal-issuer:3001`,
