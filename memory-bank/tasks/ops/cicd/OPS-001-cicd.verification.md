@@ -107,3 +107,29 @@ K1lbJq0e9dpxq6MywA9EAAAAFHVzZXJANjAzMzU5OS1kcTk1NDUzAQ==
 	1. ну до этого рано
 5. Docs
 	1. о каких доках идет речь если не работает предыдущее
+
+## 2025-11-27 15:10 by codex-cli d742 `OPS-001-003-cicd-phase2.story`
+### CI path-based rules & deploy verification (dev-cfa2)
+- Pipelines (dev-cfa2):
+  - `#287` (api, FORCE_BUILD_ALL=1, SHA e0d553a…) — полный прогон sdk+build+deploy, упал на deploy из-за битого `SSH_PRIVATE_KEY_CFA2` (libcrypto).
+  - `#288` (api, FORCE_BUILD_ALL=1, SHA e0d553a…) — осознанно cancel через glab api /pipelines/288/cancel (auto-cancel rule, чтобы не ждать повторный full build).
+  - `#289` (push, SHA 6a77272…) — CI-only change (`.gitlab/gitlab-ci.dev.yml` + `AGENTS.md`), jobs: только `deploy-cfa2`; `validate-specs`/`generate-sdks`/все `build-*` = skipped.
+  - `#290` (push, SHA 3855d3b2…) — TC2 registry-only: change в `services/registry/ci-tc2-registry.md`; jobs: `build-registry` + `deploy-cfa2` = success, остальные backend/frontend build jobs = skipped.
+  - `#291` (push, SHA a72f4897…) — TC3 portal-issuer-only: change в `apps/portal-issuer/ci-tc3-portal-issuer.md`; jobs: `build-portal-issuer` + `deploy-cfa2` = success, другие фронты и все backend build jobs = skipped.
+
+- SSH key / deploy:
+  - Сгенерирован новый ed25519 key (`/tmp/ci_deploy_cfa2`), public установлен в `~/.ssh/authorized_keys` на `cfa2`.
+  - Private залит в GitLab Var `SSH_PRIVATE_KEY_CFA2` в base64, `protected=false`, `masked=true`, `environment_scope=*`.
+  - Deploy через CI: `deploy-cfa2` использует этот ключ (ssh-agent + ssh-add /tmp/ci_ssh_key).
+  - Manual deploy-only: отдельный job `deploy-cfa2-only` (stage deploy, when: manual) добавлен в `.gitlab/gitlab-ci.dev.yml` для чистого `docker compose pull/up` без build.
+
+- Runtime check (cfa2, via eywa1):
+  - `ssh cfa2 "cd /srv/cfa && docker compose ps"` → все backend-сервисы, keycloak, minio, redis, postgres и три фронта `portal-issuer`/`portal-investor`/`backoffice` в состоянии Up.
+  - `curl http://92.51.38.126:58081/swagger` → 301 на `swagger/index.html` (живой api-gateway).
+  - `curl http://92.51.38.126:3001/3002/3003` → HTML Next.js c тайтлами Issuer/Investor/Backoffice (фронты отдают UI); для Investor сейчас `/api/auth/error?error=Configuration` (нужна отдельная настройка Keycloak/NextAuth).
+
+- CI behavior summary:
+  - Path-based rules теперь зависят от `CI_PIPELINE_SOURCE`:
+    - для `source=="push"` → `changes:` работает как задумано (TC1–TC3 подтверждают);
+    - для `source=="api"` → sdk/build jobs запускаются только при явном `FORCE_BUILD_ALL=1`/`ENABLE_SDK_JOBS=1`, иначе `when: never`.
+  - Auto-cancel: API-пайплайны, которые гоняют лишние builds, явно отменяем и используем либо push-пайплайны, либо ручной `deploy-cfa2-only`/ssh+compose, чтобы не ждать 10–15 минут.
