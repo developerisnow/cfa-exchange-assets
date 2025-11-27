@@ -1,13 +1,13 @@
 ---
 created: 2025-11-27 10:55
-updated: 2025-11-27 10:55
+updated: 2025-11-27 11:50
 type: story
 sphere: [devops]
 topic: [cfa2, cicd, backend]
 author: alex
 agentID: fdfe6b1e-e4ee-4505-a723-e892922472f9
 partAgentID: [co-76ca]
-version: 0.1.0
+version: 0.1.1
 tags: [cfa2, backend, docker-compose, gitlab-ci, dev-cfa2]
 epic_id: OPS-001-CICD
 story_id: OPS-001-002

@@ -1,13 +1,13 @@
 ---
 created: 2025-11-27 10:50
-updated: 2025-11-27 10:50
+updated: 2025-11-27 11:50
 type: story
 sphere: [devops]
 topic: [cfa2, vds1, gitlab, runner]
 author: alex
 agentID: fdfe6b1e-e4ee-4505-a723-e892922472f9
 partAgentID: [co-76ca]
-version: 0.1.0
+version: 0.1.1
 tags: [cfa2, vds1, gitlab-runner, registry, glab]
 epic_id: OPS-001-CICD
 story_id: OPS-001-001
@@ -26,9 +26,9 @@ points: 2
 
 - [ ] Runner vds1:
   - [x] gitlab-runner установлен и зарегистрирован в проекте `npk/ois-cfa`; ✅ 2025-11-27
-	  - Какой командой проверяем?
+    - Как проверяем: через GitLab UI (Settings → CI/CD → Runners) и/или `glab api /runners?scope=project&per_page=20`.
   - [x] runner показывает статус **online** в GitLab UI и имеет тег `vds1`; ✅ 2025-11-27
-  - [ ] есть короткий чеклист/команда проверки статуса (make/скрипт или glab).
+  - [ ] есть короткий чеклист/команда проверки статуса (make/скрипт или glab) с зафиксированными примерами вывода.
 - [x] GitLab/Registry: ✅ 2025-11-27
   - [x] есть рабочий GitLab personal access token для пользователя `cicd` (переменная в `.env` на eywa1); ✅ 2025-11-27
   - [x] `glab auth status --hostname git.telex.global` зелёный и задокументирован; ✅ 2025-11-27
@@ -36,15 +36,14 @@ points: 2
 - [ ] cfa2:
   - [x] на `92.51.38.126` существует `/srv/cfa`, user `user` в sudoers; ✅ 2025-11-27
   - [x] установлен Docker + docker compose, `docker ps` и `docker compose version` работают; ✅ 2025-11-27
-  - [ ] SSH-ключ `id_ed25519` для user@cfa2 зафиксирован и понятно, какой именно ключ использовать в CI.
+  - [ ] SSH-ключ `id_ed25519` для user@cfa2 зафиксирован и понятно, какой именно ключ использовать в CI (и как он должен выглядеть в CI variable).
 - [ ] CI variables:
-  - [ ] в GitLab CI/CD Variables создана `SSH_PRIVATE_KEY_CFA2` (masked, Unprotected для dev) с приватным ключом `user@cfa2`;
+  - [ ] в GitLab CI/CD Variables создана `SSH_PRIVATE_KEY_CFA2` (masked, Unprotected для dev) с приватным ключом `user@cfa2`; **факт наличия ключа в UI есть, формат/значение ещё не подтверждены — deploy падает.**
   - [x] GITLAB_USER_CICD_TOKEN сохранён в `.env` на eywa1 и используется glab; ✅ 2025-11-27
   - [ ] переменные registry (`CI_REGISTRY`, `CI_REGISTRY_USER`, `CI_REGISTRY_PASSWORD`) рабочие (check docker login в job’е).
-	  - точно ли созданы переменные в gitlab? 
-		  - проверить какой командой через `gitlab cli` ?
+    - Как проверить из CI: отдельный debug job `docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"` и убедиться, что он зелёный.
 - [ ] Docs:
-  - [ ] в `docs/deploy/vps-cfa2/cfa2-dev-runbook.md` есть раздел "PHASE0 / prerequisites" с описанием runner, SSH и glab;
+  - [ ] в `docs/deploy/vps-cfa2/cfa2-dev-runbook.md` есть раздел "PHASE0 / prerequisites" с описанием runner, SSH, glab и CI vars (с командами проверки);
   - [x] epic `OPS-001-CICD` обновлён ссылками на эту story. ✅ 2025-11-27
 
 ## 🔎 Verification Matrix
