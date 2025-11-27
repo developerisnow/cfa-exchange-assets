@@ -74,6 +74,16 @@ export GITLAB_TOKEN=$(grep -m1 '^GITLAB_USER_CICD_TOKEN=' /home/user/__Repositor
 | Builds skipped | Add `-F "variables[FORCE_BUILD_ALL]=1"` to trigger |
 | SDK stage fails | Don't include `ENABLE_SDK_JOBS` or fix specs |
 | Manifest unknown | Run force build first to create `:dev` images |
+| All jobs run (API) | Use `git push` instead of `glab api POST` |
+
+## CRITICAL: API vs Push Pipelines
+
+| Trigger | `before_sha` | Path-based rules |
+|---------|--------------|------------------|
+| `git push` | Real SHA | WORK correctly |
+| `glab api POST` | `000...` | IGNORED (all run) |
+
+**To test path-based**: `git push`, NOT `glab api`!
 
 ## Slash Commands
 

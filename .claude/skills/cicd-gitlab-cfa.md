@@ -240,6 +240,31 @@ build-identity:
 
 ### Gotchas
 
+**0. API-triggered pipelines IGNORE path-based rules!** (CRITICAL)
+
+```bash
+# API trigger (glab api POST) sets before_sha = 0000000...
+glab api --method POST /projects/npk%2Fois-cfa/pipeline -F ref=dev-cfa2
+# → before_sha: "0000000000000000000000000000000000000000"
+# → GitLab treats this as "diff = entire repo"
+# → ALL jobs with changes: rules will run!
+
+# Push trigger has real before_sha
+git push origin dev-cfa2
+# → before_sha: "abc123..." (previous commit)
+# → GitLab computes real diff
+# → Only changed paths trigger builds
+```
+
+| Trigger Method | `before_sha` | Path-based works? |
+|----------------|--------------|-------------------|
+| `git push` | Real SHA | YES |
+| `glab api POST` | `000...` | NO (all jobs run) |
+| MR pipeline | Real SHA | YES |
+| Manual retry | Inherits | Depends on original |
+
+**To test path-based rules**: Use `git push`, NOT `glab api`!
+
 1. **Shared packages trigger many builds**
    - Change in `packages/contracts/` → ALL backend + frontend builds
    - Change in `packages/sdks/` → ALL frontend builds
