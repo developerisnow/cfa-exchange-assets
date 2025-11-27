@@ -32,13 +32,13 @@ points: 3
 
 ## ✅ Definition of Done
 
-- [ ] Cloudflare DNS:
-  - [ ] В нужном CF-аккаунте есть зона `telex.global`.
-  - [ ] A-записи `auth|issuer|investor|backoffice|api.cfa2.telex.global` указывают на `92.51.38.126`.
-  - [ ] Записи заведены через скрипт `ops/scripts/cloudflare-dns-upsert.sh` и конфиг `.../.env.cfa2.telex` (без хардкода токенов в коде).
-- [ ] TLS / nginx:
-  - [ ] На cfa2 установлен nginx и слушает 443 для `*.cfa2.telex.global`.
-  - [ ] Выпущен сертификат (`certbot`/Cloudflare DNS challenge или Cloudflare Origin), файлы лежат под `/etc/letsencrypt/live/...` или эквивалент.
+- [x] Cloudflare DNS: ✅ 2025-11-27
+  - [x] В нужном CF-аккаунте есть зона `telex.global`. ✅ 2025-11-27
+  - [x] A-записи `auth|issuer|investor|backoffice|api.cfa2.telex.global` указывают на `92.51.38.126`. ✅ 2025-11-27
+  - [x] Записи заведены через скрипт `ops/scripts/cloudflare-dns-upsert.sh` и конфиг `.../.env.cfa2.telex` (без хардкода токенов в коде). ✅ 2025-11-27
+- [x] TLS / nginx: ✅ 2025-11-27
+  - [x] На cfa2 установлен nginx и слушает 443 для `*.cfa2.telex.global`. ✅ 2025-11-27
+  - [x] Выпущен сертификат (`certbot`/Cloudflare DNS challenge или Cloudflare Origin), файлы лежат под `/etc/letsencrypt/live/...` или эквивалент. ✅ 2025-11-27
   - [ ] Есть nginx vhost (по образцу UK1 `cfa.llmneighbors.com`), который:
     - [ ] `auth.cfa2.telex.global` → прокси на `keycloak:8080`,
     - [ ] `issuer.cfa2.telex.global` → прокси на `portal-issuer:3001`,
@@ -61,13 +61,13 @@ points: 3
 
 ## 🔎 Verification Matrix
 
-| Check type   | Required | How exactly                                                                                      | Evidence                           |
-|-------------|----------|---------------------------------------------------------------------------------------------------|------------------------------------|
-| DNS records | ✅        | `dig +short auth.cfa2.telex.global` и остальные → `92.51.38.126`                                | dig output                         |
-| TLS         | ✅        | `curl -vk https://auth.cfa2.telex.global` (сертификат валиден, CN/SAN совпадает)                | curl -v output                     |
-| Keycloak    | ✅        | `curl -s https://auth.cfa2.telex.global/realms/ois/.well-known/openid-configuration | jq .issuer`                        | issuer URL                         |
-| Frontends   | ✅        | Открыть issuer/investor/backoffice в браузере, пройти login-flow с тест-аккаунтами              | скриншоты / e2e отчёты             |
-| CI / scripts| ✅        | `./ops/scripts/cloudflare-dns-upsert.sh ...` отработал без ошибок, записи видны в Cloudflare UI | лог скрипта + Cloudflare dashboard |
+| Check type   | Required | How exactly                                                                                     | Evidence                           |            |
+| ------------ | -------- | ----------------------------------------------------------------------------------------------- | ---------------------------------- | ---------- |
+| DNS records  | ✅        | `dig +short auth.cfa2.telex.global` и остальные → `92.51.38.126`                                | dig output                         |            |
+| TLS          | ✅        | `curl -vk https://auth.cfa2.telex.global` (сертификат валиден, CN/SAN совпадает)                | curl -v output                     |            |
+| Keycloak     | ✅        | `curl -s https://auth.cfa2.telex.global/realms/ois/.well-known/openid-configuration             | jq .issuer`                        | issuer URL |
+| Frontends    | ✅        | Открыть issuer/investor/backoffice в браузере, пройти login-flow с тест-аккаунтами              | скриншоты / e2e отчёты             |            |
+| CI / scripts | ✅        | `./ops/scripts/cloudflare-dns-upsert.sh ...` отработал без ошибок, записи видны в Cloudflare UI | лог скрипта + Cloudflare dashboard |            |
 
 ## 🚀 Kickoff / Plan (для агента)
 
