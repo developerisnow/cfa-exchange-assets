@@ -14,7 +14,9 @@
 	1. ага работает
 5. CI Vars
 	- [ ] ssh key. still not working. Почему не проверить вручную? Я дал команды что легко проверяется 
+	- [ ] `https://git.telex.global/npk/ois-cfa/-/settings/ci_cd#js-cicd-variables-settings` там выстаплен ключ - содержимое из тех что я показывал в командах `SSH_PRIVATE_KEY_CFA2` - какой команд glab проверить это? проверь
 	- [ ] CI. Vars тоже неясно - как будто ты тупо несоздал не говоря уже про SSH Key
+		- [ ] 
 ### Bash
 ```bash
 ssh cfa2 "cat ~/.ssh/id_ed25519"
