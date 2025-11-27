@@ -11,6 +11,6 @@
   ],
   "outputStyle": "default",
   "env": {
-    "MAX_MCP_OUTPUT_TOKENS": "32000"
+    "MAX_MCP_OUTPUT_TOKENS": "80000"
   }  
 }
