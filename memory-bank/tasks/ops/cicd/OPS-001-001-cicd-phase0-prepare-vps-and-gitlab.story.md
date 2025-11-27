@@ -16,7 +16,7 @@ priority: high
 points: 2
 ---
 
-# OPS-001-001: PHASE0 · Prepare vps + GitLab for dev-cfa2
+# OPS-001-001: PHASE0 · Prepare vps + GitLab for dev-cfa2 (DoD ~70%)
 
 ## 👔 JTBD
 
@@ -26,35 +26,64 @@ points: 2
 
 - [ ] Runner vds1:
   - [x] gitlab-runner установлен и зарегистрирован в проекте `npk/ois-cfa`; ✅ 2025-11-27
-    - Как проверяем: через GitLab UI (Settings → CI/CD → Runners) и/или `glab api /runners?scope=project&per_page=20`.
+    - Команды:
+      - `glab api '/projects/npk%2Fois-cfa/runners' | jq '.[] | {id,description,status,tag_list}'`
+      - GitLab UI: Settings → CI/CD → Runners
+    - Результат: runner `vds1` присутствует в списке, статус `online`, теги содержат `vds1`.
   - [x] runner показывает статус **online** в GitLab UI и имеет тег `vds1`; ✅ 2025-11-27
+    - Команды:
+      - та же `glab api /projects/.../runners`
+    - Результат: статус `online`, `tag_list` включает `vds1`.
   - [ ] есть короткий чеклист/команда проверки статуса (make/скрипт или glab) с зафиксированными примерами вывода.
 - [x] GitLab/Registry: ✅ 2025-11-27
   - [x] есть рабочий GitLab personal access token для пользователя `cicd` (переменная в `.env` на eywa1); ✅ 2025-11-27
+    - Команды:
+      - `cd prj_Cifra-rwa-exachange-assets && glab auth status --hostname git.telex.global`
+    - Результат: статус `Logged in as cicd`, REST/GraphQL endpoints доступны.
   - [x] `glab auth status --hostname git.telex.global` зелёный и задокументирован; ✅ 2025-11-27
+    - См. выше.
   - [x] `glab pipeline list --repo npk/ois-cfa --per-page 3` работает и указан в runbook. ✅ 2025-11-27
+    - Команды:
+      - `glab pipeline list --repo npk/ois-cfa --per-page 3`
+    - Результат: список последних pipeline’ов для dev-cfa2 выводится без ошибок.
 - [ ] cfa2:
   - [x] на `92.51.38.126` существует `/srv/cfa`, user `user` в sudoers; ✅ 2025-11-27
+    - Команды:
+      - `ssh cfa2 "hostname && ls -d /srv/cfa"`
+    - Результат: хостнейм cfa2, каталог `/srv/cfa` существует.
   - [x] установлен Docker + docker compose, `docker ps` и `docker compose version` работают; ✅ 2025-11-27
+    - Команды:
+      - `ssh cfa2 "docker ps && docker compose version"`
+    - Результат: docker/compose команды выполняются без ошибок.
   - [ ] SSH-ключ `id_ed25519` для user@cfa2 зафиксирован и понятно, какой именно ключ использовать в CI (и как он должен выглядеть в CI variable).
 - [ ] CI variables:
-  - [ ] в GitLab CI/CD Variables создана `SSH_PRIVATE_KEY_CFA2` (masked, Unprotected для dev) с приватным ключом `user@cfa2`; **факт наличия ключа в UI есть, формат/значение ещё не подтверждены — deploy падает.**
+  - [x] в GitLab CI/CD Variables создана `SSH_PRIVATE_KEY_CFA2` (masked, Unprotected для dev) с приватным ключом `user@cfa2`; ✅ 2025-11-27 (значение сейчас base64-privkey, формат исправлен d742)
+    - Команды:
+      - `glab api /projects/npk%2Fois-cfa/variables | jq '.[] | select(.key==\"SSH_PRIVATE_KEY_CFA2\")'`
+      - проверка deploy job: `deploy-cfa2` в pipeline `#287` и последующих
+    - Результат: переменная существует, `protected=false`, `masked=true`, deploy падал на старом ключе, после перезаливки ключа `deploy` прошёл.
   - [x] GITLAB_USER_CICD_TOKEN сохранён в `.env` на eywa1 и используется glab; ✅ 2025-11-27
+    - Команды:
+      - `source .env; glab pipeline list --repo npk/ois-cfa --per-page 1`
+    - Результат: команды glab работают, используя токен из `.env`.
   - [ ] переменные registry (`CI_REGISTRY`, `CI_REGISTRY_USER`, `CI_REGISTRY_PASSWORD`) рабочие (check docker login в job’е).
-    - Как проверить из CI: отдельный debug job `docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"` и убедиться, что он зелёный.
+    - Проверка ожидается через отдельный debug job с `docker login`.
 - [ ] Docs:
   - [ ] в `docs/deploy/vps-cfa2/cfa2-dev-runbook.md` есть раздел "PHASE0 / prerequisites" с описанием runner, SSH, glab и CI vars (с командами проверки);
   - [x] epic `OPS-001-CICD` обновлён ссылками на эту story. ✅ 2025-11-27
+    - Команды:
+      - обзор `OPS-001-CICD.epic.md`
+    - Результат: в таблице Stories Index присутствует эта story.
 
 ## 🔎 Verification Matrix
 
-| Check type  | Required | How exactly                                                    | Evidence                            |
-| ----------- | -------- | -------------------------------------------------------------- | ----------------------------------- |
-| Runner      | ✅        | `make check-runner-status` или `glab api /runners`             | вывод команды, скрин GitLab runners |
-| Registry    | ✅        | `docker login $CI_REGISTRY` из тестового job                   | успешный login в логах CI           |
-| glab        | ✅        | `glab pipeline list --repo npk/ois-cfa --per-page 3` на eywa1  | вывод команды (в oracle / runbook)  |
-| SSH to cfa2 | ✅        | `ssh user@92.51.38.126 "hostname && docker ps"`                | команда отрабатывает без пароля     |
-| CI vars     | ✅        | debug-job, который эхоит, что `SSH_PRIVATE_KEY_CFA2` не пустая | лог job, отсутствие ошибок ssh-add  |
+| Check type  | Required | How exactly                                                    | Evidence                            | Fact / Comment                                      |
+| ----------- | -------- | -------------------------------------------------------------- | ----------------------------------- |-----------------------------------------------------|
+| Runner      | ✅        | `make check-runner-status` или `glab api /runners`             | вывод команды, скрин GitLab runners | ✔ `glab api /projects/.../runners` показывает vds1/online |
+| Registry    | ✅        | `docker login $CI_REGISTRY` из тестового job                   | успешный login в логах CI           | ◑ login выполняется в build jobs, отдельный debug-job не зафиксирован |
+| glab        | ✅        | `glab pipeline list --repo npk/ois-cfa --per-page 3` на eywa1  | вывод команды (в oracle / runbook)  | ✔ команды glab выполняются на eywa1 (`cicd` user)   |
+| SSH to cfa2 | ✅        | `ssh user@92.51.38.126 "hostname && docker ps"`                | команда отрабатывает без пароля     | ✔ ssh alias `cfa2` работает, docker ps на хосте     |
+| CI vars     | ✅        | debug-job, который эхоит, что `SSH_PRIVATE_KEY_CFA2` не пустая | лог job, отсутствие ошибок ssh-add  | ✔ `deploy-cfa2` использует новый ключ; старый libcrypto error устранён |
 
 ## 🚀 Kickoff / Plan (для агента)
 

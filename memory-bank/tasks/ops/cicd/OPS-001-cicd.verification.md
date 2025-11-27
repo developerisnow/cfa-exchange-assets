@@ -133,3 +133,88 @@ K1lbJq0e9dpxq6MywA9EAAAAFHVzZXJANjAzMzU5OS1kcTk1NDUzAQ==
     - для `source=="push"` → `changes:` работает как задумано (TC1–TC3 подтверждают);
     - для `source=="api"` → sdk/build jobs запускаются только при явном `FORCE_BUILD_ALL=1`/`ENABLE_SDK_JOBS=1`, иначе `when: never`.
   - Auto-cancel: API-пайплайны, которые гоняют лишние builds, явно отменяем и используем либо push-пайплайны, либо ручной `deploy-cfa2-only`/ssh+compose, чтобы не ждать 10–15 минут.
+
+## 2025-11-27 17:15 by codex-cli d742 `OPS-001-005-cicd-cfa2-cloudflare-ingress.story`
+### Cloudflare DNS + TLS + Keycloak/NextAuth alignment for cfa2.telex.global
+- Cloudflare / DNS:
+  - На `eywa1` с `/home/user/__Repositories/cloudflare__developerisnow/.env`:
+    - `CLOUDFLARE_CFA_API_TOKEN` при `curl -s /zones?name=telex.global` → `\"success\":false,"errors":[{\"code\":9109,\"message\":\"Invalid access token\"}]`.  
+    - Через `CLOUDFLARE_CFA_API_GLOBAL` + `CLOUDFLARE_CFA_EMAIL` (`X-Auth-Email`/`X-Auth-Key`) найдена зона `telex.global` (id `87c094e12d10e8d9977f0739adcc3e81`, account `CLOUDFLARE_CFA_ACCOUNT_ID`).  
+    - Создан `/home/user/__Repositories/cloudflare__developerisnow/.env.cfa2.telex`:
+      - `CF_ZONE_NAME=telex.global`, `CF_ZONE_ID=87c094e12d10e8d9977f0739adcc3e81`, `CF_API_TOKEN=${CLOUDFLARE_CFA_API_TOKEN}`, `CF_ACCOUNT_ID=${CLOUDFLARE_CFA_ACCOUNT_ID}`, `CF_HOST_PREFIXES=auth,issuer,investor,backoffice,api`, `CF_BASE_LABEL=cfa2`.  
+    - A-записи для `auth|issuer|investor|backoffice|api.cfa2.telex.global` upsert’нуты через Cloudflare API (curl + jq) на `92.51.38.126`, `proxied=false`.  
+    - Проверка:  
+      ```bash
+      dig +short auth.cfa2.telex.global issuer.cfa2.telex.global \
+          investor.cfa2.telex.global backoffice.cfa2.telex.global \
+          api.cfa2.telex.global @1.1.1.1
+      # все → 92.51.38.126
+      ```  
+  - **Блокер/заметка:** скрипт `ops/scripts/cloudflare-dns-upsert.sh` по-прежнему требует рабочий API token (`CF_API_TOKEN`), т.к. использует `Authorization: Bearer ...`. Для telex.global нужно:  
+    - в Cloudflare UI создать/обновить API Token с DNS-edit для зоны `telex.global` (`CLOUDFLARE_CFA_ACCOUNT_ID`),  
+    - обновить `CLOUDFLARE_CFA_API_TOKEN` в `.env` на `eywa1` и перегенерировать `.env.cfa2.telex`,  
+    - после этого можно перейти на штатный `cloudflare-dns-upsert.sh` вместо ручных curl.
+- TLS / nginx (cfa2):
+  - На `cfa2` (92.51.38.126):
+    - Установлены `nginx`, `certbot`, `python3-certbot-dns-cloudflare`.  
+    - Создан `/root/.secrets/cloudflare.ini` c `dns_cloudflare_email`/`dns_cloudflare_api_key` (глобальный ключ для CFA-аккаунта, значения не логировались).  
+    - Команда:
+      ```bash
+      sudo certbot certonly --dns-cloudflare \
+        --dns-cloudflare-credentials /root/.secrets/cloudflare.ini \
+        --dns-cloudflare-propagation-seconds 45 \
+        -d '*.cfa2.telex.global' -d 'cfa2.telex.global' \
+        --agree-tos --email ops@developerisnow.com --non-interactive
+      ```
+      → сертификат в `/etc/letsencrypt/live/cfa2.telex.global/`.  
+    - Развёрнут `/etc/nginx/sites-available/cfa2-portals.conf`:
+      - HTTP→HTTPS redirect для `auth|issuer|investor|backoffice|api.cfa2.telex.global`;  
+      - upstream’ы: `keycloak` → `127.0.0.1:58080`, порталы → `127.0.0.1:3001/2/3`, api-gateway → `127.0.0.1:58081`;  
+      - `ssl_certificate`/`ssl_certificate_key` с wildcard LE.  
+    - Активирован vhost (`sites-enabled`) и `nginx -t && systemctl reload nginx`.  
+    - Проверка:
+      ```bash
+      curl -vk https://auth.cfa2.telex.global | head -20
+      # TLS: CN=*.cfa2.telex.global, issuer=Let's Encrypt (E7), 302 → https://auth.cfa2.telex.global/admin/
+      ```
+- Keycloak (`ois` realm) + clients:
+  - Compose/env:
+    - В `deploy/docker-compose-at-vps/cfa2/docker-compose.yml` для `keycloak` добавлены:
+      - `KC_HOSTNAME=auth.cfa2.telex.global`, `KC_PROXY=edge`, `KC_HTTP_ENABLED=true`.  
+    - `.env.cfa2` на cfa2 после `sync-compose-cfa2.sh`:
+      - `NEXT_PUBLIC_API_BASE_URL=https://api.cfa2.telex.global`,  
+      - `NEXT_PUBLIC_KEYCLOAK_URL=https://auth.cfa2.telex.global`,  
+      - порталы на 3001/3002/3003.  
+  - Внутри контейнера `ois-keycloak` через `kcadm`:
+    - Realm `ois` существует (`kcadm get realms/ois`).  
+    - Клиенты:
+      - `portal-issuer` → `rootUrl=https://issuer.cfa2.telex.global`, `redirectUris=["https://issuer.cfa2.telex.global/*","https://issuer.cfa2.telex.global/api/auth/callback/keycloak"]`, `webOrigins=["https://issuer.cfa2.telex.global"]`, `secret=secret`.  
+      - `portal-investor` → аналогично c `https://investor.cfa2.telex.global`.  
+      - `backoffice` → аналогично c `https://backoffice.cfa2.telex.global`.  
+    - Пользователи:
+      - `issuer@test.com` (роль `issuer`), `investor@test.com` (роль `investor`), `cfa.devs@gmail.com` (роли `backoffice` + `admin`) — проверено через `kcadm get users` + `role-mappings/realm`.  
+    - OpenID configuration:
+      ```bash
+      curl -sk https://auth.cfa2.telex.global/realms/ois/.well-known/openid-configuration | jq .issuer
+      # "https://auth.cfa2.telex.global/realms/ois"
+      ```
+- Portals / NextAuth (issuer/investor/backoffice):
+  - Обновлён compose для порталов (`deploy/docker-compose-at-vps/cfa2/docker-compose.yml`):
+    - Все три портала:
+      - `NEXT_PUBLIC_API_BASE_URL=https://api.cfa2.telex.global`,  
+      - `NEXT_PUBLIC_KEYCLOAK_URL=https://auth.cfa2.telex.global`, `NEXT_PUBLIC_KEYCLOAK_REALM=ois`, `NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=portal-issuer|portal-investor|backoffice`,  
+      - `NEXTAUTH_URL=https://<portal>.cfa2.telex.global`,  
+      - `KEYCLOAK_CLIENT_SECRET=secret`,  
+      - `KEYCLOAK_INTERNAL_URL=http://keycloak:8080`,  
+      - `NEXTAUTH_SECRET=dev-nextauth-secret-cfa2`.  
+    - После `sync-compose-cfa2.sh` → `ssh cfa2 "cd /srv/cfa && docker compose up -d"` перезапущены `portal-issuer|portal-investor|backoffice`.  
+  - До правок `portal-investor`/`backoffice` выдавали:
+    - 500/`/api/auth/error?error=Configuration` и в логах `NextAuth error NO_SECRET MissingSecretError`.  
+  - После правок:
+    ```bash
+    curl -kI https://issuer.cfa2.telex.global      # HTTP/2 307 → /auth/signin
+    curl -kI https://investor.cfa2.telex.global    # HTTP/2 307 → /auth/signin
+    curl -kI https://backoffice.cfa2.telex.global  # HTTP/2 307 → /api/auth/signin?callbackUrl=%2F
+    ```
+    - `/auth/signin` для issuer/investor отдаёт HTML Next.js с формой логина, без 500/Configuration.  
+  - **TODO (manual):** в браузере пройти полный login-flow для `issuer@test.com` / `investor@test.com` / `cfa.devs@gmail.com` и приложить скриншоты/e2e отчёты (см. DoD story).

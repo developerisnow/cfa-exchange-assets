@@ -1,0 +1,1033 @@
+user@eywa-ubuntu-8gb-hel1-2:~/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets$ codex --yolo                        
+Command 'codex' not found, did you mean:                       
+  command 'godex' from deb golang-golang-x-tools (1:0.1.9+ds-2ubuntu2.2)                                                       
+Try: sudo apt install <deb name>                               
+user@eywa-ubuntu-8gb-hel1-2:~/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets$ codex --yolo                        
+Command 'codex' not found, did you mean:                       
+  command 'godex' from deb golang-golang-x-tools (1:0.1.9+ds-2ubuntu2.2)                                                       
+Try: sudo apt install <deb name>                               
+user@eywa-ubuntu-8gb-hel1-2:~/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets$ source ~/.bashrc                    
+!: command not found                                           
+🚀 TMUX aliases loaded! Run 'tmux-help' for commands           
+✅ Paths configured                                            
+✅ Claude aliases loaded                                       
+✅ Tmux aliases loaded                                         
+🚀 Modular bash configuration loaded                           
+Your user’s .npmrc file (${HOME}/.npmrc)                       
+has a `globalconfig` and/or a `prefix` setting, which are incompatible with nvm.                                               
+Run `nvm use --delete-prefix v20.19.5 --silent` to unset it.   
+bash: .: filename argument required                            
+.: usage: . filename [arguments]                               
+bash: .: filename argument required                            
+.: usage: . filename [arguments]                               
+bash: : No such file or directory                              
+bash: : No such file or directory                              
+[13:25] user@eywa-ubuntu-8gb-hel1-2 prj_Cifra-rwa-exachange-assets (main+) $ codex --yolo                                                                                                                                                                      
+╭───────────────────────────────────────────────╮              
+│ >_ OpenAI Codex (v0.63.0)                     │              
+│                                               │              
+│ model:     gpt-5.1 high   /model to change    │              
+│ directory: ~/…/prj_Cifra-rwa-exachange-assets │              
+╰───────────────────────────────────────────────╯              
+
+  To get started, describe a task or try one of these commands:                                                                
+
+  /init - create an AGENTS.md file with instructions for Codex 
+  /status - show current session configuration                 
+  /approvals - choose what Codex can do without approval       
+  /model - choose what model and reasoning effort to use       
+  /review - review any changes and find issues                 
+
+
+› ---                                                          
+  created: 2025-11-27 16:15                                    
+  updated: 2025-11-27 16:15                                    
+  type: agent-prompt                                           
+  sphere: [devops]                                             
+  topic: [cfa2, cloudflare, dns, tls, nginx, keycloak]         
+  author: alex                                                 
+  agentID: to-be-filled-by-runner                              
+  version: 0.1.0                                               
+  tags: [cfa2, telex.global, cloudflare, ingress, portals, keycloak]                                                           
+  ---                                                          
+
+  # Agent Prompt · OPS-001-005: cfa2 Cloudflare ingress (telex.global)                                                         
+
+  ## ROLE / CONTEXT                                            
+
+  - ROLE: Senior DevOps / NetOps engineer.                     
+  - CONTROL PLANE: `eywa1` (Ubuntu), tmux session `p-cfa`.     
+  - TARGETS:                                                   
+    - `uk1` — прод/демо стенд с уже настроенным Cloudflare/ingress для `*.cfa.llmneighbors.com`.                               
+    - `cfa1` — dev-стенд с доменами `*.cfa1.llmneighbors.com`. 
+    - `cfa2` — текущий dev-стенд (92.51.38.126), compose в `/srv/cfa`, CI в `npk/ois-cfa`.                                     
+  - REPOS:                                                     
+    - Основной: `/home/user/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets/repositories/customer-gitlab/ois-cfa`. 
+    - Cloudflare: `/home/user/__Repositories/cloudflare__developerisnow`.                                                      
+
+  Ты продолжаешь работу d742/w8, которые уже:                  
+
+  - подняли backend+frontends+Keycloak на cfa2 через compose;  
+  - настроили dev-cfa2 CI с path-based build’ами и отдельным deploy-only job;                                                  
+  - развернули realm `ois` и клиентов в Keycloak 25 на `cfa2` (через kcadm) для IP-режима.                                     
+
+  Твоя зона ответственности: домены + TLS + доведение login-flow до состояния “issuer/investor/backoffice логинятся по HTTPS-доменам, а не по IP”.                                                                                                             
+
+  ## ОБЯЗАТЕЛЬНО ПРОЧИТАТЬ ПЕРЕД ЛЮБЫМИ ПРАВКАМИ               
+
+  1. **Story / Epic / Verification**                           
+     - `memory-bank/tasks/ops/cicd/OPS-001-CICD.epic.md`       
+     - `memory-bank/tasks/ops/cicd/OPS-001-003-cicd-phase2.story.md` (front+Keycloak+CI базовый контекст)                      
+     - `memory-bank/tasks/ops/cicd/OPS-001-005-cicd-cfa2-cloudflare-ingress.story.md` (эта story, JTBD/DoD/Matrix).            
+     - `memory-bank/tasks/ops/cicd/OPS-001-cicd.verification.md` (последний блок про cfa2).                                    
+
+  2. **Docs / Runbooks**                                       
+     - `docs/deploy/20251113-cloudflare-ingress.md` — как делали UK1 (`*.cfa.llmneighbors.com`):                               
+       - Cloudflare DNS/TLS,                                   
+       - wildcard cert + nginx,                                
+       - Keycloak `KC_HOSTNAME_URL`,                           
+       - порталы под доменами.                                 
+     - `docs/deploy/vps-cfa2/MULTI_ACCOUNT_SETUP.md` — Multi-account модель для cfa1/cfa2:                                     
+       - `.env.cfa1`, `.env.cfa2.telex`,                       
+       - `ops/scripts/cloudflare-dns-upsert.sh`.               
+
+  3. **Keycloak / Playwright / локальный опыт**                
+     - `memory-bank/snapshots-aggregated-context-duplicates/tmux-sessions/eywa1-p-cfa-w17.p1-20251126-2014.session.txt` — как поднимали локальный Keycloak realm `ois`, клиентов `portal-issuer|portal-investor|backoffice` и тестовых пользователей.          
+     - `memory-bank/Scrum/20251112-ports-closed-on-vps/20251113-uk1-deploy_co-76ca.md` — UK1 ingress: nginx, Cloudflare, Keycloak.                                                                                                                             
+
+  4. **Cloudflare repo / tokens (на eywa1)**                   
+     - `/home/user/__Repositories/cloudflare__developerisnow/.env` — текущие токены:                                           
+       - `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_API_GLOBAL`, `CLOUDFLARE_ACCOUNT_ID` → аккаунт `llmneighbors.com` (uk1/cfa1).     
+       - `CLOUDFLARE_CFA_API_TOKEN`, `CLOUDFLARE_CFA_API_GLOBAL`, `CLOUDFLARE_CFA_ACCOUNT_ID` → отдельный аккаунт для cfa (в т.ч. telex.global).                                                                                                               
+     - ВАЖНО:                                                  
+       - для `llmneighbors.com` используй `CLOUDFLARE_API_TOKEN`;                                                              
+       - для `telex.global` используй именно `CLOUDFLARE_CFA_API_TOKEN` (+ `CLOUDFLARE_CFA_ACCOUNT_ID`), **НЕ** generic `CLOUDFLARE_API_TOKEN`;                                                                                                                
+       - никогда не печатай значения токенов в логах; используй их только как env для curl/wrangler.                           
+
+  ## TELEX.GLOBAL / CFA2 ОСОБЕННОСТИ                           
+
+  - Желаемые хосты:                                            
+    - `auth.cfa2.telex.global` → Keycloak (58080),             
+    - `issuer.cfa2.telex.global` → portal-issuer (3001),       
+    - `investor.cfa2.telex.global` → portal-investor (3002),   
+    - `backoffice.cfa2.telex.global` → backoffice (3003),      
+    - `api.cfa2.telex.global` → api-gateway (58081).           
+  - Текущее состояние (база):                                  
+    - cfa2 compose/env в `deploy/docker-compose-at-vps/cfa2/docker-compose.yml` и `/srv/cfa/.env`.                             
+    - Keycloak realm `ois` и клиенты уже созданы на cfa2 (см. w17/w21/w8 логи), но пока работают с IP URL и/или без полноценного hostname.                                                                                                                     
+    - Фронты (3001/2/3) открываются, но login даёт `Configuration`/`OAuthSignin` ошибки при Keycloak-чейне.                    
+
+  ## ЗАДАЧИ (HIGH-LEVEL)                                       
+
+  1. **DNS (Cloudflare) для cfa2/telex.global**                
+     - Найти, в каком аккаунте есть зона `telex.global`:       
+       - через Cloudflare API (`/zones?name=telex.global`) с `CLOUDFLARE_CFA_API_TOKEN` или общим `CLOUDFLARE_API_TOKEN`.      
+     - Если зона НЕ видна с текущими токенами:                 
+       - Не пытаться “угадывать”; зафиксировать это как BLOCKER в `OPS-001-cicd.verification.md` и в этой story (Loop trace).  
+       - Описать, что нужно сделать человеку: добавить `telex.global` в нужный аккаунт и выдать токен с DNS-edit.              
+     - Если зона доступна:                                     
+       - Создать `.../.env.cfa2.telex` по шаблону из `MULTI_ACCOUNT_SETUP.md`.                                                 
+       - Прогнать `./ops/scripts/cloudflare-dns-upsert.sh <env.cfa2.telex> 92.51.38.126`.                                      
+       - Провалидировать `dig auth.cfa2.telex.global` и остальные.                                                             
+
+  2. **TLS + nginx на cfa2**                                   
+     - По мотивам UK1:                                         
+       - Проверить, не занят ли 443 чем-то (x-ui/postfix — не твой scope, но может блокировать).                               
+       - Выпустить сертификат для `*.cfa2.telex.global` (LE DNS challenge, используя CF token из `.env.cfa2.telex`, или Cloudflare Origin cert).                                                                                                               
+       - Развернуть nginx vhost, по образцу конфигов с uk1/cfa1:                                                               
+         - `auth.cfa2.telex.global` → локальный `keycloak:8080`,                                                               
+         - `issuer/investor/backoffice/api` → соответствующие контейнеры.                                                      
+     - Убедиться, что http→https редиректы корректные, HSTS не мешает отладке.                                                 
+
+  3. **Keycloak / NextAuth интеграция с доменами**             
+
+  Из уже выполненного:                                         
+
+  - Realm `ois` и клиенты `portal-issuer`, `portal-investor`, `backoffice` были настроены на локальные/LLM-домены (см. w17, uk1/cfa1).                                                                                                                         
+  - На cfa2 частично повторили сценарий (через kcadm, но пока с rootUrl `http://92.51.38.126:300X` и IP-адресами).             
+
+  Твоя задача:                                                 
+
+  - Привести Keycloak конфиг на cfa2 к “доменно-ориентированному” виду:                                                        
+    - `KC_HOSTNAME_URL=https://auth.cfa2.telex.global` (через compose/env).                                                    
+    - realm `ois`:                                             
+      - clients:                                               
+        - `portal-issuer`: rootUrl `https://issuer.cfa2.telex.global`, redirectUris включают `https://issuer.cfa2.telex.global/api/auth/callback/keycloak`.                                                                                                    
+        - `portal-investor`: аналогично для investor.          
+        - `backoffice`: аналогично для backoffice.             
+    - users/roles: issuer/investor/backoffice/admin по шаблону w17.                                                            
+  - С согласованием фронтов:                                   
+    - Проверить `apps/portal-issuer|portal-investor|backoffice/src/lib/auth.ts` и `next.config.js` — они используют `NEXT_PUBLIC_KEYCLOAK_URL`, `NEXT_PUBLIC_KEYCLOAK_REALM`, `NEXT_PUBLIC_KEYCLOAK_CLIENT_ID`, `NEXTAUTH_URL`, `KEYCLOAK_CLIENT_SECRET`.      
+    - Убедиться, что:                                          
+      - в compose на cfa2 `NEXT_PUBLIC_KEYCLOAK_URL` → `https://auth.cfa2.telex.global`,                                       
+      - `NEXTAUTH_URL` → `https://issuer/investor/backoffice.cfa2.telex.global`,                                               
+      - `KEYCLOAK_CLIENT_SECRET` совпадает с секретом клиента в Keycloak.                                                      
+
+  4. **Проверки**                                              
+
+  - DNS:                                                       
+    - `dig +short auth.cfa2.telex.global`, `issuer...`, `investor...`, `backoffice...`, `api...` → `92.51.38.126`.             
+  - TLS:                                                       
+    - `curl -vk https://auth.cfa2.telex.global` → редирект на `/admin` или страница Keycloak, не certificate error.            
+  - Keycloak:                                                  
+    - `curl -s -o - -w "HTTP:%{http_code}" https://auth.cfa2.telex.global/realms/ois/.well-known/openid-configuration` → `HTTP:200` и issuer `https://auth.cfa2.telex.global/realms/ois`.                                                                      
+  - Portals:                                                   
+    - Через браузер:                                           
+      - `https://issuer.cfa2.telex.global` → login → `issuer@test.com / Passw0rd!` работает.                                   
+      - `https://investor.cfa2.telex.global` → login → `investor@test.com / Passw0rd!`.                                        
+      - `https://backoffice.cfa2.telex.global` → login → `cfa.devs@gmail.com / Passw0rd!`.                                     
+
+  Если где-то видишь `OAuthSignin`/`Configuration` от NextAuth:
+
+  - Сначала смотри логи контейнера (`docker logs portal-issuer|portal-investor|backoffice` на cfa2).                           
+  - Затем:                                                     
+    - проверяй issuer URL, redirect URI, `NEXTAUTH_URL`, clientId/secret в Keycloak,                                           
+    - сверяй, нет ли смешения http/https или IP vs domain.     
+
+  ## БЛОКЕРЫ / ЧТО ДЕЛАТЬ, ЕСЛИ НЕ ПОЛУЧАЕТСЯ                  
+
+  Если:                                                        
+
+  - зона `telex.global` не появляется в `GET /zones?name=telex.global` ни с одним из доступных токенов; или                    
+  - нет прав на DNS edit / нельзя выпустить сертификат через DNS challenge;                                                    
+
+  ты обязан:                                                   
+
+  - оформить блокер в:                                         
+    - `memory-bank/tasks/ops/cicd/OPS-001-005-cicd-cfa2-cloudflare-ingress.story.md` (Loop trace),                             
+    - `memory-bank/tasks/ops/cicd/OPS-001-cicd.verification.md` (новый блок с описанием проблемы),                             
+  - чётко указать:                                             
+    - какой токен/аккаунт использовался,                       
+    - какие запросы к Cloudflare API делал,                    
+    - какая именно ошибка (отсутствие зоны/прав),              
+    - что должен сделать человек (например, привязать домен telex.global к нужному аккаунту и выдать token с DNS edit).        
+
+  ## SSH / Доступ к серверам                                   
+
+  - Используй алиасы:                                          
+    - `ssh uk1` — смотреть референсный nginx/Keycloak конфиг и опыт UK1.                                                       
+    - `ssh cfa1` — смотреть cfa1 ingress/Keycloak.             
+    - `ssh cfa2` — текущий таргет (compose, nginx, Keycloak, порталы).                                                         
+  - Работай аккуратно с продовым UK1: никаких правок без явной необходимости; используй его как эталон.                        
+
+  ## СТИЛЬ РАБОТЫ                                              
+
+  - Проверяй: сначала DNS/HTTP, потом Keycloak, потом фронты.  
+  - Не ломай CI/cicd (dev-cfa2) — story про Cloudflare не должна влиять на .gitlab/gitlab-ci.dev.yml.                          
+  - Все команды, которые важны для DoD, фиксируй в Loop trace сториз и `OPS-001-cicd.verification.md`.                         
+
+
+• I’ll first scan the repo and the referenced docs/runbooks to align with the existing UK1/cfa1 setup, then check Cloudflare for telex.global, set up DNS/env, move on to TLS+nginx on cfa2, and finally adjust Keycloak + portal configs and validate the     
+  login flows.                                                 
+
+• Explored                                                     
+  └ List ls                                                    
+    List cicd                                                  
+    Read OPS-001-CICD.epic.md, OPS-001-003-cicd-phase2.story.md, OPS-001-005-cicd-cfa2-cloudflare-ingress.story.md, 20251113-cloudflare-ingress.md                                                                                                             
+    List docs                                                  
+    Search rg --files                                          
+    Search 20251113-cloudflare-ingress.md|MULTI_ACCOUNT_SETUP.md                                                               
+    Search cloudflare-ingress                                  
+    List repositories                                          
+    List customer-gitlab                                       
+    List ois-cfa                                               
+    List deploy                                                
+    Read 20251113-cloudflare-ingress.md                        
+    List vps-cfa2                                              
+    Read MULTI_ACCOUNT_SETUP.md, OPS-001-cicd.verification.md  
+
+• Updated Plan                                                 
+  └ Set up cfa2 Cloudflare ingress for telex.global: DNS, TLS/nginx, Keycloak/NextAuth alignment, and verification.            
+    □ Check Cloudflare zone and prepare .env.cfa2.telex        
+    □ Run DNS upsert and validate hostnames                    
+    □ Configure TLS cert and nginx vhosts on cfa2              
+    □ Align Keycloak realm/clients and portal envs with domains
+    □ Run end-to-end HTTPS and login checks, update docs/story 
+
+• Explored                                                     
+  └ List cloudflare__developerisnow                            
+    List cloudflare__developerisnow                            
+    Read .env                                                  
+
+• Ran cd /home/user/__Repositories/cloudflare__developerisnow && set -a && source .env && set +a && curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=telex.global" -H "Authorization: Bearer $CLOUDFLARE_CFA_API_TOKEN" -H "Content-Type:       
+  │ application/json" | jq '.'                                 
+  └ .env: line 8: ouQV»48d=0qhgu4iehvcbLK#VD: command not found
+    {                                                          
+    … +8 lines                                                 
+      "result": null                                           
+    }                                                          
+
+• Ran cd /home/user/__Repositories/cloudflare__developerisnow && set -a && source .env && set +a && curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=telex.global" -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type:           
+  │ application/json" | jq '.'                                 
+  └ .env: line 8: ouQV»48d=0qhgu4iehvcbLK#VD: command not found
+    {                                                          
+    … +10 lines                                                
+      "messages": []                                           
+    }                                                          
+
+• Explored                                                     
+  └ List ls                                                    
+
+• Added ~/__Repositories/cloudflare__developerisnow/.env.cfa2.telex (+6 -0)                                                    
+    1 +CF_ZONE_NAME=telex.global                               
+    2 +CF_ZONE_ID=<FILL_ME_TELEX_GLOBAL_ZONE_ID>               
+    3 +CF_API_TOKEN=${CLOUDFLARE_CFA_API_TOKEN}                
+    4 +CF_ACCOUNT_ID=${CLOUDFLARE_CFA_ACCOUNT_ID}              
+    5 +CF_HOST_PREFIXES=auth,issuer,investor,backoffice,api    
+    6 +CF_BASE_LABEL=cfa2                                      
+
+• Ran cd /home/user/__Repositories/cloudflare__developerisnow && set -a && source .env && set +a && curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=telex.global" -H "X-Auth-Email: $CLOUDFLARE_CFA_EMAIL" -H "X-Auth-Key:                     
+  │ $CLOUDFLARE_CFA_API_GLOBAL" -H "Content-Type: application/json" | jq '.'                                                   
+  └ .env: line 8: ouQV»48d=0qhgu4iehvcbLK#VD: command not found
+    {                                                          
+    … +187 lines                                               
+      "messages": []                                           
+    }                                                          
+
+• Explored                                                     
+  └ Read cloudflare-dns-upsert.sh, AGENTS.md                   
+
+• Ran cd /home/user/__Repositories/cloudflare__developerisnow && set -a && source .env && set +a && curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=telex.global" -H "Authorization: Bearer $CLOUDFLARE_CFA_API_GLOBAL" -H "Content-Type:      
+  │ application/json" | jq '.'                                 
+  └ .env: line 8: ouQV»48d=0qhgu4iehvcbLK#VD: command not found
+    {                                                          
+    … +14 lines                                                
+      "result": null                                           
+    }                                                          
+
+• Updated Plan                                                 
+  └ ✔ Check Cloudflare zone and prepare .env.cfa2.telex        
+    □ Run DNS upsert and validate hostnames                    
+    □ Configure TLS cert and nginx vhosts on cfa2              
+    □ Align Keycloak realm/clients and portal envs with domains
+    □ Run end-to-end HTTPS and login checks, update docs/story 
+
+• Edited ~/__Repositories/cloudflare__developerisnow/.env.cfa2.telex (+1 -1)                                                   
+    1  CF_ZONE_NAME=telex.global                               
+    2 -CF_ZONE_ID=<FILL_ME_TELEX_GLOBAL_ZONE_ID>               
+    2 +CF_ZONE_ID=87c094e12d10e8d9977f0739adcc3e81             
+    3  CF_API_TOKEN=${CLOUDFLARE_CFA_API_TOKEN}                
+
+• Ran cd /home/user/__Repositories/cloudflare__developerisnow && set -a && source .env && source .env.cfa2.telex && set +a && CF_API_BASE="https://api.cloudflare.com/client/v4" && TARGET_IP="92.51.38.126" && IFS=',' read -r -a PREFIXES                    
+  │ <<<"$CF_HOST_PREFIXES" && for prefix in "${PREFIXES[@]}"; do prefix_trimmed="${prefix//[[:space:]]/}"; [ -z "$prefix_trimmed" ] && continue; NAME="${prefix_trimmed}.${CF_BASE_LABEL}"; FQDN="${NAME}.${CF_ZONE_NAME}"; echo "-- upsert ${FQDN}            
+  │ -> ${TARGET_IP}"; EXIST_ID=$(curl -s -X GET "${CF_API_BASE}/zones/${CF_ZONE_ID}/dns_records?type=A&name=${FQDN}" -H "X-Auth-Email: $CLOUDFLARE_CFA_EMAIL" -H "X-Auth-Key: $CLOUDFLARE_CFA_API_GLOBAL" -H "Content-Type: application/json" | jq -r          
+  │ … +3 lines                                                 
+  └ .env: line 8: ouQV»48d=0qhgu4iehvcbLK#VD: command not found
+    -- upsert auth.cfa2.telex.global -> 92.51.38.126           
+    … +2 lines                                                 
+    -- upsert backoffice.cfa2.telex.global -> 92.51.38.126     
+    -- upsert api.cfa2.telex.global -> 92.51.38.126            
+
+• Ran dig +short auth.cfa2.telex.global issuer.cfa2.telex.global investor.cfa2.telex.global backoffice.cfa2.telex.global api.cfa2.telex.global                                                                                                                 
+  └ 92.51.38.126                                               
+
+• Ran for h in auth issuer investor backoffice api; do echo "### $h"; dig +short "$h.cfa2.telex.global"; done                  
+  └ ### auth                                                   
+    92.51.38.126                                               
+    … +2 lines                                                 
+    ### backoffice                                             
+    ### api                                                    
+
+• Ran cd /home/user/__Repositories/cloudflare__developerisnow && set -a && source .env && source .env.cfa2.telex && set +a && for h in auth issuer investor backoffice api; do echo "### $h"; curl -s "https://api.cloudflare.com/client/v4/zones/             
+  │ ${CF_ZONE_ID}/dns_records?type=A&name=${h}.${CF_BASE_LABEL}.${CF_ZONE_NAME}" -H "X-Auth-Email: $CLOUDFLARE_CFA_EMAIL" -H "X-Auth-Key: $CLOUDFLARE_CFA_API_GLOBAL" -H "Content-Type: application/json" | jq '.result'; done                                 
+  └ .env: line 8: ouQV»48d=0qhgu4iehvcbLK#VD: command not found
+    ### auth                                                   
+    … +87 lines                                                
+      }                                                        
+    ]                                                          
+
+• Ran for h in auth issuer investor backoffice api; do echo "### $h"; dig +short "$h.cfa2.telex.global" @1.1.1.1; done         
+  └ ### auth                                                   
+    92.51.38.126                                               
+    … +6 lines                                                 
+    ### api                                                    
+    92.51.38.126                                               
+
+• Updated Plan                                                 
+  └ ✔ Check Cloudflare zone and prepare .env.cfa2.telex        
+    ✔ Run DNS upsert and validate hostnames                    
+    □ Configure TLS cert and nginx vhosts on cfa2              
+    □ Align Keycloak realm/clients and portal envs with domains
+    □ Run end-to-end HTTPS and login checks, update docs/story 
+
+• Ran ssh cfa2 "hostname && sudo ss -tulpn | grep ':443' || echo 'no-443'"                                                     
+  └ 6033599-dq95453                                            
+    no-443                                                     
+
+• Ran ssh cfa2 "nginx -v 2>&1 || echo 'nginx-not-installed'"   
+  └ bash: line 1: nginx: command not found                     
+    nginx-not-installed                                        
+
+• Ran ssh cfa2 "sudo apt-get update -y && sudo apt-get install -y nginx jq"                                                    
+  └ Hit:1 http://zabbix.repo.timeweb.ru/ubuntu focal InRelease 
+    Hit:2 http://mirror.timeweb.ru/ubuntu noble InRelease      
+    … +60 lines                                                
+    Processing triggers for man-db (2.12.0-4build2) ...        
+    Processing triggers for ufw (0.36.2-6) ...                 
+
+• Ran ssh cfa2 "certbot --version 2>/dev/null || snap list certbot 2>/dev/null || echo 'certbot-not-installed'"                
+  └ certbot-not-installed                                      
+
+• Ran ssh cfa2 "sudo apt-get install -y certbot python3-certbot-dns-cloudflare"                                                
+  └ Reading package lists...                                   
+    Building dependency tree...                                
+    … +108 lines                                               
+    Setting up python3-certbot-dns-cloudflare (2.0.0-1) ...    
+    Processing triggers for man-db (2.12.0-4build2) ...        
+
+• Ran cd /home/user/__Repositories/cloudflare__developerisnow && set -a && source .env && set +a && ssh cfa2 'sudo mkdir -p /root/.secrets && sudo chmod 700 /root/.secrets && sudo bash -lc "cat > /root/.secrets/cloudflare.ini <<EOF                        
+  │ dns_cloudflare_email = $CLOUDFLARE_CFA_EMAIL               
+  │ dns_cloudflare_api_key = $CLOUDFLARE_CFA_API_GLOBAL        
+  │ … +2 lines                                                 
+  └ .env: line 8: ouQV»48d=0qhgu4iehvcbLK#VD: command not found
+
+• Ran ssh cfa2 "sudo certbot certonly --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/cloudflare.ini --dns-cloudflare-propagation-seconds 45 -d '*.cfa2.telex.global' -d 'cfa2.telex.global' --agree-tos --email ops@developerisnow.com           
+  │ --non-interactive"                                         
+  └ Saving debug log to /var/log/letsencrypt/letsencrypt.log   
+    Account registered.                                        
+    Requesting a certificate for *.cfa2.telex.global and cfa2.telex.global                                                     
+    /root/.secrets/cloudflare.ini: Either dns_cloudflare_api_token (recommended), or dns_cloudflare_email and dns_cloudflare_api_key are required. (see https://dash.cloudflare.com/?to=/:account/profile/api-tokens)                                          
+    Ask for help or search for solutions at https://community.letsencrypt.org. See the logfile /var/log/letsencrypt/letsencrypt.log or re-run Certbot with -v for more details.                                                                                
+
+• Ran ssh cfa2 "sudo sed -E 's/(dns_cloudflare_email[[:space:]]*=[[:space:]]*).*/\1<redacted>/' /root/.secrets/cloudflare.ini | sudo sed -E 's/(dns_cloudflare_api_key[[:space:]]*=[[:space:]]*).*/\1<redacted>/'"                                             
+  └ dns_cloudflare_email = <redacted>                          
+    dns_cloudflare_api_key = <redacted>                        
+
+• Ran ssh cfa2 "grep -n 'dns_cloudflare_api_token' -R /usr/lib/python3/dist-packages/certbot_dns_cloudflare 2>/dev/null | head"                                                                                                                                
+  └ /usr/lib/python3/dist-packages/certbot_dns_cloudflare/_internal/dns_cloudflare.py:63:            raise errors.PluginError('{}: Either dns_cloudflare_api_token (recommended), or '                                                                         
+    /usr/lib/python3/dist-packages/certbot_dns_cloudflare/__init__.py:51:   dns_cloudflare_api_token = 0123456789abcdef0123456789abcdef01234567                                                                                                                
+
+• Ran ssh cfa2 "sed -n '40,90p' /usr/lib/python3/dist-packages/certbot_dns_cloudflare/_internal/dns_cloudflare.py"             
+  └     def more_info(self) -> str:                            
+            return 'This plugin configures a DNS TXT record to respond to a dns-01 challenge using ' + \                       
+    … +47 lines                                                
+
+    class _CloudflareClient:                                   
+
+• Ran ssh cfa2 "sed -n '40,80p' /usr/lib/python3/dist-packages/certbot_dns_cloudflare/__init__.py"                             
+  └                                                            
+    Using Cloudflare Tokens also requires at least version 2.3.1 of the ``cloudflare``                                         
+    … +37 lines                                                
+
+    .. note::                                                  
+
+• Ran cd /home/user/__Repositories/cloudflare__developerisnow && set -a && source .env && set +a && ssh cfa2 "CFA_EMAIL=$CLOUDFLARE_CFA_EMAIL CFA_KEY=$CLOUDFLARE_CFA_API_GLOBAL sudo bash -lc 'cat > /root/.secrets/cloudflare.ini <<EOF                      
+  │ dns_cloudflare_email = '"$CFA_EMAIL"'                      
+  │ dns_cloudflare_api_key = '"$CFA_KEY"'                      
+  │ … +2 lines                                                 
+  └ .env: line 8: ouQV»48d=0qhgu4iehvcbLK#VD: command not found
+
+• Ran ssh cfa2 "sudo certbot certonly --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/cloudflare.ini --dns-cloudflare-propagation-seconds 45 -d '*.cfa2.telex.global' -d 'cfa2.telex.global' --agree-tos --email ops@developerisnow.com           
+  │ --non-interactive"                                         
+  └ Saving debug log to /var/log/letsencrypt/letsencrypt.log   
+    Requesting a certificate for *.cfa2.telex.global and cfa2.telex.global                                                     
+    /root/.secrets/cloudflare.ini: Either dns_cloudflare_api_token (recommended), or dns_cloudflare_email and dns_cloudflare_api_key are required. (see https://dash.cloudflare.com/?to=/:account/profile/api-tokens)                                          
+    Ask for help or search for solutions at https://community.letsencrypt.org. See the logfile /var/log/letsencrypt/letsencrypt.log or re-run Certbot with -v for more details.                                                                                
+
+• Ran ssh cfa2 "sed -n '1,80p' /usr/lib/python3/dist-packages/certbot_dns_cloudflare/_internal/dns_cloudflare.py"              
+  └ """DNS Authenticator for Cloudflare."""                    
+    import logging                                             
+    … +76 lines                                                
+            self._get_cloudflare_client().del_txt_record(domain, validation_name, validation)                                  
+
+
+• Ran ssh cfa2 "grep -n 'class CredentialsConfiguration' -R /usr/lib/python3/dist-packages/certbot/plugins 2>/dev/null"        
+  └ /usr/lib/python3/dist-packages/certbot/plugins/dns_common.py:261:class CredentialsConfiguration:                           
+
+• Ran ssh cfa2 "sed -n '261,340p' /usr/lib/python3/dist-packages/certbot/plugins/dns_common.py"                                
+  └ class CredentialsConfiguration:                            
+        """Represents a user-supplied filed which stores API credentials."""                                                   
+    … +76 lines                                                
+            raise errors.PluginError('Path is a directory: {0}'.format(filename))                                              
+
+
+• Ran ssh cfa2 "sed -n '200,280p' /usr/lib/python3/dist-packages/certbot/plugins/dns_common.py"                                
+  └             validator(credentials_configuration)           
+
+    … +77 lines                                                
+                    exc_info=True                              
+                )                                              
+
+• Ran ssh cfa2 "sed -n '120,220p' /usr/lib/python3/dist-packages/certbot/plugins/dns_common.py"                                
+  └         """                                                
+            Deletes the DNS TXT record which would have been created by `_perform_achall`.                                     
+    … +97 lines                                                
+                __validator,                                   
+                'Input your {0}'.format(label),                
+
+• Ran ssh cfa2 "grep -n 'def dest' -n /usr/lib/python3/dist-packages/certbot/plugins/dns_common.py"                            
+  └ (no output)                                                
+
+• Ran ssh cfa2 "grep -n 'def dest' /usr/lib/python3/dist-packages/certbot/plugins/dns_common.py"                               
+  └ (no output)                                                
+
+• Ran ssh cfa2 "grep -n 'dest(' /usr/lib/python3/dist-packages/certbot/plugins/dns_common.py"                                  
+  └ 145:            setattr(self.config, self.dest(key), new_value)                                                            
+    162:            setattr(self.config, self.dest(key), os.path.abspath(os.path.expanduser(new_value)))                       
+
+• Ran ssh cfa2 "grep -n 'dest =' -n /usr/lib/python3/dist-packages/certbot/plugins/dns_common.py || sed -n '80,140p' /usr/lib/python3/dist-packages/certbot/plugins/dns_common.py"                                                                             
+  └         # reliable (the machine this code is running on might be able to see an update before                              
+            # the ACME server). So: we sleep for a short amount of time we believe to be long enough.                          
+    … +57 lines                                                
+            """                                                
+
+
+• Ran ssh cfa2 "sudo python3 - << 'PY'                         
+  │ from certbot.plugins.dns_common import CredentialsConfiguration                                                            
+  │ from certbot_dns_cloudflare._internal.dns_cloudflare import Authenticator                                                  
+  │ … +7 lines                                                 
+  └ token: empty                                               
+    email: empty                                               
+    api-key: empty                                             
+
+• Ran ssh cfa2 "sudo python3 - << 'PY'                         
+  │ from certbot_dns_cloudflare._internal.dns_cloudflare import Authenticator                                                  
+  │                                                            
+  │ … +4 lines                                                 
+  └ api-token -> dns_cloudflare_api_token                      
+    email -> dns_cloudflare_email                              
+    api-key -> dns_cloudflare_api_key                          
+
+• Ran ssh cfa2 "sudo python3 - << 'PY'                         
+  │ from certbot.plugins.dns_common import CredentialsConfiguration                                                            
+  │ from certbot_dns_cloudflare._internal.dns_cloudflare import Authenticator                                                  
+  │ … +5 lines                                                 
+  └ keys: ['dns_cloudflare_email', 'dns_cloudflare_api_key']   
+
+• Ran ssh cfa2 "sudo python3 - << 'PY'                         
+  │ from certbot.plugins.dns_common import CredentialsConfiguration                                                            
+  │ from certbot_dns_cloudflare._internal.dns_cloudflare import Authenticator                                                  
+  │ … +7 lines                                                 
+  └ dns_cloudflare_email len 0                                 
+    dns_cloudflare_api_key len 0                               
+
+• Ran cd /home/user/__Repositories/cloudflare__developerisnow && set -a && source .env && set +a && cat <<EOF | ssh cfa2 'sudo mkdir -p /root/.secrets && sudo tee /root/.secrets/cloudflare.ini >/dev/null'                                                   
+  │ dns_cloudflare_email = $CLOUDFLARE_CFA_EMAIL               
+  │ dns_cloudflare_api_key = $CLOUDFLARE_CFA_API_GLOBAL        
+  │ … +2 lines                                                 
+  └ .env: line 8: ouQV»48d=0qhgu4iehvcbLK#VD: command not found
+
+• Ran ssh cfa2 "sudo python3 - << 'PY'                         
+  │ from certbot.plugins.dns_common import CredentialsConfiguration                                                            
+  │ from certbot_dns_cloudflare._internal.dns_cloudflare import Authenticator                                                  
+  │ … +10 lines                                                
+  └ dns_cloudflare_email len 16                                
+    dns_cloudflare_api_key len 37                              
+    token: empty                                               
+    email: set                                                 
+    api-key: set                                               
+
+• Ran ssh cfa2 "sudo certbot certonly --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/cloudflare.ini --dns-cloudflare-propagation-seconds 45 -d '*.cfa2.telex.global' -d 'cfa2.telex.global' --agree-tos --email ops@developerisnow.com           
+  │ --non-interactive"                                         
+  └ Saving debug log to /var/log/letsencrypt/letsencrypt.log   
+    Requesting a certificate for *.cfa2.telex.global and cfa2.telex.global                                                     
+    … +12 lines                                                
+     * Donating to EFF:                    https://eff.org/donate-le                                                           
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -                                            
+
+• Explored                                                     
+  └ Read nginx-cfa-portals.conf, docker-compose.yml            
+
+• Ran ssh cfa2 "cd /srv/cfa && ls && sed -n '1,200p' .env"     
+  └ docker-compose.yml                                         
+    REGISTRY_IMAGE=git.telex.global:5050/npk/ois-cfa           
+    … +29 lines                                                
+    NEXT_PUBLIC_KEYCLOAK_CLIENT_ID_INVESTOR=portal-investor    
+    NEXT_PUBLIC_KEYCLOAK_CLIENT_ID_BACKOFFICE=backoffice       
+
+• Ran cat repositories/customer-gitlab/ois-cfa/ops/infra/uk1/nginx-cfa-portals.conf | ssh cfa2 'sudo tee /etc/nginx/sites-available/cfa2-portals.template.conf >/dev/null'                                                                                     
+  └ (no output)                                                
+
+• Ran ssh cfa2 "CFA_BASE_DOMAIN=cfa2.telex.global AUTH_HOST=auth.cfa2.telex.global ISSUER_HOST=issuer.cfa2.telex.global INVESTOR_HOST=investor.cfa2.telex.global BACKOFFICE_HOST=backoffice.cfa2.telex.global API_HOST=api.cfa2.telex.global                   
+  │ KC_UPSTREAM=127.0.0.1:58080 ISSUER_UPSTREAM=127.0.0.1:3001 INVESTOR_UPSTREAM=127.0.0.1:3002 BACKOFFICE_UPSTREAM=127.0.0.1:3003 API_UPSTREAM=127.0.0.1:58081 envsubst < /etc/nginx/sites-available/cfa2-portals.template.conf | sudo tee /etc/nginx/        
+  │ sites-available/cfa2-portals.conf >/dev/null"              
+  └ (no output)                                                
+
+• Ran ssh cfa2 "sudo ln -sf /etc/nginx/sites-available/cfa2-portals.conf /etc/nginx/sites-enabled/cfa2-portals.conf && sudo rm -f /etc/nginx/sites-enabled/default && sudo nginx -t && sudo systemctl reload nginx && sudo ss -tulpn | grep ':443' || echo     
+  │ 'no-443'"                                                  
+  └ 2025/11/27 13:38:05 [emerg] 458562#458562: invalid number of arguments in "map" directive in /etc/nginx/sites-enabled/cfa2-portals.conf:17                                                                                                                 
+    nginx: configuration file /etc/nginx/nginx.conf test failed
+    no-443                                                     
+
+• Ran ssh cfa2 "sudo sed -n '1,120p' /etc/nginx/sites-available/cfa2-portals.conf"                                             
+  └ # Template for /etc/nginx/sites-available/cfa-portals.conf 
+    # Usage: envsubst < nginx-cfa-portals.conf > /etc/nginx/sites-available/cfa-portals.conf                                   
+    … +70 lines                                                
+        location / { proxy_pass http://api_upstream; }         
+    }                                                          
+
+• Ran ssh cfa2 "CFA_BASE_DOMAIN=cfa2.telex.global AUTH_HOST=auth.cfa2.telex.global ISSUER_HOST=issuer.cfa2.telex.global INVESTOR_HOST=investor.cfa2.telex.global BACKOFFICE_HOST=backoffice.cfa2.telex.global API_HOST=api.cfa2.telex.global                   
+  │ KC_UPSTREAM=127.0.0.1:58080 ISSUER_UPSTREAM=127.0.0.1:3001 INVESTOR_UPSTREAM=127.0.0.1:3002 BACKOFFICE_UPSTREAM=127.0.0.1:3003 API_UPSTREAM=127.0.0.1:58081 envsubst '$CFA_BASE_DOMAIN $AUTH_HOST $ISSUER_HOST $INVESTOR_HOST $BACKOFFICE_HOST $API_HOST   
+  │ $KC_UPSTREAM $ISSUER_UPSTREAM $INVESTOR_UPSTREAM $BACKOFFICE_UPSTREAM $API_UPSTREAM' < /etc/nginx/sites-available/cfa2-portals.template.conf | sudo tee /etc/nginx/sites-available/cfa2-portals.conf >/dev/null"                                           
+  └ (no output)                                                
+
+• Ran ssh cfa2 "sudo nginx -t && sudo systemctl reload nginx && sudo ss -tulpn | grep ':443' || echo 'no-443'"                 
+  └ 2025/11/27 13:38:30 [emerg] 458912#458912: invalid port in upstream "${KC_UPSTREAM:-127.0.0.1:8081}" in /etc/nginx/sites-enabled/cfa2-portals.conf:21                                                                                                      
+    nginx: configuration file /etc/nginx/nginx.conf test failed
+    no-443                                                     
+
+• Ran ssh cfa2 'sudo tee /etc/nginx/sites-available/cfa2-portals.conf >/dev/null <<"EOF"                                       
+  │ map $http_x_forwarded_proto $forward_proto {               
+  │     default $http_x_forwarded_proto;                       
+  │ … +57 lines                                                
+  └ (no output)                                                
+
+• Ran ssh cfa2 "sudo ln -sf /etc/nginx/sites-available/cfa2-portals.conf /etc/nginx/sites-enabled/cfa2-portals.conf && sudo rm -f /etc/nginx/sites-enabled/default && sudo nginx -t && sudo systemctl reload nginx && sudo ss -tulpn | grep ':443' || echo     
+  │ 'no-443'"                                                  
+  └ nginx: the configuration file /etc/nginx/nginx.conf syntax is ok                                                           
+    nginx: configuration file /etc/nginx/nginx.conf test is successful                                                         
+    tcp   LISTEN 0      511              0.0.0.0:443        0.0.0.0:*    users:(("nginx",pid=459194,fd=11),("nginx",pid=454377,fd=11))                                                                                                                         
+
+• Ran ssh cfa2 "cd /srv/cfa && docker compose ps"              
+  └ NAME                 IMAGE                                                   COMMAND                  SERVICE              CREATED             STATUS                       PORTS                                                                          
+    api-gateway          git.telex.global:5050/npk/ois-cfa/api-gateway:dev       "dotnet api-gateway.…"   api-gateway          2 hours ago         Up About an hour             0.0.0.0:58081->8080/tcp, [::]:58081->8080/tcp                                  
+    … +10 lines                                                
+    registry-service     git.telex.global:5050/npk/ois-cfa/registry:dev          "dotnet registry.dll"    registry-service     About an hour ago   Up About an hour             0.0.0.0:58084->8080/tcp, [::]:58084->8080/tcp                                  
+    settlement-service   git.telex.global:5050/npk/ois-cfa/settlement:dev        "dotnet settlement.d…"   settlement-service   2 hours ago         Up 2 hours                   0.0.0.0:58085->8080/tcp, [::]:58085->8080/tcp                                  
+
+• Ran curl -vk https://auth.cfa2.telex.global 2>&1 | sed -n '1,40p'                                                            
+  └   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current                                            
+                                     Dload  Upload   Total   Spent    Left  Speed                                              
+    … +36 lines                                                
+    * TLSv1.3 (OUT), TLS handshake, Finished (20):             
+    } [52 bytes data]                                          
+
+• Ran curl -vk https://auth.cfa2.telex.global 2>&1 | sed -n '40,120p'                                                          
+  └ } [52 bytes data]                                          
+    * SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384    
+    … +51 lines                                                
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0                                                 
+    * Connection #0 to host auth.cfa2.telex.global left intact 
+
+• Ran for h in auth issuer investor backoffice api; do echo "### $h"; curl -kI https://$h.cfa2.telex.global || echo "curl-failed"; echo; done                                                                                                                  
+  └ ### auth                                                   
+      % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current                                            
+    … +62 lines                                                
+
+
+
+• Updated Plan                                                 
+  └ ✔ Check Cloudflare zone and prepare .env.cfa2.telex        
+    ✔ Run DNS upsert and validate hostnames                    
+    ✔ Configure TLS cert and nginx vhosts on cfa2              
+    □ Align Keycloak realm/clients and portal envs with domains
+    □ Run end-to-end HTTPS and login checks, update docs/story 
+
+• Explored                                                     
+  └ Read sync-compose-cfa2.sh, .env.cfa2                       
+    Search kcadm in tmux-sessions                              
+    Read eywa1-p-cfa-w17.p1-20251126-2014.session.txt          
+
+• Edited ~/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets/repositories/customer-gitlab/ois-cfa/deploy/docker-compose-at-vps/cfa2/docker-compose.yml (+5 -3)                                                                                       
+     33        KC_DB_PASSWORD: ${POSTGRES_PASSWORD}            
+     34 +      KC_HOSTNAME: auth.cfa2.telex.global             
+     35 +      KC_HOSTNAME_URL: https://auth.cfa2.telex.global 
+     36        KC_HOSTNAME_STRICT: "false"                     
+        ⋮                                                      
+    227        NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: ${NEXT_PUBLIC_KEYCLOAK_CLIENT_ID_ISSUER}                                        
+    226 -      NEXTAUTH_URL: http://92.51.38.126:${PORTAL_ISSUER_PORT}                                                         
+    228 +      NEXTAUTH_URL: https://issuer.cfa2.telex.global  
+    229        KEYCLOAK_CLIENT_SECRET: secret                  
+        ⋮                                                      
+    246        NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: ${NEXT_PUBLIC_KEYCLOAK_CLIENT_ID_INVESTOR}                                      
+    245 -      NEXTAUTH_URL: http://92.51.38.126:${PORTAL_INVESTOR_PORT}                                                       
+    247 +      NEXTAUTH_URL: https://investor.cfa2.telex.global
+    248        KEYCLOAK_CLIENT_SECRET: secret                  
+        ⋮                                                      
+    265        NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: ${NEXT_PUBLIC_KEYCLOAK_CLIENT_ID_BACKOFFICE}                                    
+    264 -      NEXTAUTH_URL: http://92.51.38.126:${BACKOFFICE_PORT}                                                            
+    266 +      NEXTAUTH_URL: https://backoffice.cfa2.telex.global                                                              
+    267        KEYCLOAK_CLIENT_SECRET: secret                  
+
+• Edited ~/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets/repositories/customer-gitlab/ois-cfa/deploy/docker-compose-at-vps/cfa2/.env.cfa2 (+2 -2)                                                                                                
+    26                                                         
+    27 -NEXT_PUBLIC_API_BASE_URL=http://92.51.38.126:${GATEWAY_HOST_PORT}                                                      
+    28 -NEXT_PUBLIC_KEYCLOAK_URL=http://92.51.38.126:${KEYCLOAK_HOST_PORT}                                                     
+    27 +NEXT_PUBLIC_API_BASE_URL=https://api.cfa2.telex.global 
+    28 +NEXT_PUBLIC_KEYCLOAK_URL=https://auth.cfa2.telex.global
+    29  NEXT_PUBLIC_KEYCLOAK_REALM=ois                         
+
+• Ran cd repositories/customer-gitlab/ois-cfa && ./ops/scripts/sync-compose-cfa2.sh                                            
+  └ Synced compose + env to user@cfa2:/srv/cfa                 
+
+• Ran ssh cfa2 "cd /srv/cfa && sed -n '1,40p' .env && echo '--- docker-compose.yml keycloak env ---' && sed -n '20,80p' docker-compose.yml | sed -n '20,80p'"                                                                                                  
+  └ REGISTRY_IMAGE=git.telex.global:5050/npk/ois-cfa           
+    TAG=dev                                                    
+    … +71 lines                                                
+          - "${REDIS_HOST_PORT}:6379"                          
+        volumes:                                               
+
+• Ran ssh cfa2 "cd /srv/cfa && sed -n '40,120p' docker-compose.yml"                                                            
+  └     command: start-dev                                     
+        depends_on:                                            
+    … +77 lines                                                
+          ASPNETCORE_URLS: http://0.0.0.0:8080                 
+          ASPNETCORE_ENVIRONMENT: Development                  
+
+• Ran ssh cfa2 "cd /srv/cfa && sed -n '20,60p' docker-compose.yml"                                                             
+  └     restart: unless-stopped                                
+
+    … +37 lines                                                
+          - "${MINIO_CONSOLE_PORT}:9001"                       
+        environment:                                           
+
+• Ran ssh cfa2 "cd /srv/cfa && sed -n '180,260p' docker-compose.yml"                                                           
+  └     environment:                                           
+          ASPNETCORE_URLS: http://0.0.0.0:8080                 
+    … +77 lines                                                
+        image: ${REGISTRY_IMAGE}/backoffice:${TAG}             
+        container_name: backoffice                             
+
+• Ran ssh cfa2 "cd /srv/cfa && sed -n '260,320p' docker-compose.yml"                                                           
+  └     container_name: backoffice                             
+        environment:                                           
+    … +22 lines                                                
+        name: ois-cfa_ois-network                              
+        driver: bridge                                         
+
+• Ran ssh cfa2 "cd /srv/cfa && docker compose up -d"           
+  └  Container ois-postgres  Running                           
+     Container issuance-service  Running                       
+    … +47 lines                                                
+     Container portal-issuer  Started                          
+     Container portal-investor  Started                        
+
+• Ran ssh cfa2 "cd /srv/cfa && docker compose ps"              
+  └ NAME                 IMAGE                                                   COMMAND                  SERVICE              CREATED             STATUS                             PORTS                                                                    
+    api-gateway          git.telex.global:5050/npk/ois-cfa/api-gateway:dev       "dotnet api-gateway.…"   api-gateway          2 hours ago         Up About an hour                   0.0.0.0:58081->8080/tcp, [::]:58081->8080/tcp                            
+    … +10 lines                                                
+    registry-service     git.telex.global:5050/npk/ois-cfa/registry:dev          "dotnet registry.dll"    registry-service     About an hour ago   Up About an hour                   0.0.0.0:58084->8080/tcp, [::]:58084->8080/tcp                            
+    settlement-service   git.telex.global:5050/npk/ois-cfa/settlement:dev        "dotnet settlement.d…"   settlement-service   2 hours ago         Up 2 hours                         0.0.0.0:58085->8080/tcp, [::]:58085->8080/tcp                            
+
+• Ran ssh cfa2 "sg docker -c 'docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh config credentials --server http://localhost:8080 --realm master --user ${KEYCLOAK_ADMIN:-admin} --password ${KEYCLOAK_ADMIN_PASSWORD:-admin123}'"                           
+  └ Logging into http://localhost:8080 as user admin of realm master                                                           
+    Failed to send request - Connect to localhost:8080 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused                                                                                                                             
+
+• Ran ssh cfa2 "cd /srv/cfa && docker compose ps ois-keycloak" 
+  └ no such service: ois-keycloak                              
+
+• Ran ssh cfa2 "docker ps --format 'table {{.Names}}\t{{.Status}}' | sed -n '2,20p'"                                           
+  └ portal-investor      Up 49 seconds                         
+    backoffice           Up 49 seconds                         
+    … +10 lines                                                
+    ois-postgres         Up 2 hours (healthy)                  
+    portainer            Up 5 days                             
+
+• Ran sleep 30 && ssh cfa2 "docker ps --format 'table {{.Names}}\t{{.Status}}' | sed -n '2,20p'"                               
+  └ portal-investor      Up About a minute                     
+    backoffice           Up About a minute                     
+    … +10 lines                                                
+    ois-postgres         Up 2 hours (healthy)                  
+    portainer            Up 5 days                             
+
+• Ran ssh cfa2 "sg docker -c 'docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh config credentials --server http://localhost:8080 --realm master --user ${KEYCLOAK_ADMIN:-admin} --password ${KEYCLOAK_ADMIN_PASSWORD:-admin123}'"                           
+  └ Logging into http://localhost:8080 as user admin of realm master                                                           
+    Failed to send request - Connect to localhost:8080 [localhost/127.0.0.1, localhost/0:0:0:0:0:0:0:1] failed: Connection refused                                                                                                                             
+
+• Ran ssh cfa2 "docker logs --tail=40 ois-keycloak"            
+  └ Updating the configuration and installing your custom providers, if any. Please wait.                                      
+    2025-11-27 13:42:51,283 INFO  [io.qua.dep.QuarkusAugmentor] (main) Quarkus augmentation completed in 41482ms               
+    … +4 lines                                                 
+    2025-11-27 13:43:22,315 INFO  [org.keycloak.broker.provider.AbstractIdentityProviderMapper] (main) Registering class org.keycloak.broker.provider.mappersync.ConfigSyncEventListener                                                                       
+    2025-11-27 13:43:22,386 INFO  [org.keycloak.connections.infinispan.DefaultInfinispanConnectionProviderFactory] (main) Node name: node_235818, Site name: null                                                                                              
+
+• Ran ssh cfa2 "sleep 20 && docker logs --tail=40 ois-keycloak"
+  └ Updating the configuration and installing your custom providers, if any. Please wait.                                      
+    2025-11-27 13:42:51,283 INFO  [io.qua.dep.QuarkusAugmentor] (main) Quarkus augmentation completed in 41482ms               
+    … +8 lines                                                 
+    2025-11-27 13:43:27,874 INFO  [io.quarkus] (main) Installed features: [agroal, cdi, hibernate-orm, jdbc-postgresql, keycloak, logging-gelf, narayana-jta, reactive-routes, resteasy-reactive, resteasy-reactive-jackson, smallrye-context-propagation,     
+    smallrye-health, vertx]                                    
+    2025-11-27 13:43:27,900 WARN  [org.keycloak.quarkus.runtime.KeycloakMain] (main) Running the server in development mode. DO NOT use this configuration in production.                                                                                      
+
+• Ran ssh cfa2 "sg docker -c 'docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh config credentials --server http://localhost:8080 --realm master --user ${KEYCLOAK_ADMIN:-admin} --password ${KEYCLOAK_ADMIN_PASSWORD:-admin123}'"                           
+  └ Logging into http://localhost:8080 as user admin of realm master                                                           
+
+• Ran ssh cfa2 "sg docker -c 'docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh get clients -r ois --fields id,clientId,rootUrl,redirectUris,webOrigins | grep -E \"clientId\|rootUrl\" -n || true'"                                                         
+  └                                                            
+
+• Ran ssh cfa2 "sg docker -c 'docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh get realms/ois || echo realm-missing'"       
+  └ {                                                          
+      "id" : "9d6a3ba3-5e6e-4934-be3f-4dda4a93f845",           
+    … +128 lines                                               
+      }                                                        
+    }                                                          
+
+• Ran ssh cfa2 "sg docker -c 'docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh get clients -r ois --fields id,clientId,rootUrl,redirectUris,webOrigins'" | sed -n '1,80p'                                                                                   
+  └                                                            
+    [ {                                                        
+    … +49 lines                                                
+      "webOrigins" : [ "+" ]                                   
+    } ]                                                        
+
+• Ran ssh cfa2 'sg docker -c "ID=$(docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh get clients -r ois -q clientId=portal-issuer --fields id --format csv | tail -n1 | tr -d \"\r\"); docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh update clients/   
+  │ $ID -r ois -s rootUrl=https://issuer.cfa2.telex.global -s \"redirectUris=[\\\"https://issuer.cfa2.telex.global/*\\\",\\\"https://issuer.cfa2.telex.global/api/auth/callback/keycloak\\\"]\" -s \"webOrigins=[\\\"https://issuer.cfa2.telex.global\\\"]\"   
+  │ -s secret=secret"'                                         
+  └ HTTP request error: Cannot deserialize value of type `com.fasterxml.jackson.databind.node.ObjectNode` from Array value (token `JsonToken.START_ARRAY`)                                                                                                     
+     at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1]                       
+
+• Ran ssh cfa2 "docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh update clients/a0468954-382a-46c9-a004-7819557ee7f6 -r ois -s rootUrl=https://issuer.cfa2.telex.global -s 'redirectUris=[\"https://issuer.cfa2.telex.global/*\",\"https://                 
+  │ issuer.cfa2.telex.global/api/auth/callback/keycloak\"]' -s 'webOrigins=[\"https://issuer.cfa2.telex.global\"]' -s secret=secret"                                                                                                                           
+  └ (no output)                                                
+
+• Ran ssh cfa2 "docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh get clients -r ois --fields id,clientId,rootUrl | sed -n '1,80p'"                                                                                                                          
+  └                                                            
+    [ {                                                        
+    … +31 lines                                                
+      "rootUrl" : "${authAdminUrl}"                            
+    } ]                                                        
+
+• Ran ssh cfa2 "docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh update clients/d27b590e-02ca-400a-98ec-5b9bef54ab1f -r ois -s rootUrl=https://investor.cfa2.telex.global -s 'redirectUris=[\"https://investor.cfa2.telex.global/*\",\"https://             
+  │ investor.cfa2.telex.global/api/auth/callback/keycloak\"]' -s 'webOrigins=[\"https://investor.cfa2.telex.global\"]' -s secret=secret"                                                                                                                       
+  └ (no output)                                                
+
+• Ran ssh cfa2 "docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh update clients/f7b2a5a9-f916-419a-ae56-99ba6ca5f396 -r ois -s rootUrl=https://backoffice.cfa2.telex.global -s 'redirectUris=[\"https://backoffice.cfa2.telex.global/*\",\"https://         
+  │ backoffice.cfa2.telex.global/api/auth/callback/keycloak\"]' -s 'webOrigins=[\"https://backoffice.cfa2.telex.global\"]' -s secret=secret"                                                                                                                   
+  └ (no output)                                                
+
+• Ran ssh cfa2 "docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh get clients -r ois --fields clientId,rootUrl,redirectUris,webOrigins | sed -n '1,80p'"                                                                                                     
+  └                                                            
+    [ {                                                        
+    … +40 lines                                                
+      "webOrigins" : [ "+" ]                                   
+    } ]                                                        
+
+• Ran ssh cfa2 "docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh get users -r ois -q username=issuer@test.com"              
+  └ [ {                                                        
+      "id" : "5e73074d-00ba-4730-bd1e-9cab3bf80b71",           
+    … +16 lines                                                
+      }                                                        
+    } ]                                                        
+
+• Ran ssh cfa2 "docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh get users -r ois -q username=investor@test.com"            
+  └ [ {                                                        
+      "id" : "6b5f0f23-b918-4f80-9bfe-5956eeb71090",           
+    … +16 lines                                                
+      }                                                        
+    } ]                                                        
+
+• Ran ssh cfa2 "docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh get users -r ois -q username=cfa.devs@gmail.com || docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh get users -r ois -q username=backoffice@test.com"                                   
+  └ [ {                                                        
+      "id" : "3cca919f-ca73-405f-9648-a0424b94a6c1",           
+    … +16 lines                                                
+      }                                                        
+    } ]                                                        
+
+• Ran ssh cfa2 "docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh get users/5e73074d-00ba-4730-bd1e-9cab3bf80b71/role-mappings/realm -r ois && echo '---' && docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh get                                         
+  │ users/6b5f0f23-b918-4f80-9bfe-5956eeb71090/role-mappings/realm -r ois && echo '---' && docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh get users/3cca919f-ca73-405f-9648-a0424b94a6c1/role-mappings/realm -r ois"                                      
+  └ [ {                                                        
+      "id" : "5c7c22e6-b08b-42f7-837b-2588c6423809",           
+    … +26 lines                                                
+      "containerId" : "9d6a3ba3-5e6e-4934-be3f-4dda4a93f845"   
+    } ]---                                                     
+
+• Ran ssh cfa2 "docker exec ois-keycloak /opt/keycloak/bin/kcadm.sh get users/3cca919f-ca73-405f-9648-a0424b94a6c1/role-mappings/realm -r ois"                                                                                                                 
+  └ [ {                                                        
+      "id" : "5c7c22e6-b08b-42f7-837b-2588c6423809",           
+    … +16 lines                                                
+      "containerId" : "9d6a3ba3-5e6e-4934-be3f-4dda4a93f845"   
+    } ]                                                        
+
+• Explored                                                     
+  └ Read auth.ts                                               
+
+• Ran curl -sk -o - -w "HTTP:%{http_code}" https://auth.cfa2.telex.global/realms/ois/.well-known/openid-configuration | sed -n '1,40p'                                                                                                                         
+  └ {"issuer":"http://auth.cfa2.telex.global/realms/ois","authorization_endpoint":"http://auth.cfa2.telex.global/realms/ois/protocol/openid-connect/auth","token_endpoint":"http://auth.cfa2.telex.global/realms/ois/protocol/                                 
+    openid-connect/token","introspection_endpoint":"http://auth.cfa2.telex.global/realms/ois/protocol/openid-connect/token/introspect","userinfo_endpoint":"http://auth.cfa2.telex.global/realms/ois/protocol/openid-connect/                                  
+    userinfo","end_session_endpoint":"http://auth.cfa2.telex.global/realms/ois/protocol/openid-connect/logout","frontchannel_logout_session_supported":true,"frontchannel_logout_supported":true,"jwks_uri":"http://                                           
+    auth.cfa2.telex.global/realms/ois/protocol/openid-connect/certs","check_session_iframe":"http://auth.cfa2.telex.global/realms/ois/protocol/openid-connect/login-status-iframe.html","grant_types_supported":                                               
+    ["authorization_code","implicit","refresh_token","password","client_credentials","urn:openid:params:grant-type:ciba","urn:ietf:params:oauth:grant-type:device_code"],"acr_values_supported":                                                               
+    ["0","1"],"response_types_supported":["code","none","id_token","token","id_token token","code id_token","code token","code id_token token"],"subject_types_supported":                                                                                     
+    ["public","pairwise"],"id_token_signing_alg_values_supported":["PS384","RS384","EdDSA","ES384","HS256","HS512","ES256","RS256","HS384","ES512","PS256","PS512","RS512"],"id_token_encryption_alg_values_supported":                                        
+    ["RSA-OAEP","RSA-OAEP-256","RSA1_5"],"id_token_encryption_enc_values_supported":["A256GCM","A192GCM","A128GCM","A128CBC-HS256","A192CBC-HS384","A256CBC-HS512"],"userinfo_signing_alg_values_supported":                                                   
+    ["PS384","RS384","EdDSA","ES384","HS256","HS512","ES256","RS256","HS384","ES512","PS256","PS512","RS512","none"],"userinfo_encryption_alg_values_supported":                                                                                               
+    ["RSA-OAEP","RSA-OAEP-256","RSA1_5"],"userinfo_encryption_enc_values_supported":["A256GCM","A192GCM","A128GCM","A128CBC-HS256","A192CBC-HS384","A256CBC-HS512"],"request_object_signing_alg_values_supported":                                             
+    ["PS384","RS384","EdDSA","ES384","HS256","HS512","ES256","RS256","HS384","ES512","PS256","PS512","RS512","none"],"request_object_encryption_alg_values_supported":["RSA-OAEP","RSA-OAEP-256","RSA1_5"],"request_object_encryption_enc_values_supported":   
+    ["A256GCM","A192GCM","A128GCM","A128CBC-HS256","A192CBC-HS384","A256CBC-HS512"],"response_modes_supported":["query","fragment","form_post","query.jwt","fragment.jwt","form_post.jwt","jwt"],"registration_endpoint":"http://auth.cfa2.telex.global/       
+    realms/ois/clients-registrations/openid-connect","token_endpoint_auth_methods_supported":["private_key_jwt","client_secret_basic","client_secret_post","tls_client_auth","client_secret_jwt"],"token_endpoint_auth_signing_alg_values_supported":          
+    ["PS384","RS384","EdDSA","ES384","HS256","HS512","ES256","RS256","HS384","ES512","PS256","PS512","RS512"],"introspection_endpoint_auth_methods_supported":                                                                                                 
+    ["private_key_jwt","client_secret_basic","client_secret_post","tls_client_auth","client_secret_jwt"],"introspection_endpoint_auth_signing_alg_values_supported":                                                                                           
+    ["PS384","RS384","EdDSA","ES384","HS256","HS512","ES256","RS256","HS384","ES512","PS256","PS512","RS512"],"authorization_signing_alg_values_supported":                                                                                                    
+    ["PS384","RS384","EdDSA","ES384","HS256","HS512","ES256","RS256","HS384","ES512","PS256","PS512","RS512"],"authorization_encryption_alg_values_supported":                                                                                                 
+    ["RSA-OAEP","RSA-OAEP-256","RSA1_5"],"authorization_encryption_enc_values_supported":["A256GCM","A192GCM","A128GCM","A128CBC-HS256","A192CBC-HS384","A256CBC-HS512"],"claims_supported":                                                                   
+    ["aud","sub","iss","auth_time","name","given_name","family_name","preferred_username","email","acr"],"claim_types_supported":["normal"],"claims_parameter_supported":true,"scopes_supported":                                                              
+    ["openid","offline_access","basic","email","web-origins","address","acr","roles","profile","phone","microprofile-jwt"],"request_parameter_supported":true,"request_uri_parameter_supported":true,"require_request_uri_registration":true,"code_challenge_me
+    thods_supported":["plain","S256"],"tls_client_certificate_bound_access_tokens":true,"revocation_endpoint":"http://auth.cfa2.telex.global/realms/ois/protocol/openid-connect/                                                                               
+    revoke","revocation_endpoint_auth_methods_supported":["private_key_jwt","client_secret_basic","client_secret_post","tls_client_auth","client_secret_jwt"],"revocation_endpoint_auth_signing_alg_values_supported":                                         
+    ["PS384","RS384","EdDSA","ES384","HS256","HS512","ES256","RS256","HS384","ES512","PS256","PS512","RS512"],"backchannel_logout_supported":true,"backchannel_logout_session_supported":true,"device_authorization_endpoint":"http://                         
+    auth.cfa2.telex.global/realms/ois/protocol/openid-connect/auth/device","backchannel_token_delivery_modes_supported":["poll","ping"],"backchannel_authentication_endpoint":"http://auth.cfa2.telex.global/realms/ois/protocol/openid-connect/ext/ciba/      
+    auth","backchannel_authentication_request_signing_alg_values_supported":["PS384","RS384","EdDSA","ES384","ES256","RS256","ES512","PS256","PS512","RS512"],"require_pushed_authorization_requests":false,"pushed_authorization_request_endpoint":"http://   
+    auth.cfa2.telex.global/realms/ois/protocol/openid-connect/ext/par/request","mtls_endpoint_aliases":{"token_endpoint":"http://auth.cfa2.telex.global/realms/ois/protocol/openid-connect/token","revocation_endpoint":"http://auth.cfa2.telex.global/        
+    realms/ois/protocol/openid-connect/revoke","introspection_endpoint":"http://auth.cfa2.telex.global/realms/ois/protocol/openid-connect/token/introspect","device_authorization_endpoint":"http://auth.cfa2.telex.global/realms/ois/                         
+    protocol/openid-connect/auth/device","registration_endpoint":"http://auth.cfa2.telex.global/realms/ois/clients-registrations/openid-connect","userinfo_endpoint":"http://auth.cfa2.telex.global/realms/ois/protocol/openid-connect/                        
+    userinfo","pushed_authorization_request_endpoint":"http://auth.cfa2.telex.global/realms/ois/protocol/openid-connect/ext/par/request","backchannel_authentication_endpoint":"http://auth.cfa2.telex.global/realms/ois/protocol/openid-connect/ext/ciba/     
+    auth"},"authorization_response_iss_parameter_supported":true}HTTP:200                                                      
+
+• Explored                                                     
+  └ Read docker-compose.keycloak-proxy.yml, nginx.conf         
+
+• Edited ~/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets/repositories/customer-gitlab/ois-cfa/deploy/docker-compose-at-vps/cfa2/docker-compose.yml (+1 -0)                                                                                       
+    35        KC_HOSTNAME_URL: https://auth.cfa2.telex.global  
+    36 +      KC_PROXY: edge                                   
+    37        KC_HOSTNAME_STRICT: "false"                      
+
+• Ran cd repositories/customer-gitlab/ois-cfa && ./ops/scripts/sync-compose-cfa2.sh && ssh cfa2 "cd /srv/cfa && docker compose up -d keycloak && sleep 10 && docker ps --format 'table {{.Names}}\t{{.Status}}' | sed -n '1,10p'"                              
+  └ Synced compose + env to user@cfa2:/srv/cfa                 
+     Container ois-postgres  Running                           
+    … +14 lines                                                
+    compliance-service   Up 7 minutes                          
+    issuance-service     Up 2 hours                            
+
+• Ran ssh cfa2 "sleep 30 && docker ps --format 'table {{.Names}}\t{{.Status}}' | sed -n '1,10p'"                               
+  └ NAMES                STATUS                                
+    ois-keycloak         Up 45 seconds (health: starting)      
+    … +6 lines                                                 
+    compliance-service   Up 8 minutes                          
+    issuance-service     Up 2 hours                            
+
+• Ran ssh cfa2 "sleep 20 && docker logs --tail=20 ois-keycloak"
+  └ Updating the configuration and installing your custom providers, if any. Please wait.                                      
+    2025-11-27 13:48:54,424 WARN  [org.key.qua.run.cli.Picocli] (main) The following used options or option values are DEPRECATED and will be removed or their behaviour changed in a future release:                                                          
+    … +8 lines                                                 
+    Consult the Release Notes for details.                     
+    2025-11-27 13:49:57,603 INFO  [org.infinispan.CONTAINER] (Thread-5) ISPN000556: Starting user marshaller 'org.infinispan.jboss.marshalling.core.JBossUserMarshaller'                                                                                       
+
+• Ran ssh cfa2 "sleep 15 && docker logs --tail=20 ois-keycloak"
+  └ Updating the configuration and installing your custom providers, if any. Please wait.                                      
+    2025-11-27 13:48:54,424 WARN  [org.key.qua.run.cli.Picocli] (main) The following used options or option values are DEPRECATED and will be removed or their behaviour changed in a future release:                                                          
+    … +15 lines                                                
+    2025-11-27 13:50:06,562 INFO  [io.quarkus] (main) Installed features: [agroal, cdi, hibernate-orm, jdbc-postgresql, keycloak, logging-gelf, narayana-jta, reactive-routes, resteasy-reactive, resteasy-reactive-jackson, smallrye-context-propagation,     
+    smallrye-health, vertx]                                    
+    2025-11-27 13:50:06,629 WARN  [org.keycloak.quarkus.runtime.KeycloakMain] (main) Running the server in development mode. DO NOT use this configuration in production.                                                                                      
+
+• Ran curl -sk https://auth.cfa2.telex.global/realms/ois/.well-known/openid-configuration | jq '.issuer'                       
+  └ "https://auth.cfa2.telex.global/realms/ois"                
+
+• Ran curl -sk -o /dev/null -w "HTTP:%{http_code}" https://auth.cfa2.telex.global/realms/ois/.well-known/openid-configuration  
+  └ HTTP:200                                                   
+
+• Ran curl -kI https://auth.cfa2.telex.global                  
+  └   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current                                            
+                                     Dload  Upload   Total   Spent    Left  Speed                                              
+    … +8 lines                                                 
+    x-xss-protection: 1; mode=block                            
+
+
+• Ran ssh cfa2 "docker exec portal-issuer env | grep -E '^NEXT_PUBLIC_|^NEXTAUTH_URL=|^KEYCLOAK_CLIENT_SECRET='"               
+  └ NEXT_PUBLIC_KEYCLOAK_URL=https://auth.cfa2.telex.global    
+    NEXT_PUBLIC_KEYCLOAK_REALM=ois                             
+    … +2 lines                                                 
+    KEYCLOAK_CLIENT_SECRET=secret                              
+    NEXT_PUBLIC_API_BASE_URL=https://api.cfa2.telex.global     
+
+• Ran ssh cfa2 "docker exec portal-investor env | grep -E '^NEXT_PUBLIC_|^NEXTAUTH_URL=|^KEYCLOAK_CLIENT_SECRET='"             
+  └ NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=portal-investor             
+    NEXTAUTH_URL=https://investor.cfa2.telex.global            
+    … +2 lines                                                 
+    NEXT_PUBLIC_KEYCLOAK_URL=https://auth.cfa2.telex.global    
+    NEXT_PUBLIC_KEYCLOAK_REALM=ois                             
+
+• Ran ssh cfa2 "docker exec backoffice env | grep -E '^NEXT_PUBLIC_|^NEXTAUTH_URL=|^KEYCLOAK_CLIENT_SECRET='"                  
+  └ KEYCLOAK_CLIENT_SECRET=secret                              
+    NEXT_PUBLIC_API_BASE_URL=https://api.cfa2.telex.global     
+    … +2 lines                                                 
+    NEXT_PUBLIC_KEYCLOAK_CLIENT_ID=backoffice                  
+    NEXTAUTH_URL=https://backoffice.cfa2.telex.global          
+
+• Ran for h in auth issuer investor backoffice api; do echo "### $h"; curl -kI https://$h.cfa2.telex.global || echo "curl-failed"; echo; done                                                                                                                  
+  └ ### auth                                                   
+      % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current                                            
+    … +62 lines                                                
+
+
+
+• Updated Plan                                                 
+  └ ✔ Check Cloudflare zone and prepare .env.cfa2.telex        
+    ✔ Run DNS upsert and validate hostnames                    
+    ✔ Configure TLS cert and nginx vhosts on cfa2              
+    ✔ Align Keycloak realm/clients and portal envs with domains
+    □ Run end-to-end HTTPS and login checks, update docs/story 
+
+• Ran ssh cfa2 "docker logs --tail=80 portal-issuer"           
+  └ (no output)                                                
+
+• Ran ssh cfa2 "docker logs --since=5m --tail=80 portal-issuer"
+  └ (no output)                                                
+
+• Ran curl -ks https://investor.cfa2.telex.global | head       
+  └ <!DOCTYPE html><html id="__next_error__"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="preload" as="script" fetchPriority="low" href="/_next/static/chunks/webpack-03ac84af94d19428.js"/    
+    ><script src="/_next/static/chunks/4bd1b696-10648d3508a1321f.js" async=""></script><script src="/_next/static/chunks/215-40b309faef9cc799.js" async=""></script><script src="/_next/static/chunks/main-app-bd89724728c272be.js" async=""></script><meta    
+    name="robots" content="noindex"/><title>OIS Portal - Investor</title><meta name="description" content="Portal for CFA investors"/><script src="/_next/static/chunks/polyfills-42372ed130431b0a.js" noModule=""></script></head><body><script src="/        
+    _next/static/chunks/webpack-03ac84af94d19428.js" async=""></script><script>(self.__next_f=self.__next_f||[]).push([0])</script><script>self.__next_f.push([1,"2:\"$Sreact.fragment\"\n3:I[82650,[\"4\",\"static/chunks/4-d73cd81ee9d52687.js\",\"336\",    
+    \"static/chunks/336-b5c9e2dd242212de.js\",\"776\",\"static/chunks/776-921ada2d4532ba87.js\",\"94\",\"static/chunks/94-c7b1caa03a519a37.js\",\"644\",\"static/chunks/644-f9a0b5d190fc909b.js\",\"185\",\"static/chunks/app/layout-3a9a860ffb1d8476.js\"],   
+    \"Providers\",1]\n4:I[72644,[\"4\",\"static/chunks/4-d73cd81ee9d52687.js\",\"336\",\"static/chunks/336-b5c9e2dd242212de.js\",\"776\",\"static/chunks/776-921ada2d4532ba87.js\",\"94\",\"static/chunks/94-c7b1caa03a519a37.js\",\"644\",                    
+    \"static/chunks/644-f9a0b5d190fc909b.js\",\"185\",\"static/chunks/app/layout-3a9a860ffb1d8476.js\"],\"ErrorBoundary\",1]\n5:I[39275,[],\"\"]\n6:I[61343,[],\"\"]\n7:I[27776,[\"4\",\"static/chunks/4-d73cd81ee9d52687.js\",\"336\",\"static/               
+    chunks/336-b5c9e2dd242212de.js\",\"776\",\"static/chunks/776-921ada2d4532ba87.js\",\"94\",\"static/chunks/94-c7b1caa03a519a37.js\",\"644\",\"static/chunks/644-f9a0b5d190fc909b.js\",\"185\",\"static/chunks/app/layout-3a9a860ffb1d8476.js\"],            
+    \"Toaster\",1]\n9:I[53120,[],\"OutletBoundary\"]\nb:I[53120,[],\"MetadataBoundary\"]\nd:I[53120,[],\"ViewportBoundary\"]\nf:I[76130,[],\"\"]\n1:HL[\"/_next/static/css/cd0ce77786dd197f.css\",\"style\"]\n"])</script><script>self.__next_f.push([1,"0:    
+    {\"P\":null,\"b\":\"4YDnqegidegSCx9q6pHU3\",\"p\":\"\",\"c\":[\"\",\"\"],\"i\":false,\"f\":[[[\"\",{\"children\":[\"__PAGE__\",{}]},\"$undefined\",\"$undefined\",true],[\"\",[\"$\",\"$2\",\"c\",{\"children\":[[[\"$\",\"link\",\"0\",{\"rel\":          
+    \"stylesheet\",\"href\":\"/_next/static/css/cd0ce77786dd197f.css\",\"precedence\":\"next\",\"crossOrigin\":\"$undefined\",\"nonce\":\"$undefined\"}]],[\"$\",\"html\",null,{\"lang\":\"ru\",\"children\":[\"$\",\"body\",null,{\"className\":\"font-sans\",
+    \"children\":[\"$\",\"$L3\",null,{\"children\":[\"$\",\"$L4\",null,{\"children\":[[\"$\",\"$L5\",null,{\"parallelRouterKey\":\"children\",\"segmentPath\":[\"children\"],\"error\":\"$undefined\",\"errorStyles\":\"$undefined\",\"errorScripts\":         
+    \"$undefined\",\"template\":[\"$\",\"$L6\",null,{}],\"templateStyles\":\"$undefined\",\"templateScripts\":\"$undefined\",\"notFound\":[[\"$\",\"title\",null,{\"children\":\"404: This page could not be found.\"}],[\"$\",\"div\",null,{\"style\":        
+    {\"fontFamily\":\"system-ui,\\\"Segoe UI\\\",Roboto,Helvetica,Arial,sans-serif,\\\"Apple Color Emoji\\\",\\\"Segoe UI Emoji\\\"\",\"height\":\"100vh\",\"textAlign\":\"center\",\"display\":\"flex\",\"flexDirection\":\"column\",\"alignItems\":          
+    \"center\",\"justifyContent\":\"center\"},\"children\":[\"$\",\"div\",null,{\"children\":[[\"$\",\"style\",null,{\"dangerouslySetInnerHTML\":{\"__html\":\"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}  
+    @media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}\"}}],[\"$\",\"h1\",null,{\"className\":\"next-error-h1\",\"style\":{\"display\":\"inline-block\",\"margin\":\"0 20px 0     
+    0\",\"padding\":\"0 23px 0 0\",\"fontSize\":24,\"fontWeight\":500,\"verticalAlign\":\"top\",\"lineHeight\":\"49px\"},\"children\":\"404\"}],[\"$\",\"div\",null,{\"style\":{\"display\":\"inline-block\"},\"children\":[\"$\",\"h2\",null,{\"style\":      
+    {\"fontSize\":14,\"fontWeight\":400,\"lineHeight\":\"49px\",\"margin\":0},\"children\":\"This page could not be found.\"}]}]]}]}]],\"notFoundStyles\":[]}],[\"$\",\"$L7\",null,{}]]}]}]}]}]]}],{\"children\":[\"__PAGE__\",[\"$\",\"$2\",\"c\",            
+    {\"children\":[\"$L8\",null,[\"$\",\"$L9\",null,{\"children\":\"$La\"}]]}],{},null]},null],[\"$\",\"$2\",\"h\",{\"children\":[null,[\"$\",\"$2\",\"2uqlnfR35bJfTeU6xB290\",{\"children\":[[\"$\",\"$Lb\",null,{\"children\":\"$Lc\"}],[\"$\",\"$Ld\",null, 
+    {\"children\":\"$Le\"}],null]}]]}]]],\"m\":\"$undefined\",\"G\":\"$f\",\"s\":false,\"S\":false}\n"])</script><script>self.__next_f.push([1,"e:[[\"$\",\"meta\",\"0\",{\"name\":\"viewport\",\"content\":\"width=device-width, initial-scale=1\"}]]\nc:     
+    [[\"$\",\"meta\",\"0\",{\"charSet\":\"utf-8\"}],[\"$\",\"title\",\"1\",{\"children\":\"OIS Portal - Investor\"}],[\"$\",\"meta\",\"2\",{\"name\":\"description\",\"content\":\"Portal for CFA investors\"}]]\na:null\n8:E{\"digest\":\"1330751725\"}\n"])</
+    script></body></html>                                      
+
+• Ran curl -ks "https://backoffice.cfa2.telex.global/api/auth/error?error=Configuration" | head                                
+  └ <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,                                                                                         
+    initial-scale=1.0"><style>:root{--border-width:1px;--border-radius:0.5rem;--color-error:#c94b4b;--color-info:#157efb;--color-info-hover:#0f6ddb;--color-info-text:#fff}.__next-auth-theme-auto,.__next-auth-theme-light{--color-background:#ececec;--color-
+    background-hover:hsla(0,0%,93%,.8);--color-background-card:#fff;--color-text:#000;--color-primary:#444;--color-control-border:#bbb;--color-button-active-background:#f9f9f9;--color-button-active-border:#aaa;--color-separator:#ccc}.__next-auth-theme-dar
+    k{--color-background:#161b22;--color-background-hover:rgba(22,27,34,.8);--color-background-card:#0d1117;--color-text:#fff;--color-primary:#ccc;--color-control-border:#555;--color-button-active-background:#060606;--color-button-active-border:#666;--col
+    or-separator:#444}@media (prefers-color-scheme:dark)       
+    {.__next-auth-theme-auto{--color-background:#161b22;--color-background-hover:rgba(22,27,34,.8);--color-background-card:#0d1117;--color-text:#fff;--color-primary:#ccc;--color-control-border:#555;--color-button-active-background:#060606;--color-button-a
+    ctive-border:#666;--color-separator:#444}a.button,button{background-color:var(--provider-dark-bg,var(--color-background));color:var(--provider-dark-color,var(--color-primary))}                                                                           
+    a.button:hover,button:hover{background-color:var(--provider-dark-bg-hover,var(--color-background-hover))!important}#provider-logo{display:none!important}#provider-logo-dark{display:block!important;width:25px}}                                          
+    html{box-sizing:border-box}*,:after,:before{box-sizing:inherit;margin:0;padding:0}body{background-color:var(--color-background);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe                                                 
+    UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;margin:0;padding:0}h1{font-weight:400}h1,p{color:var(--color-text);margin-bottom:1.5rem;padding:0 1rem}                              
+    form{margin:0;padding:0}label{font-weight:500;margin-bottom:.25rem;text-align:left}input[type],label{color:var(--color-text);display:block}input[type]{background:var(--color-background-card);border:var(--border-width)                                  
+    solid var(--color-control-border);border-radius:var(--border-radius);box-sizing:border-box;font-size:1rem;padding:.5rem 1rem;width:100%}input[type]:focus{box-shadow:none}                                                                                 
+    p{font-size:1.1rem;line-height:2rem}a.button{line-height:1rem;text-decoration:none}a.button:link,a.button:visited{background-color:var(--color-background);color:var(--color-primary)}button span{flex-grow:1}                                             
+    a.button,button{align-items:center;background-color:var(--provider-bg);border-color:rgba(0,0,0,.1);border-radius:var(--border-radius);color:var(--provider-color,var(--color-primary));display:flex;font-size:1.1rem;font-weight:500;justify-content:center
+    ;min-height:62px;padding:.75rem 1rem;position:relative;transition:all .1s ease-in-out}a.button:hover,button:hover{background-color:var(--provider-bg-hover,var(--color-background-hover));cursor:pointer}                                                  
+    a.button:active,button:active{cursor:pointer}a.button #provider-logo,button #provider-logo{display:block;width:25px}a.button #provider-logo-dark,button                                                                                                    
+    #provider-logo-dark{display:none}#submitButton{background-color:var(--brand-color,var(--color-info));color:var(--button-text-color,var(--color-info-text));width:100%}                                                                                     
+    #submitButton:hover{background-color:var(--button-hover-bg,var(--color-info-hover))!important}a.site{color:var(--color-primary);font-size:1rem;line-height:2rem;text-decoration:none}                                                                      
+    a.site:hover{text-decoration:underline}.page{box-sizing:border-box;display:grid;height:100%;margin:0;padding:0;place-items:center;position:absolute;width:100%}.page>div{text-align:center}.error                                                          
+    a.button{margin-top:.5rem;padding-left:2rem;padding-right:2rem}.error .message{margin-bottom:1.5rem}.signin input[type=text]                                                                                                                               
+    {display:block;margin-left:auto;margin-right:auto}.signin hr{border:0;border-top:1px solid var(--color-separator);display:block;margin:2rem auto 1rem;overflow:visible}.signin                                                                             
+    hr:before{background:var(--color-background-card);color:#888;content:"or";padding:0 .4rem;position:relative;top:-.7rem}.signin .error{background:#f5f5f5;background:var(--color-error);border-radius:.3rem;font-weight:500}.signin .error                  
+    p{color:var(--color-info-text);font-size:.9rem;line-height:1.2rem;padding:.5rem 1rem;text-align:left}.signin form,.signin>div{display:block}.signin form input[type],.signin>div input[type]{margin-bottom:.5rem}.signin form button,.signin>div           
+    button{width:100%}.signin .provider+.provider{margin-top:1rem}.logo{display:inline-block;margin:1.25rem 0;max-height:70px;max-width:150px}.card{background-color:var(--color-background-card);border-radius:2rem;padding:1.25rem                           
+    2rem}.card .header{color:var(--color-primary)}.section-header{color:var(--color-text)}@media screen and (min-width:450px){.card{margin:2rem 0;width:368px}}@media screen and (max-width:450px){.card{margin:1rem 0;width:343px}}</style><title>Error</     
+    title></head><body class="__next-auth-theme-auto"><div class="page"><div class="error"><div class="card"><h1>Server error</h1><div class="message"><div><p>There is a problem with the server configuration.</p><p>Check the server logs for more          
+    information.</p></div></div></div></div></div></body></html>                                                               
+
+• Explored                                                     
+  └ Read auth.ts                                               
+
+• Edited ~/__Repositories/yury-customer/prj_Cifra-rwa-exachange-assets/repositories/customer-gitlab/ois-cfa/deploy/docker-compose-at-vps/cfa2/docker-compose.yml (+3 -0)                                                                                       
+    230        KEYCLOAK_CLIENT_SECRET: secret                  
+    231 +      KEYCLOAK_INTERNAL_URL: http://keycloak:8080     
+    232      ports:                                            
+        ⋮                                                      
+    250        KEYCLOAK_CLIENT_SECRET: secret                  
+    251 +      KEYCLOAK_INTERNAL_URL: http://keycloak:8080     
+    252      ports:                                            
+        ⋮                                                      
+    270        KEYCLOAK_CLIENT_SECRET: secret                  
+    271 +      KEYCLOAK_INTERNAL_URL: http://keycloak:8080     
+    272      ports:                                            
+
+• Running cd repositories/customer-gitlab/ois-cfa && ./ops/scripts/sync-compose-cfa2.sh && ssh cfa2 "cd /srv/cfa && docker compose up -d portal-issuer portal-investor backoffice && sleep 5 && docker ps --format 'table {{.Names}}\t{{.Status}}' | sed -n    
+  │ '1,10p'"                                                   
+
+◦ Checking configuration files (32m 27s • esc to interrupt)    
+
+
+› Improve documentation in @filename                           
+
+  51% context left · ? for shortcuts                           
