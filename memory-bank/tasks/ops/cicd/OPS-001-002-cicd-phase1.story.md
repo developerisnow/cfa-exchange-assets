@@ -1,22 +1,22 @@
 ---
 created: 2025-11-27 10:55
-updated: 2025-11-27 11:50
+updated: 2025-11-27 18:25
 type: story
 sphere: [devops]
 topic: [cfa2, cicd, backend]
 author: alex
 agentID: fdfe6b1e-e4ee-4505-a723-e892922472f9
 partAgentID: [co-76ca]
-version: 0.1.1
+version: 0.2.0
 tags: [cfa2, backend, docker-compose, gitlab-ci, dev-cfa2]
 epic_id: OPS-001-CICD
 story_id: OPS-001-002
-status: in_progress
+status: done
 priority: high
 points: 3
 ---
 
-# OPS-001-002: PHASE1 · Backend dev pipeline for cfa2 (DoD ~80%)
+# OPS-001-002: PHASE1 · Backend dev pipeline for cfa2 (DoD ~100%)
 
 ## 👔 JTBD
 
@@ -80,9 +80,15 @@ points: 3
     - Команды:
       - `ssh cfa2 "cd /srv/cfa && grep KAFKA_ENABLED .env"`
     - Результат: `KAFKA_ENABLED=false`.
-- [ ] Docs:
-  - [ ] `docs/deploy/vps-cfa2/cfa2-dev-runbook.md` содержит секцию "Backend dev pipeline" с: стадиями, именами jobs, портами, примером проверки;
-  - [ ] `docs/deploy/vps-cfa2/CI-BUILD-MATRIX.md` отражает backend jobs и их пути.
+- [x] Docs:
+  - [x] `docs/deploy/vps-cfa2/cfa2-dev-runbook.md` содержит секцию "Backend dev pipeline" с: стадиями, именами jobs, портами, примером проверки; ✅ 2025-11-27
+    - Команды:
+      - просмотр `docs/deploy/vps-cfa2/cfa2-dev-runbook.md`;
+    - Результат: разделы "PHASE0 / prerequisites" и "Backend dev pipeline" описывают runner/registry/SSH, список backend build jobs, stage-порядок (`sdk → build → deploy`), порты и ручную проверку через `docker compose ps` + swagger.
+  - [x] `docs/deploy/vps-cfa2/CI-BUILD-MATRIX.md` отражает backend jobs и их пути. ✅ 2025-11-27
+    - Команды:
+      - просмотр `docs/deploy/vps-cfa2/CI-BUILD-MATRIX.md`;
+    - Результат: матрица содержит строки `build-*` backend’ов с корректными `services/*` + `packages/contracts|domain|types`, а также общий раздел про стадии и переменные (`FORCE_BUILD_ALL`, `CI_PIPELINE_SOURCE=="push"`).
 
 ## 🔎 Verification Matrix
 
@@ -92,7 +98,7 @@ points: 3
 | Build     | ✅       | GitLab pipeline на `dev-cfa2`: все `build-*` backend зелёные                                      | ссылка на pipeline, список jobs      | ✔ `#287`, `#290`, `#291` — backend `build-*` success |
 | Deploy    | ✅       | job `deploy-cfa2` успешен, нет ошибок ssh-agent/libcrypto/docker compose                          | лог job в GitLab                     | ✔ `deploy-cfa2` зелёный после фикса SSH key  |
 | Runtime   | ✅       | `ssh user@cfa2 "cd /srv/cfa && docker compose ps"`, curl swagger/health                          | вывод команд, HTTP 200               | ✔ все backend контейнеры Up, swagger доступен |
-| Docs      | ✅       | diff по `docs/deploy/vps-cfa2/cfa2-dev-runbook.md` и `CI-BUILD-MATRIX.md`                        | `git diff` в отчёте агента           | ◑ Docs ещё не доработаны для полного DoD     |
+| Docs      | ✅       | diff по `docs/deploy/vps-cfa2/cfa2-dev-runbook.md` и `CI-BUILD-MATRIX.md`                        | `git diff` в отчёте агента           | ✔ Docs обновлены: backend секция в runbook + backend строки в CI-BUILD-MATRIX согласованы с pipelines #287–#295 |
 
 ## 🚀 Kickoff / Plan (для агента)
 
@@ -125,3 +131,12 @@ points: 3
 - TESTS / CHECKS: `deploy-cfa2` успешен, swagger отвечает.  
 - DOCS: runbook: шаги "Как задеплоить backend stack на cfa2".  
 - COMMIT: `fix(ci): make deploy-cfa2 green for dev-cfa2`.
+
+### Loop 4 (backend docs + CI matrix)
+- PLAN: зафиксировать сделанную работу по backend pipeline в документации.  
+- EXECUTE:  
+  - дополнен runbook `cfa2-dev-runbook.md` (секции "Backend dev pipeline" и ручные проверки swagger/портов);  
+  - обновлена матрица `CI-BUILD-MATRIX.md` для backend jobs и стадий.  
+- TESTS / CHECKS: пересмотрены успешные pipeline’ы `#287–#295` (все backend `build-*` + `deploy-cfa2` зелёные и соответствуют описанию).  
+- DOCS: обновлены DoD/Verification Matrix для PHASE1 и epic.  
+- COMMIT: `docs(ci): document backend dev pipeline and CI build matrix for dev-cfa2`.

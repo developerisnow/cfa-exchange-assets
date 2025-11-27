@@ -1,13 +1,13 @@
 ---
 created: 2025-11-27 11:00
-updated: 2025-11-27 11:00
+updated: 2025-11-27 18:30
 type: story
 sphere: [devops]
 topic: [cfa2, cicd, frontend, sdk, rules]
 author: alex
 agentID: fdfe6b1e-e4ee-4505-a723-e892922472f9
 partAgentID: [co-76ca]
-version: 0.1.0
+version: 0.2.0
 tags: [cfa2, frontends, portal-issuer, portal-investor, backoffice, sdk, rules]
 epic_id: OPS-001-CICD
 story_id: OPS-001-003
@@ -16,7 +16,7 @@ priority: high
 points: 3
 ---
 
-# OPS-001-003: PHASE2 · Frontends + path-based builds + SDK jobs (DoD ~80%)
+# OPS-001-003: PHASE2 · Frontends + path-based builds + SDK jobs (DoD ~90%)
 
 ## 👔 JTBD
 
@@ -46,9 +46,15 @@ points: 3
 - [x] Runtime:
   - [x] после deploy `curl http://92.51.38.126:3001`/`3002`/`3003` возвращает HTML (Next.js заголовки Issuer/Investor/Backoffice видны);
   - [ ] фронты корректно обращаются к gateway/Keycloak на cfa2 (env ссылками, без localhost) — требуется отдельная донастройка Keycloak/NextAuth (сейчас есть `/api/auth/error?error=Configuration` на investor).
-- [ ] Docs:
-  - [ ] `docs/deploy/vps-cfa2/CI-BUILD-MATRIX.md` отражает path-based rules и sdk stage;
-  - [ ] `docs/deploy/vps-cfa2/cfa2.md` / `cfa2-dev-runbook.md` содержат секцию "Frontends on cfa2" с портами и проверками.
+- [x] Docs:
+  - [x] `docs/deploy/vps-cfa2/CI-BUILD-MATRIX.md` отражает path-based rules и sdk stage; ✅ 2025-11-27
+    - Команды:
+      - просмотр `docs/deploy/vps-cfa2/CI-BUILD-MATRIX.md`;
+    - Результат: матрица содержит строки для `validate-specs`/`generate-sdks`, всех backend и frontend `build-*` jobs, а также `deploy-cfa2` и `registry:login-check` с указанием paths и условий (`CI_PIPELINE_SOURCE=="push"`, `FORCE_BUILD_ALL`, `ENABLE_SDK_JOBS`).
+  - [x] `docs/deploy/vps-cfa2/cfa2.md` / `cfa2-dev-runbook.md` содержат секцию "Frontends on cfa2" с портами и проверками. ✅ 2025-11-27
+    - Команды:
+      - просмотр `docs/deploy/vps-cfa2/cfa2-dev-runbook.md`;
+    - Результат: runbook дополнили разделы "Frontends and SDK (PHASE2)" и список портов 3001/3002/3003 с базовыми curl-проверками HTML.
 
 ## 🔎 Verification Matrix
 
@@ -64,15 +70,18 @@ points: 3
 - **TC1 – CI-only change (no services/apps/packages)**  
   - Commit: только `.gitlab/gitlab-ci.dev.yml` / `AGENTS.md` / docs.  
   - Pipeline: `#289` (source: `push`, SHA `6a77272...`).  
-  - Jobs: `deploy-cfa2` = success; `sdk` и все `build-*` jobs = skipped.  
+  - Jobs: `deploy-cfa2` = success; `validate-specs`/`generate-sdks` и все `build-*` jobs = skipped (path-based rules не трогают CI-only изменения).  
+  - Статус: **PASS** (path-based logic для "CI-only" работает, лишних сборок нет).  
 - **TC2 – single backend change (registry-only)**  
   - Change: `services/registry/ci-tc2-registry.md`.  
   - Pipeline: `#290` (source: `push`, SHA `3855d3b2...`).  
   - Jobs: `build-registry` + `deploy-cfa2` = success; другие backend/frontend build jobs = skipped.  
+  - Статус: **PASS** (меняется только registry, билдится только `build-registry`).  
 - **TC3 – single frontend change (portal-issuer-only)**  
   - Change: `apps/portal-issuer/ci-tc3-portal-issuer.md`.  
   - Pipeline: `#291` (source: `push`, SHA `a72f4897...`).  
   - Jobs: `build-portal-issuer` + `deploy-cfa2` = success; остальные фронты и все backend build jobs = skipped.
+  - Статус: **PASS** (меняется только portal-issuer, билдится только соответствующий frontend image).
 
 ## 🚀 Kickoff / Plan (для агента)
 

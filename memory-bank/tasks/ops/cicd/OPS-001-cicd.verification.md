@@ -218,3 +218,78 @@ K1lbJq0e9dpxq6MywA9EAAAAFHVzZXJANjAzMzU5OS1kcTk1NDUzAQ==
     ```
     - `/auth/signin` для issuer/investor отдаёт HTML Next.js с формой логина, без 500/Configuration.  
   - **TODO (manual):** в браузере пройти полный login-flow для `issuer@test.com` / `investor@test.com` / `cfa.devs@gmail.com` и приложить скриншоты/e2e отчёты (см. DoD story).
+
+## 2025-11-27 18:30 by d742-codex `OPS-001-001-cicd-phase0-prepare-vps-and-gitlab.story`
+
+### Highlights
+
+- Переподнята проверка runner’а: `make check-runner-status` теперь не зависит от kubeconfig и использует GitLab API для проекта `npk/ois-cfa` (через `glab`), что даёт быстрый чек статуса `vds1` на eywa1.  
+- Уточнены и задокументированы SSH/CI переменные: зафиксирован fingerprint ключа `user@cfa2` и подтверждено, что `SSH_PRIVATE_KEY_CFA2` и registry-переменные (`CI_REGISTRY*`) используются во всех `build-*`/`deploy-cfa2` job’ах; добавлен debug-job `registry:login-check`.  
+- Runbook `cfa2-dev-runbook.md` обновлён секцией "PHASE0 / prerequisites" (runner, glab, SSH, CI vars) и теперь прямо ссылается на команды проверки.
+
+### Bash
+
+```bash
+# Runner / glab
+cd repositories/customer-gitlab/ois-cfa
+./ops/scripts/check-runner-status.sh
+glab auth status --hostname git.telex.global
+glab api '/projects/npk%2Fois-cfa/runners?per_page=20' | jq '.[] | {id,description,status,tag_list}'
+
+# SSH / runtime на cfa2
+ssh cfa2 "hostname && ls -d /srv/cfa && docker compose ps"
+ssh cfa2 "ssh-keygen -lf ~/.ssh/id_ed25519.pub"
+
+# CI vars / registry
+glab api /projects/npk%2Fois-cfa/variables | jq '.[] | select(.key==\"SSH_PRIVATE_KEY_CFA2\")'
+glab api '/projects/npk%2Fois-cfa/pipelines?ref=dev-cfa2&per_page=10' | jq '.[] | {id,source,status}'
+```
+
+## 2025-11-27 18:35 by d742-codex `OPS-001-002/003-cicd-phase1-2.story` (backend + frontends + SDK)
+
+### Highlights
+
+- Подтверждён backend dev pipeline: compose/env на cfa2 соответствуют `deploy/docker-compose-at-vps/cfa2/*`, все backend-сервисы и gateway в состоянии `Up` (`docker compose ps` на cfa2), swagger отвечает по портам 5808x.  
+- Проверены path-based rules и SDK stage: на push-пайплайнах TC1–TC3 (ID `289–291`) запускались только ожидаемые jobs (`deploy-cfa2` / `build-registry` / `build-portal-issuer`), что зафиксировано в story и CI-BUILD-MATRIX.  
+- Runbook `cfa2-dev-runbook.md` и `CI-BUILD-MATRIX.md` расширены секциями про backend dev pipeline и "Frontends and SDK (PHASE2)" (ports, jobs, stage-порядок, условия запуска).  
+
+### Bash
+
+```bash
+# Pipelines и path-based jobs
+glab api '/projects/npk%2Fois-cfa/pipelines?ref=dev-cfa2&per_page=10' \
+  | jq '.[] | {id,iid,sha,source,status}'
+
+for id in 289 290 291; do
+  echo "== Pipeline $id jobs =="
+  glab api "/projects/npk%2Fois-cfa/pipelines/$id/jobs" \
+    | jq '.[] | {name,stage,status}'
+done
+
+# Runtime на cfa2
+ssh cfa2 "cd /srv/cfa && docker compose ps"
+curl -sS --max-time 5 http://92.51.38.126:58081/swagger | head -1 || true
+curl -sS --max-time 5 http://92.51.38.126:3001 | head -1
+```
+
+## 2025-11-27 18:40 by d742-codex `OPS-001-004-cicd-phase4.story` (guardians)
+
+### Highlights
+
+- Добавлен JSON-конфиг guardian’ов `ops/guardians/guardian.config.json` с минимальным набором правил: запрет новых `.gitlab-ci*.yml` вне корня/.gitlab, запрет `docker-compose.yml` и `.env` в `docs/**`, `apps/**`, `tests/**`, защита `ops/infra/uk1/**` и `ops/infra/cfa1/**` с override-переменной.  
+- Реализован скрипт `scripts/guardians/check-guardians.sh`, который считывает staged или изменённые файлы (локально и в CI), проверяет их против правил и падает с понятными сообщениями при нарушении; поддерживает `GUARDIANS_BYPASS` и `GUARDIANS_ALLOW_PROD_INFRA`.  
+- В `.gitlab/gitlab-ci.dev.yml` добавлен job `guardians:check` (stage `sdk`, `tags: [vds1]`); на push-пайплайне `#300` (dev-cfa2, SHA `be9e49c6...`) job `guardians:check` (id `3013`) прошёл успешно, проверив именно изменённые файлы (ci config, runbook, matrix, guardians-config, script).
+
+### Bash
+
+```bash
+cd repositories/customer-gitlab/ois-cfa
+
+# Проверка конфига и скрипта локально
+cat ops/guardians/guardian.config.json | jq '.rules[].id'
+scripts/guardians/check-guardians.sh
+
+# Фрагмент CI-конфига (manual review)
+sed -n '1,80p' .gitlab/gitlab-ci.dev.yml
+sed -n '80,180p' .gitlab/gitlab-ci.dev.yml
+```

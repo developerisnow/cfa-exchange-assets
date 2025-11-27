@@ -1,12 +1,12 @@
 ---
 created: 2025-11-27 16:35
-updated: 2025-11-27 16:35
+updated: 2025-11-27 17:45
 type: agent-prompt-notes
 sphere: [devops]
 topic: [cfa2, cloudflare, dns, tls, nginx, keycloak]
 author: alex
 agentID: meta-lessons
-version: 0.1.0
+version: 0.1.1
 tags: [ops-001-005, lessons, pitfalls, cloudflare, telex.global]
 ---
 
@@ -102,6 +102,22 @@ tags: [ops-001-005, lessons, pitfalls, cloudflare, telex.global]
     - пересборкой/перезапуском порталов после правки env/compose,
     - smoke-тестами (login-сценарии).
 
+- **E2E-валидация через Playwright и “многократные IP”**
+  - Пользователь уже проверял логин из разных IP/браузеров — treat это как сигнал, что “на стороне клиента всё ок, проблема на стороне Keycloak/NextAuth/ingress”.
+  - Для формальной верификации используй готовые e2e-тесты:
+    - repo `ois-cfa`, каталог `tests/e2e-playwright/tests/public-auth.spec.ts`;
+    - env-переменные для cfa2:
+      - `ISSUER_BASE_URL=https://issuer.cfa2.telex.global`,
+      - `INVESTOR_BASE_URL=https://investor.cfa2.telex.global`,
+      - `BACKOFFICE_BASE_URL=https://backoffice.cfa2.telex.global`,
+      - `USE_KEYCLOAK_AUTH=true`,
+      - логины/пароли тестовых пользователей (issuer/investor/backoffice).
+  - Если Playwright показывает `Configuration`/`OAuthSignin`:
+    - сразу смотри `docker logs` порталов и сравни:
+      - `NEXTAUTH_URL` / фактический URL в браузере,
+      - `NEXT_PUBLIC_KEYCLOAK_URL` / `issuer` из `/.well-known/openid-configuration`,
+      - `redirectUris`/`webOrigins` клиентов в Keycloak.
+
 ## 🧾 Что фиксировать в stories/verification
 
 - Если ты:
@@ -114,4 +130,3 @@ tags: [ops-001-005, lessons, pitfalls, cloudflare, telex.global]
 
 > TL;DR: прошлый агент идёт по правильному пути (DNS + HTTPS + nginx на cfa2 уже работают),  
 > но тебе важно аккуратно доехать до конца — Keycloak/NextAuth login по доменам, с учётом всех типичных ловушек выше.
-

@@ -1,22 +1,22 @@
 ---
 created: 2025-11-27 10:50
-updated: 2025-11-27 11:50
+updated: 2025-11-27 18:20
 type: story
 sphere: [devops]
 topic: [cfa2, vds1, gitlab, runner]
 author: alex
 agentID: fdfe6b1e-e4ee-4505-a723-e892922472f9
 partAgentID: [co-76ca]
-version: 0.1.1
+version: 0.2.0
 tags: [cfa2, vds1, gitlab-runner, registry, glab]
 epic_id: OPS-001-CICD
 story_id: OPS-001-001
-status: in_progress
+status: done
 priority: high
 points: 2
 ---
 
-# OPS-001-001: PHASE0 · Prepare vps + GitLab for dev-cfa2 (DoD ~70%)
+# OPS-001-001: PHASE0 · Prepare vps + GitLab for dev-cfa2 (DoD ~100%)
 
 ## 👔 JTBD
 
@@ -24,7 +24,7 @@ points: 2
 
 ## ✅ Definition of Done
 
-- [ ] Runner vds1:
+- [x] Runner vds1:
   - [x] gitlab-runner установлен и зарегистрирован в проекте `npk/ois-cfa`; ✅ 2025-11-27
     - Команды:
       - `glab api '/projects/npk%2Fois-cfa/runners' | jq '.[] | {id,description,status,tag_list}'`
@@ -34,7 +34,11 @@ points: 2
     - Команды:
       - та же `glab api /projects/.../runners`
     - Результат: статус `online`, `tag_list` включает `vds1`.
-  - [ ] есть короткий чеклист/команда проверки статуса (make/скрипт или glab) с зафиксированными примерами вывода.
+  - [x] есть короткий чеклист/команда проверки статуса (make/скрипт или glab) с зафиксированными примерами вывода; ✅ 2025-11-27
+    - Команды:
+      - `make check-runner-status` (обёртка над `./ops/scripts/check-runner-status.sh` с fallback в GitLab API mode);
+      - `./ops/scripts/check-gitlab-runners.sh "$GITLAB_TOKEN" npk/ois-cfa`.
+    - Результат: при отсутствии kubeconfig скрипт предупреждает и показывает список project runners через `glab api` (в т.ч. `vds1-auto-runner` online); вывод сохранён в runbook/verification.
 - [x] GitLab/Registry: ✅ 2025-11-27
   - [x] есть рабочий GitLab personal access token для пользователя `cicd` (переменная в `.env` на eywa1); ✅ 2025-11-27
     - Команды:
@@ -46,7 +50,7 @@ points: 2
     - Команды:
       - `glab pipeline list --repo npk/ois-cfa --per-page 3`
     - Результат: список последних pipeline’ов для dev-cfa2 выводится без ошибок.
-- [ ] cfa2:
+- [x] cfa2:
   - [x] на `92.51.38.126` существует `/srv/cfa`, user `user` в sudoers; ✅ 2025-11-27
     - Команды:
       - `ssh cfa2 "hostname && ls -d /srv/cfa"`
@@ -55,8 +59,11 @@ points: 2
     - Команды:
       - `ssh cfa2 "docker ps && docker compose version"`
     - Результат: docker/compose команды выполняются без ошибок.
-  - [ ] SSH-ключ `id_ed25519` для user@cfa2 зафиксирован и понятно, какой именно ключ использовать в CI (и как он должен выглядеть в CI variable).
-- [ ] CI variables:
+  - [x] SSH-ключ `id_ed25519` для user@cfa2 зафиксирован и понятно, какой именно ключ использовать в CI (и как он должен выглядеть в CI variable); ✅ 2025-11-27
+    - Команды:
+      - `ssh cfa2 "ssh-keygen -lf ~/.ssh/id_ed25519.pub"`
+    - Результат: fingerprint ED25519-ключа задокументирован; именно этот ключ используется в GitLab CI variable `SSH_PRIVATE_KEY_CFA2` для job `deploy-cfa2`.
+- [x] CI variables:
   - [x] в GitLab CI/CD Variables создана `SSH_PRIVATE_KEY_CFA2` (masked, Unprotected для dev) с приватным ключом `user@cfa2`; ✅ 2025-11-27 (значение сейчас base64-privkey, формат исправлен d742)
     - Команды:
       - `glab api /projects/npk%2Fois-cfa/variables | jq '.[] | select(.key==\"SSH_PRIVATE_KEY_CFA2\")'`
@@ -64,12 +71,19 @@ points: 2
     - Результат: переменная существует, `protected=false`, `masked=true`, deploy падал на старом ключе, после перезаливки ключа `deploy` прошёл.
   - [x] GITLAB_USER_CICD_TOKEN сохранён в `.env` на eywa1 и используется glab; ✅ 2025-11-27
     - Команды:
-      - `source .env; glab pipeline list --repo npk/ois-cfa --per-page 1`
+      - `cd prj_Cifra-rwa-exachange-assets && source .env; glab pipeline list --repo npk/ois-cfa --per-page 1`
     - Результат: команды glab работают, используя токен из `.env`.
-  - [ ] переменные registry (`CI_REGISTRY`, `CI_REGISTRY_USER`, `CI_REGISTRY_PASSWORD`) рабочие (check docker login в job’е).
-    - Проверка ожидается через отдельный debug job с `docker login`.
-- [ ] Docs:
-  - [ ] в `docs/deploy/vps-cfa2/cfa2-dev-runbook.md` есть раздел "PHASE0 / prerequisites" с описанием runner, SSH, glab и CI vars (с командами проверки);
+  - [x] переменные registry (`CI_REGISTRY`, `CI_REGISTRY_USER`, `CI_REGISTRY_PASSWORD`) рабочие (check docker login в job’е); ✅ 2025-11-27
+    - Команды:
+      - просмотр `.gitlab/gitlab-ci.dev.yml` (`docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"` в шаблонах build/deploy);
+      - GitLab pipelines `#290–#295` (успешные `build-*` и `deploy-cfa2`);
+      - новый debug-job `registry:login-check` (stage `build`) с `ENABLE_REGISTRY_DEBUG=1` как механизм явной проверки login.
+    - Результат: во всех успешных `build-*`/`deploy-cfa2` job’ах docker login проходит; при необходимости можно отдельно запускать `registry:login-check` для проверки связки CI_REGISTRY*.
+- [x] Docs:
+  - [x] в `docs/deploy/vps-cfa2/cfa2-dev-runbook.md` есть раздел "PHASE0 / prerequisites" с описанием runner, SSH, glab и CI vars (с командами проверки); ✅ 2025-11-27
+    - Команды:
+      - просмотр `docs/deploy/vps-cfa2/cfa2-dev-runbook.md`;
+    - Результат: runbook описывает `make check-runner-status`, glab, SSH к cfa2 и ключевые CI-переменные (включая `SSH_PRIVATE_KEY_CFA2` и registry).
   - [x] epic `OPS-001-CICD` обновлён ссылками на эту story. ✅ 2025-11-27
     - Команды:
       - обзор `OPS-001-CICD.epic.md`
@@ -79,8 +93,8 @@ points: 2
 
 | Check type  | Required | How exactly                                                    | Evidence                            | Fact / Comment                                      |
 | ----------- | -------- | -------------------------------------------------------------- | ----------------------------------- |-----------------------------------------------------|
-| Runner      | ✅        | `make check-runner-status` или `glab api /runners`             | вывод команды, скрин GitLab runners | ✔ `glab api /projects/.../runners` показывает vds1/online |
-| Registry    | ✅        | `docker login $CI_REGISTRY` из тестового job                   | успешный login в логах CI           | ◑ login выполняется в build jobs, отдельный debug-job не зафиксирован |
+| Runner      | ✅        | `make check-runner-status` или `glab api /runners`             | вывод команды, скрин GitLab runners | ✔ `./ops/scripts/check-runner-status.sh` падает в GitLab API mode и показывает project runners (vds1 online) |
+| Registry    | ✅        | `docker login $CI_REGISTRY` из тестового job                   | успешный login в логах CI           | ✔ docker login выполняется в backend/frontend build jobs и может быть явно проверен через `registry:login-check` |
 | glab        | ✅        | `glab pipeline list --repo npk/ois-cfa --per-page 3` на eywa1  | вывод команды (в oracle / runbook)  | ✔ команды glab выполняются на eywa1 (`cicd` user)   |
 | SSH to cfa2 | ✅        | `ssh user@92.51.38.126 "hostname && docker ps"`                | команда отрабатывает без пароля     | ✔ ssh alias `cfa2` работает, docker ps на хосте     |
 | CI vars     | ✅        | debug-job, который эхоит, что `SSH_PRIVATE_KEY_CFA2` не пустая | лог job, отсутствие ошибок ssh-add  | ✔ `deploy-cfa2` использует новый ключ; старый libcrypto error устранён |
@@ -114,3 +128,13 @@ points: 2
 - TESTS / CHECKS: в job нет ошибок libcrypto/ssh-add, ssh проходит.  
 - DOCS: дописан раздел "SSH key / CI variables" в cfa2 runbook.  
 - COMMIT: `fix(ci): wire SSH_PRIVATE_KEY_CFA2 for cfa2 deploy debug`.
+
+### Loop 3 (registry login + PHASE0 docs)
+- PLAN: зафиксировать работоспособность registry vars и добавить явную проверку login.  
+- EXECUTE:  
+  - в `.gitlab/gitlab-ci.dev.yml` добавлен debug-job `registry:login-check` (stage `build`, запускается при `ENABLE_REGISTRY_DEBUG=1`);  
+  - подтверждено, что существующие `build-*` и `deploy-cfa2` jobs используют `docker login` с `CI_REGISTRY*`;  
+  - обновлён runbook `cfa2-dev-runbook.md` (разделы PHASE0 / Backend dev pipeline / Frontends and SDK).  
+- TESTS / CHECKS: успешные pipeline’ы `#290–#295` показывают зелёные `build-*` и `deploy-cfa2` (docker login не падает).  
+- DOCS: обновлены story DoD/Verification Matrix и PHASE0-разделы runbook + CI-BUILD-MATRIX.  
+- COMMIT: `chore(ci): add registry login debug job and document PHASE0 checks for dev-cfa2`.
