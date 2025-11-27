@@ -1,0 +1,93 @@
+---
+created: 2025-11-27 11:00
+updated: 2025-11-27 11:00
+type: story
+sphere: [devops]
+topic: [cfa2, cicd, frontend, sdk, rules]
+author: alex
+agentID: fdfe6b1e-e4ee-4505-a723-e892922472f9
+partAgentID: [co-76ca]
+version: 0.1.0
+tags: [cfa2, frontends, portal-issuer, portal-investor, backoffice, sdk, rules]
+epic_id: OPS-001-CICD
+story_id: OPS-001-003
+status: in_progress
+priority: high
+points: 3
+---
+
+# OPS-001-003: PHASE2 · Frontends + path-based builds + SDK jobs
+
+## 👔 JTBD
+
+Сделать так, чтобы фронты (`portal-issuer`, `portal-investor`, `backoffice`) собирались и деплоились через dev-cfa2 pipeline вместе с backend’ами, с path-based rules для всех build jobs и отдельными `sdk` jobs (validate-specs/generate-sdks), которые триггерятся только при изменении contracts/SDK.
+
+## ✅ Definition of Done
+
+- [ ] Compose (frontends):
+  - [ ] в `deploy/docker-compose-at-vps/cfa2/docker-compose.yml` есть сервисы `portal-issuer`, `portal-investor`, `backoffice`;
+  - [ ] каждый фронт использует `${REGISTRY_IMAGE}/<image>:${TAG}` и пробрасывает `NEXT_PUBLIC_*` в соответствии с cfa2 (API gateway + Keycloak);
+  - [ ] порты: 3001/3002/3003 на хосте cfa2 указаны в `.env.cfa2` и документации.
+- [ ] CI build (frontends):
+  - [ ] есть jobs `build-portal-issuer`, `build-portal-investor`, `build-backoffice`;
+  - [ ] каждый job:
+    - [ ] выполняет `npm ci && npm run build` в соответствующем `apps/*` перед docker build;
+    - [ ] прокидывает `NEXT_PUBLIC_*` (API_BASE_URL, KEYCLOAK_URL, REALM, CLIENT_ID) через `--build-arg`;
+    - [ ] пушит образы в `$CI_REGISTRY_IMAGE/<image>:$CI_COMMIT_SHORT_SHA` и `:$DEPLOY_TAG` на `dev-cfa2`.
+- [ ] SDK stage:
+  - [ ] stage `sdk` присутствует перед `build` в `.gitlab/gitlab-ci.dev.yml`;
+  - [ ] job `validate-specs` валидирует OpenAPI/AsyncAPI/JSON Schemas (`make validate-specs` или эквивалент) и отрабатывает только при изменениях в `packages/contracts/**` и `packages/types/**`;
+  - [ ] job `generate-sdks` перегенерирует TS/.NET SDK (`make generate-sdks` или openapi-generator) и запускается только при изменениях в `packages/contracts/**`, `packages/sdks/**`, `packages/types/**`;
+  - [ ] build jobs помечены `needs` на sdk jobs (optional), чтобы ломанный контракт ломал сборку раньше.
+- [ ] Path-based rules:
+  - [ ] для backend jobs настроены `rules:changes`, которые ограничивают запуск соответствующими `services/<name>/**` + общими пакетами;
+  - [ ] для frontend jobs `rules:changes` включают `apps/<app>/**`, `apps/shared-ui/**`, `packages/contracts/**`, `packages/sdks/**`, `packages/types/**`;
+  - [ ] для sdk jobs заданы `rules:changes` по contracts/sdks/types.
+- [ ] Runtime:
+  - [ ] после deploy `curl http://92.51.38.126:3001`/`3002`/`3003` возвращает HTML (Next.js соответствует ожидаемому заголовку);
+  - [ ] фронты корректно обращаются к gateway/Keycloak на cfa2 (env ссылками, без localhost).
+- [ ] Docs:
+  - [ ] `docs/deploy/vps-cfa2/CI-BUILD-MATRIX.md` отражает path-based rules и sdk stage;
+  - [ ] `docs/deploy/vps-cfa2/cfa2.md` / `cfa2-dev-runbook.md` содержат секцию "Frontends on cfa2" с портами и проверками.
+
+## 🔎 Verification Matrix
+
+| Check type | Required | How exactly                                                                                  | Evidence                           |
+|-----------|----------|-----------------------------------------------------------------------------------------------|------------------------------------|
+| Frontend build | ✅   | локально или в CI: `npm ci && npm run build` для каждого apps/*                            | успешный build, отсутствие ошибок  |
+| CI rules  | ✅       | GitLab pipeline: при правке только одного сервиса/приложения запускаются только нужные jobs | скрин pipeline, список jobs        |
+| SDK jobs  | ✅       | при изменении contracts/types запускаются `validate-specs`/`generate-sdks`                   | логи sdk stage                     |
+| Runtime   | ✅       | `curl http://92.51.38.126:3001`/`3002`/`3003` + базовый логин-флоу (минимум, без e2e)        | вывод curl/скрин UI                |
+
+## 🚀 Kickoff / Plan (для агента)
+
+1. Проверить Dockerfile’ы фронтов и убедиться, что они принимают `NEXT_PUBLIC_*` через ARG/ENV (при необходимости доработать).  
+2. Убедиться, что compose для cfa2 содержит фронты и корректные порты.  
+3. Настроить frontend build jobs: добавить `APP_PATH`, `npm ci && npm run build`, build-args.  
+4. Добавить/уточнить sdk stage (`validate-specs`, `generate-sdks`) и dependencies.  
+5. Настроить `rules:changes` для всех jobs по архитектурной карте (`artifacts/AlexA/ois-cfa.reposcan.json`).  
+6. Запустить pipeline на `dev-cfa2` (при необходимости с `FORCE_BUILD_ALL=1`) и убедиться, что все фронты и sdk jobs работают.  
+7. Обновить CI-BUILD-MATRIX + runbooks, зафиксировать Loop trace и сделать commit.
+
+## 🔁 Loop trace
+
+### Loop 1 (front build + compose)
+- PLAN: собрать и поднять фронты на cfa2 вместе с backend’ами.  
+- EXECUTE: правки Dockerfile’ов/compose, локальные `npm run build`, sync на cfa2 и manual `docker compose up`.  
+- TESTS / CHECKS: локальные build’ы зелёные, фронты открываются по IP/портам.  
+- DOCS: дописана секция "Frontends on cfa2" в runbook.  
+- COMMIT: `feat(ci): add cfa2 frontends containers and builds`.
+
+### Loop 2 (sdk stage)
+- PLAN: вынести validate-specs/generate-sdks в отдельную стадию.  
+- EXECUTE: добавить sdk jobs в `.gitlab/gitlab-ci.dev.yml`, настроить `rules:changes`.  
+- TESTS / CHECKS: при правке contracts/types/sdk sdk stage запускается и падает/проходит ожидаемо.  
+- DOCS: отражено в CI-BUILD-MATRIX.  
+- COMMIT: `feat(ci): add sdk stage for contracts and sdks`.
+
+### Loop 3 (path-based rules)
+- PLAN: минимизировать лишние сборки, чтобы не гонять все образы при каждой правке.  
+- EXECUTE: настроить `rules:changes` для backend/frontend/sdk jobs по реальным путям.  
+- TESTS / CHECKS: несколько экспериментальных коммитов с правкой только одного сервиса/приложения.  
+- DOCS: CI-BUILD-MATRIX показывает маппинг "service → paths".  
+- COMMIT: `chore(ci): tighten path-based rules for dev-cfa2`.
