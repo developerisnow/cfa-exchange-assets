@@ -27,3 +27,26 @@ tags: [agents, commands, meta]
 На данный момент каталог служит каркасом; конкретные команды будут добавляться
 после фиксации NX‑00 серии и CodeMachine workflow.
 
+## Available Commands
+
+### Git & Repos
+| Command | Description |
+|---------|-------------|
+| `/commit` | Smart git commits with conventional format |
+| `/add-repos` | Discover GitHub repos from markdown and add as submodules |
+| `/analyze-repos` | Analyze GitHub repositories and add to registry |
+| `/mirror-repos` | Mirror submodule repositories to web3stealth GitHub |
+
+### CI/CD (ois-cfa)
+| Command | Description |
+|---------|-------------|
+| `/cicd-status` | Check pipelines, runners, variables status |
+| `/cicd-run` | Trigger GitLab pipeline (optional: force, sdk flags) |
+| `/cicd-vars` | Manage CI/CD variables (list, check, unprotect) |
+| `/cicd-logs` | Get job logs and traces for debugging |
+
+## Related Files
+- `.claude/agents/` - Agent definitions
+- `.claude/skills/` - Skills and knowledge bases
+- `.claude/cicd-cheatsheet.md` - Quick reference for CI/CD commands
+
