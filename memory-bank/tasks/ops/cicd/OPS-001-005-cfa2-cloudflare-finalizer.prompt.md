@@ -107,6 +107,8 @@ Do **not** touch any of this unless you find a concrete misconfiguration. Your j
    - close remaining DoD in `OPS-001-003` (Runtime) and `OPS-001-005` (Frontends/login),
    - add a concise block to `OPS-001-cicd.verification.md` with commands, pipeline IDs, Playwright run, and screenshot paths.
 
+6. **Enable and verify Keycloak self-registration (like on uk1)** so that new users can sign up (Wezer registration use case) without manual admin intervention.
+
 ## HIGH-LEVEL PLAN
 
 1. Confirm that HEAD on `dev-cfa2` already contains the `fix(auth)` commit and no further auth regressions.
@@ -120,5 +122,82 @@ Do **not** touch any of this unless you find a concrete misconfiguration. Your j
 7. If tests pass, perform manual browser checks and save screenshots under `docs/deploy/vps-cfa2/screenshots/`.
 8. Close DoD/Verification Matrix in `OPS-001-003` and `OPS-001-005`, and add a verification entry in `OPS-001-cicd.verification.md`.
 
-> You are allowed and expected to use all available tests (Playwright + manual) and to iterate until the portals login flow is truly green, not just “probably works”.
+## EXTRA: Enable self-registration in Keycloak realm `ois` (uk1 parity)
 
+On uk1 self-registration was enabled by toggling Keycloak realm login flags (`registrationAllowed=true`, `verifyEmail=true`) and wiring SMTP (Postfix). For cfa2 we want the **same behavior** for realm `ois`, but with minimal scope:
+
+### 1. UI steps (admin console)
+
+If you prefer doing it by hand, use the admin UI:
+
+1. Open `https://auth.cfa2.telex.global/admin` in a browser.
+2. Log in with the Keycloak admin user you already use on cfa2.
+3. In the **left menu**, select:
+   - Realm: `ois`,
+   - then go to **Realm settings → Login**.
+4. On the Login tab:
+   - Turn **ON**:
+     - `User registration`,
+     - `Login with email` (если ещё не включён),
+     - `Forgot password` (опционально, но удобно).
+   - Optionally turn **ON**:
+     - `Verify email` (тогда нужны рабочие SMTP‑настройки, см. uk1 пример).
+5. Click **Save**.
+
+This should immediately expose the “Register” button on the Keycloak login page for realm `ois` when you hit `https://auth.cfa2.telex.global/realms/ois/account` or go through the portals’ “Sign in” flow.
+
+### 2. CLI steps (kcadm) — preferred for repeatability
+
+If you want to do it via CLI (and make it scriptable, similar to uk1), use `kcadm` inside `ois-keycloak`:
+
+```bash
+ssh cfa2 "docker exec -it ois-keycloak bash"
+
+# inside the container:
+kcadm.sh config credentials \
+  --server https://auth.cfa2.telex.global \
+  --realm master \
+  --user <admin-username> \
+  --password '<admin-password>' \
+  --config /tmp/kcadm.cfa2.config
+
+# Enable self-registration and login-by-email on realm 'ois'
+kcadm.sh update realms/ois \
+  -s registrationAllowed=true \
+  -s loginWithEmailAllowed=true \
+  --config /tmp/kcadm.cfa2.config
+
+# (optional) enable email verification, if SMTP is configured
+# kcadm.sh update realms/ois \
+#   -s verifyEmail=true \
+#   --config /tmp/kcadm.cfa2.config
+```
+
+Notes:
+
+- On uk1 we used the same pattern (see `20251113-uk1-deploy_co-76ca.md`): `verifyEmail=true`, `registrationAllowed=true`, SMTP = local Postfix.
+- On cfa2 you can start with `registrationAllowed=true` and `loginWithEmailAllowed=true` without verifyEmail, and add `verifyEmail=true` later when SMTP is ready.
+
+### 3. Verify self-registration end-to-end
+
+1. In a browser:
+   - Go to `https://issuer.cfa2.telex.global` (or investor/backoffice),
+   - click “Sign in with Keycloak”,
+   - on the Keycloak login page check for a “Register”/“Зарегистрироваться” link.
+2. Use a test email to go through the registration flow:
+   - If `verifyEmail=false` — user should be created and able to log in immediately after filling the form.
+   - If `verifyEmail=true` — you should receive a verification email (once SMTP is wired) and complete the link.
+3. Confirm that the new user appears in realm `ois` and can log in to the portal (Wezer registration scenario).
+
+### 4. Update stories to reflect registration DoD
+
+- `OPS-001-005-cicd-cfa2-cloudflare-ingress.story.md`:
+  - Under Frontends DoD, add that self-registration for realm `ois` is enabled (`registrationAllowed=true`) and works (Wezer registration flow).
+  - In Verification Matrix, add a comment that registration was validated manually (and via Playwright if you extend tests).
+- `OPS-001-cicd.verification.md`:
+  - Add a short block summarizing:
+    - kcadm commands used to toggle `registrationAllowed`,
+    - evidence (screenshots/logs) that the registration link appears and a new user can sign up and log in.
+
+
+> You are allowed and expected to use all available tests (Playwright + manual) and to iterate until the portals login flow is truly green, not just “probably works”.
